@@ -15,8 +15,10 @@ instance:
     group: %CUNAME%
     gid: 509
     groups:
-    - gridware
-    - admins:388
+      - gridware
+      - admins:388
+    ssh_public_key: |
+      %CUKEY%
 EOF
 chown root:root /opt/clusterware/etc/config.yml
 chmod 0640 /opt/clusterware/etc/config.yml

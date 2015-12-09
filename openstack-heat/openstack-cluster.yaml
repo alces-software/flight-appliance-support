@@ -25,7 +25,12 @@ parameters:
     description: Cluster user username
     default: alces-cluster
 
-  user_key:
+  cluster_user_key:
+    type: string
+    label: Cluster user public SSH key
+    description: Enter the cluster user public SSH key in `ssh-rsa 1234 user` format
+
+  admin_key:
     type: string
     label: Cluster user key
     description: Existing SSH key to be used by user for access
@@ -100,10 +105,12 @@ resources:
             chmod 0640 /opt/clusterware/etc/config.yml
             sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
                 -e "s/%CUNAME%/%CLUSTER_USER%/g" \
+                -e "s/%CUKEY%/%CWUKEY%/g" \
                 -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: cluster_name }
             "%CLUSTER_USER%": { get_param: cluster_user }
+            "%CWUKEY%": { get_param: cluster_user_key }
 
   node_config:
     type: OS::Heat::SoftwareConfig
@@ -119,11 +126,12 @@ resources:
             chmod 0640 /opt/clusterware/etc/config.yml
             sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
                 -e "s/%CUNAME%/%CLUSTER_USER%/g" \
+                -e "s/%CUKEY%/%CWUKEY%/g" \
                 -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: cluster_name }
             "%CLUSTER_USER%": { get_param: cluster_user }
-
+            "%CWUKEY": { get_param: cluster_user_key }
 
   login1:
     type: OS::Nova::Server
@@ -131,7 +139,7 @@ resources:
       name: login1
       image: clusterware-el6 
       flavor: { get_param: compute_flavour }
-      key_name: { get_param: user_key }
+      key_name: { get_param: admin_key }
       networks:
         - port: { get_resource: login1_port }
       user_data_format: RAW
