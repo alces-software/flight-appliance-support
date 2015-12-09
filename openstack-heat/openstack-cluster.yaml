@@ -86,7 +86,7 @@ resources:
       group: ungrouped
       config: |
         #!/bin/bash
-        curl https://gist.githubusercontent.com/vlj91/8cb74164cc61e83e9afc/raw/b2e30ddad927efc313880cc2fe4e35a1e7660d9c/login.sh > login.sh
+        curl https://github.com/alces-software/clusterware-deployment-methods/master/openstack-heat/init/login.sh > login.sh
         sh login.sh
 
   node_config:
@@ -95,7 +95,8 @@ resources:
       group: ungrouped
       config: |
         #!/bin/bash
-        uptime 
+        curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/master/openstack-heat/init/compute.sh > compute.sh
+        sh compute.sh 
 
   login1:
     type: OS::Nova::Server
