@@ -19,6 +19,12 @@ parameters:
     description: Cluster name
     default: hpc1
 
+  cluster_user:
+    type: string
+    label: Cluster user username
+    description: Cluster user username
+    default: alces-cluster
+
   user_key:
     type: string
     label: Cluster user key
@@ -83,20 +89,41 @@ resources:
   master_config:
     type: OS::Heat::SoftwareConfig
     properties:
-      group: ungrouped
-      config: |
-        #!/bin/bash
-        curl https://github.com/alces-software/clusterware-deployment-methods/master/openstack-heat/init/login.sh > login.sh
-        sh login.sh
+      group: script
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            curl https://gist.githubusercontent.com/vlj91/93b04ab2a29b25dd91ed/raw/d945a2dfea07a7e444cea25238b286b9a605b544/login.sh > login.sh
+            sh login.sh
+            chown root:root /opt/clusterware/etc/config.yml
+            chmod 0640 /opt/clusterware/etc/config.yml
+            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
+                -e "s/%CUNAME%/%CLUSTER_USER%/g" \
+                -i /opt/clusterware/etc/config.yml
+          params:
+            "%CLUSTER_NAME%": { get_param: cluster_name }
+            "%CLUSTER_USER%": { get_param: cluster_user }
 
   node_config:
     type: OS::Heat::SoftwareConfig
     properties:
-      group: ungrouped
-      config: |
-        #!/bin/bash
-        curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/master/openstack-heat/init/compute.sh > compute.sh
-        sh compute.sh 
+      group: script
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            curl https://gist.githubusercontent.com/vlj91/7bfc57d11365ac2ef697/raw/299c7a435d83afcb96d99c3bd7dec7a732da6399/compute.sh > compute.sh
+            sh compute.sh
+            chown root:root /opt/clusterware/etc/config.yml
+            chmod 0640 /opt/clusterware/etc/config.yml
+            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
+                -e "s/%CUNAME%/%CLUSTER_USER%/g" \
+                -i /opt/clusterware/etc/config.yml
+          params:
+            "%CLUSTER_NAME%": { get_param: cluster_name }
+            "%CLUSTER_USER%": { get_param: cluster_user }
+
 
   login1:
     type: OS::Nova::Server

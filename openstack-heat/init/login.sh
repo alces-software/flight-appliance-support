@@ -3,16 +3,16 @@ cat << EOF > /opt/clusterware/etc/config.yml
 cluster:
   uuid: '7b4249e8-637a-11e5-a343-7831c1c0e63c'
   token: 'YzYwN2E2OWItNjcwNS00'
-  name: 'hpc1'
+  name: '%CWNAME%'
   role: 'master'
   tags:
     scheduler_roles: ':master:'
   quorum: 3
 instance:
   users:
-  - username: alces-cluster
+  - username: %CUNAME%
     uid: 509
-    group: alces-cluster
+    group: %CUNAME%
     gid: 509
     groups:
     - gridware
