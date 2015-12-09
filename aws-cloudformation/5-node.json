@@ -1,5 +1,5 @@
 {
-    "Description": "Launch an Alces Clusterware environment with 1 login node and 5 compute nodes, complete with SGE scheduler",
+    "Description": "Launch an Alces Clusterware environment with 1 login node and 5 compute nodes, complete with SGE scheduler. Stack includes all necessary networking components to host an Alces Clusterware environment.",
     "Parameters": {
         "ClusterName": {
             "Description": "Choose a cluster name",

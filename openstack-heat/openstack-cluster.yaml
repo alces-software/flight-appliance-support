@@ -32,8 +32,15 @@ parameters:
 
   admin_key:
     type: string
-    label: Cluster user key
-    description: Existing SSH key to be used by user for access
+    label: Cluster admin key
+    description: Enter the name of an OpenStack nova keypair for administrator access
+
+  cluster_type:
+    type: string
+    label: Cluster type
+    description: Choose a cluster variant
+    constraints:
+    - allowed_values: [ clusterware-el6, clusterware-el7 ]
 
   compute_number:
     type: string
@@ -137,7 +144,7 @@ resources:
     type: OS::Nova::Server
     properties:
       name: login1
-      image: clusterware-el6 
+      image: { get_param: cluster_type } 
       flavor: { get_param: compute_flavour }
       key_name: { get_param: admin_key }
       networks:
@@ -170,7 +177,7 @@ resources:
         type: OS::Nova::Server
         properties:
           flavor: { get_param: compute_flavour }
-          image: clusterware-el6
+          image: { get_param: cluster_type }
           user_data_format: RAW
           user_data: { get_resource: node_config }
           metadata: {"scale_group": { get_param: cluster_name }}
