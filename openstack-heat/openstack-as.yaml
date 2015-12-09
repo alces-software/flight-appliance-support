@@ -1,0 +1,170 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Launch an Alces Clusterware environment, complete with 1
+  login node and 3 compute nodes.
+  The stack includes all necessary separated networking
+  to create a private research environment, complete with
+  new SSH key to provide the user with.
+
+parameters:
+  cluster_name:
+    type: string
+    label: Cluster name
+    description: Cluster name
+    default: hpc1
+
+  user_key:
+    type: string
+    label: Cluster user key
+    description: SSH key to be used by user for access
+    constraints: 
+    - allowed_values: [ vlj ]
+      description: User SSH key
+
+  compute_number:
+    type: string
+    label: Number of compute nodes
+    description: Number of compute nodes to launch
+    default: 3
+
+  compute_flavour:
+    type: string
+    label: >
+      Compute node instance type
+    description: Compute node type 
+    constraints:
+    - allowed_values: [ m1.tiny, m1.small, m1.medium, m1.large, m1.xlarge ]
+      description: >
+        Compute node instance type to launch
+
+resources:
+  cluster_network:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: cluster_name }
+
+  cluster_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: cluster_network }
+      cidr: 10.75.0.0/16
+      gateway_ip: 10.75.0.254
+      dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
+      allocation_pools:
+        - start: 10.75.0.2 
+          end: 10.75.0.253
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: public
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: cluster_subnet }
+
+  cluster_sg:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: { get_param: cluster_name }
+      description: Enable ping/SSH
+      rules:
+      - protocol: icmp
+      - protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+
+  master_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: |
+        #!/bin/bash
+        curl https://gist.githubusercontent.com/vlj91/8cb74164cc61e83e9afc/raw/b2e30ddad927efc313880cc2fe4e35a1e7660d9c/login.sh > login.sh
+        sh login.sh
+
+  node_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: |
+        #!/bin/bash
+        uptime 
+
+  login1:
+    type: OS::Nova::Server
+    properties:
+      name: login1
+      image: clusterware-el6 
+      flavor: { get_param: compute_flavour }
+      key_name: { get_param: user_key }
+      networks:
+        - port: { get_resource: login1_port }
+      user_data_format: RAW
+      user_data: { get_resource: master_config }
+
+  login1_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: cluster_network }
+      fixed_ips:
+        - subnet_id: { get_resource: cluster_subnet }
+
+  login1_access:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: public
+      port_id: { get_resource: login1_port }
+
+  group:
+    type: OS::Heat::AutoScalingGroup
+    depends_on: login1_access
+    properties:
+      cooldown: 60
+      desired_capacity: { get_param: compute_number }
+      max_size: 20
+      min_size: 0
+      resource:
+        type: OS::Nova::Server
+        properties:
+          flavor: { get_param: compute_flavour }
+          image: clusterware-el6
+          user_data_format: RAW
+          user_data: { get_resource: node_config }
+          metadata: {"scale_group": { get_param: cluster_name }}
+          networks: [{ network: { get_resource: cluster_network } }]
+
+  scale_up_policy:
+    type: OS::Heat::ScalingPolicy
+    properties:
+      adjustment_type: change_in_capacity
+      auto_scaling_group_id: { get_resource: group }
+      cooldown: 60
+      scaling_adjustment: 1
+
+  scale_down_policy:
+    type: OS::Heat::ScalingPolicy
+    properties:
+      adjustment_type: change_in_capacity
+      auto_scaling_group_id: { get_resource: group }
+      cooldown: 60
+      scaling_adjustment: -1
+
+outputs:
+  login1_public_ip:
+    description: Floating IP address of login1 in public network
+    value: { get_attr: [ login1_access, floating_ip_address ] }
+  compute_up:
+    description: >
+      Increase the number of compute nodes using a HTTP POST to the
+      scale_up URL.
+    value: { get_attr: [ scale_up_policy, alarm_url ] }
+  compute_down:
+    description: >
+      Decrease the number of compute nodes using a HTTP POST to the
+      scale_down URL.
+    value: { get_attr: [ scale_down_policy, alarm_url ] }
