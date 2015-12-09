@@ -1,11 +1,16 @@
+# Note - some of the defaults below are for an
+# Alces Software OpenStack environment. 
+# Please verify the configuration below before launching
+# external_network: `public`
+# clusterware image names: `clusterware-el6/7`
 heat_template_version: 2013-05-23
 
 description: >
   Launch an Alces Clusterware environment, complete with 1
   login node and 3 compute nodes.
   The stack includes all necessary separated networking
-  to create a private research environment, complete with
-  new SSH key to provide the user with.
+  to create a private research environment.
+  All resources are destroyed on destruction of the stack
 
 parameters:
   cluster_name:
@@ -17,10 +22,7 @@ parameters:
   user_key:
     type: string
     label: Cluster user key
-    description: SSH key to be used by user for access
-    constraints: 
-    - allowed_values: [ vlj ]
-      description: User SSH key
+    description: Existing SSH key to be used by user for access
 
   compute_number:
     type: string
