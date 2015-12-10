@@ -1,8 +1,8 @@
 #!/bin/bash
 cat << EOF > /opt/clusterware/etc/config.yml
 cluster:
-  uuid: '7b4249e8-637a-11e5-a343-7831c1c0e63c'
-  token: 'YzYwN2E2OWItNjcwNS00'
+  uuid: '%UUID%'
+  token: '%TOKEN%'
   name: '%CWNAME%'
   role: 'slave'
   tags:
