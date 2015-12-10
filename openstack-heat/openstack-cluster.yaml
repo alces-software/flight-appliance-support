@@ -59,6 +59,18 @@ parameters:
         Compute node instance type to launch
 
 resources:
+  cluster_uuid:
+    type: OS::Heat::RandomString
+    properties:
+      length: 24
+      sequence: digits
+
+  cluster_token:
+    type: OS::Heat::RandomString
+    properties:
+      length: 20
+      sequence: lettersdigits
+
   cluster_network:
     type: OS::Neutron::Net
     properties:
@@ -106,18 +118,22 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://gist.githubusercontent.com/vlj91/93b04ab2a29b25dd91ed/raw/0a96377dc6dce6a8d5c7a21c9f9a57c6baad9a2b/login.sh > login.sh
+            curl https://gist.githubusercontent.com/vlj91/93b04ab2a29b25dd91ed/raw/cc64c7364ea733ca78e3dcbc79d09eeb7968504a/login.sh > login.sh
             sh login.sh
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
             sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
                 -e "s/%CUNAME%/%CLUSTER_USER%/g" \
                 -e "s,%CUKEY%,%CWUKEY%,g" \
+                -e "s/%UUID%/%CWUUID%/g" \
+                -e "s/%TOKEN%/%CWTOKEN%/g" \
                 -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: cluster_name }
             "%CLUSTER_USER%": { get_param: cluster_user }
             "%CWUKEY%": { get_param: cluster_user_key }
+            "%CWUUID%": { get_resource: cluster_uuid }
+            "%CWTOKEN%": { get_resource: cluster_token }
 
   node_config:
     type: OS::Heat::SoftwareConfig
@@ -127,18 +143,22 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://gist.githubusercontent.com/vlj91/7bfc57d11365ac2ef697/raw/0d3b8fcc03c04cb069c1c8b5dd8516b49d344f3a/compute.sh > compute.sh
+            curl https://gist.githubusercontent.com/vlj91/7bfc57d11365ac2ef697/raw/c4999aad43b0028f77f461717ea0626586cd15e5/compute.sh > compute.sh
             sh compute.sh
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
             sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
                 -e "s/%CUNAME%/%CLUSTER_USER%/g" \
                 -e "s,%CUKEY%,%CWUKEY%,g" \
+                -e "s/%UUID%/%CWUUID%/g" \
+                -e "s/%TOKEN%/%CWTOKEN%/g" \
                 -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: cluster_name }
             "%CLUSTER_USER%": { get_param: cluster_user }
             "%CWUKEY": { get_param: cluster_user_key }
+            "%CWUUID%": { get_resource: cluster_uuid }
+            "%CWTOKEN%": { get_resource: cluster_token }
 
   login1:
     type: OS::Nova::Server
