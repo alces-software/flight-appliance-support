@@ -15,10 +15,8 @@ instance:
     group: %CUNAME%
     gid: 509
     groups:
-      - gridware
-      - admins:388
-    ssh_public_key: | 
-      %CUKEY%
+    - gridware
+    - admins:388
+    ssh_public_key: |
+      ssh-rsa %CUKEY% openstack
 EOF
-chmod 0640 /opt/clusterware/etc/config.yml
-chown /opt/clusterware/etc/config.yml root:root
