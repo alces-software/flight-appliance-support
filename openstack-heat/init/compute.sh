@@ -18,5 +18,5 @@ instance:
     - gridware
     - admins:388
     ssh_public_key: |
-      ssh-rsa %CUKEY% openstack
+      %CUKEY%
 EOF
