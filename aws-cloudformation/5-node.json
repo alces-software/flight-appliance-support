@@ -84,7 +84,7 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "64": "ami-df6dcbac"
+                "64": "ami-a3882bd0"
             }
         }
     },
