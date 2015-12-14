@@ -64,16 +64,6 @@ parameters:
     constraints:
     - allowed_values: [ bio, chem, benchmark ]
 
-  aws_access_key:
-    type: string
-    label: AWS access key
-    description: AWS access key to obtain Gridware Depot
-
-  aws_secret:
-    type: string
-    label: AWS secret
-    description: AWS secret to obtain Gridware Depot
-
 resources:
   cluster_uuid:
     type: OS::Heat::RandomString
