@@ -58,6 +58,22 @@ parameters:
       description: >
         Compute node instance type to launch
 
+  gridware_depot:
+    type: string
+    label: Gridware Depot to install
+    constraints:
+    - allowed_values: [ bio, chem, benchmark ]
+
+  aws_access_key:
+    type: string
+    label: AWS access key
+    description: AWS access key to obtain Gridware Depot
+
+  aws_secret:
+    type: string
+    label: AWS secret
+    description: AWS secret to obtain Gridware Depot
+
 resources:
   cluster_uuid:
     type: OS::Heat::RandomString
@@ -127,6 +143,9 @@ resources:
                 -e "s,%CUKEY%,%CWUKEY%,g" \
                 -e "s/%UUID%/%CWUUID%/g" \
                 -e "s/%TOKEN%/%CWTOKEN%/g" \
+                -e "s,%INSTALL%,%DEPOT%/g" \
+                -e "s,%TKN,%AWSTOKEN%,g" \
+                -e "s,%SCRT,%AWSSECRET%,g" \
                 -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: cluster_name }
@@ -134,6 +153,7 @@ resources:
             "%CWUKEY%": { get_param: cluster_user_key }
             "%CWUUID%": { get_resource: cluster_uuid }
             "%CWTOKEN%": { get_resource: cluster_token }
+            "%DEPOT%": { get_param: gridware_depot }
 
   node_config:
     type: OS::Heat::SoftwareConfig
