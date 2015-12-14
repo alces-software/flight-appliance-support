@@ -4,6 +4,7 @@
         "ClusterName": {
             "Description": "Choose a cluster name",
             "Type": "String",
+	    "AllowedValues": "[a-z0-9]{12}
             "Default": "awscluster"
         },
         "ClusterUUID": {
@@ -16,12 +17,16 @@
         "ClusterwareToken": {
             "Description": "Enter a Clusterware token - or leave default if unknown",
             "Type": "String",
+	    "MinLength": "24",
+	    "MaxLength": "24",
             "Default": "1A0a1aaAA1aAAA/aaa1aAA=="
         },
         "ClusterUser": {
             "Description": "Choose a username for the cluster user",
             "Type": "String",
-            "Default": "alces"
+	    "MinLength": "3",
+	    "AllowedPattern": "[a-z0-9]{12}",
+            "Default": "alces-cluster"
         },
         "ClusterUserKey": {
             "Description": "Enter a public SSH key for cluster user access",
