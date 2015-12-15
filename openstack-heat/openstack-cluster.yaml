@@ -124,7 +124,7 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://gist.githubusercontent.com/vlj91/93b04ab2a29b25dd91ed/raw/cc64c7364ea733ca78e3dcbc79d09eeb7968504a/login.sh > login.sh
+            curl https://gist.githubusercontent.com/vlj91/93b04ab2a29b25dd91ed/raw/2c62cc53142624df19a0d8d6d8a23b485100e5f3/login.sh > login.sh
             sh login.sh
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
@@ -133,9 +133,7 @@ resources:
                 -e "s,%CUKEY%,%CWUKEY%,g" \
                 -e "s/%UUID%/%CWUUID%/g" \
                 -e "s/%TOKEN%/%CWTOKEN%/g" \
-                -e "s,%INSTALL%,%DEPOT%/g" \
-                -e "s,%TKN,%AWSTOKEN%,g" \
-                -e "s,%SCRT,%AWSSECRET%,g" \
+                -e "s,%INSTALL%,%DEPOT%,g" \
                 -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: cluster_name }

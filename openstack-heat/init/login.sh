@@ -8,6 +8,10 @@ cluster:
   tags:
     scheduler_roles: ':master:'
   quorum: 3
+  gridware: 
+    depots:
+    - name: %INSTALL%
+      url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/depots/%INSTALL%
 instance:
   users:
   - username: %CUNAME%
@@ -18,5 +22,6 @@ instance:
     - gridware
     - admins:388
     ssh_public_key: |
-      %CUKEY%
+      ssh-rsa %CUKEY% openstack
 EOF
+
