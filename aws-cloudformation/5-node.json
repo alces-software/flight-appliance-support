@@ -4,7 +4,7 @@
         "ClusterName": {
             "Description": "Choose a cluster name",
             "Type": "String",
-	    "AllowedValues": "[a-z0-9]{12}
+	    "AllowedValues": "[a-z0-9]{12}",
             "Default": "awscluster"
         },
         "ClusterUUID": {
