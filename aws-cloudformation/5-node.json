@@ -4,7 +4,7 @@
         "ClusterName": {
             "Description": "Choose a cluster name",
             "Type": "String",
-	    "AllowedValues": "[a-z0-9]{12}",
+	    "AllowedPattern": "[a-z0-9]*",
             "Default": "awscluster"
         },
         "ClusterUUID": {
@@ -26,7 +26,7 @@
             "Type": "String",
 	    "MinLength": "3",
 	    "AllowedPattern": "[a-z0-9]{12}",
-            "Default": "alces-cluster"
+            "Default": "alcescluster"
         },
         "ClusterUserKey": {
             "Description": "Enter a public SSH key for cluster user access",
