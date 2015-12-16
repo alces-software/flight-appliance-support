@@ -629,11 +629,111 @@
                 "InstanceType": {
                     "Ref": "ComputeType"
                 },
-                "SecurityGroups": []
-            }
+                "SecurityGroups": [],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#cloud-config",
+                                "write_files:",
+                                "\n",
+                                "- content: |",
+                                "\n",
+                                "    cluster:",
+                                "\n",
+                                "      uuid: '",
+                                {
+                                    "Ref": "ClusterUUID"
+                                },
+                                "'",
+                                "\n",
+                                "      token: '",
+                                {
+                                    "Ref": "ClusterwareToken"
+                                },
+                                "'",
+                                "\n",
+                                "      name: ",
+                                {
+                                    "Ref": "ClusterName"
+                                },
+                                "\n",
+                                "      role: 'slave'",
+                                "\n",
+                                "      tags:",
+                                "\n",
+                                "        scheduler_roles: ':compute:'",
+                                "\n",
+                                "      quorum: 3",
+                                "\n",
+                                "      aws_access_key: ",
+                                {
+                                    "Ref": "ClusterwareAccessKey"
+                                },
+                                "\n",
+                                "      aws_secret_key: ",
+                                {
+                                    "Fn::GetAtt": [
+                                        "ClusterwareAccessKey",
+                                        "SecretAccessKey"
+                                    ]
+                                },
+                                "\n",
+                                "      aws_zone_name: ",
+                                {
+                                    "Ref": "ClusterName"
+                                },
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        uid: 509",
+                                "\n",
+                                "        group: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        gid: 509",
+                                "\n",
+                                "        groups:",
+                                "\n",
+                                "          - gridware",
+                                "\n",
+                                "          - admins:388",
+                                "\n",
+                                "        ssh_public_key: |",
+                                "\n",
+                                "          ",
+                                {
+                                    "Ref": "ClusterUserKey"
+                                },
+                                "\n",
+                                "  owner: root:root",
+                                "\n",
+                                "  path: /opt/clusterware/etc/config.yml",
+                                "\n",
+                                "  permissions: '0640'",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+
+
+}
+            
         },
         "ComputeGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
+	    "DependsOn": "ClusterwareRoute53",
             "Properties": {
                 "DesiredCapacity": {
 			"Ref": "ComputeNumber"
