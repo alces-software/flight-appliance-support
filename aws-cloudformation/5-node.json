@@ -90,7 +90,13 @@
         "AWSRegionArch2AMI": {
             "eu-west-1": {
                 "64": "ami-a3882bd0"
-            }
+            },
+	    "eu-central-1": {
+		    "64": "ami-f2fce09e"
+	    },
+	    "us-west-1": {
+		    "64": "ami-ca5b30aa"
+	    }
         }
     },
     "Resources": {
@@ -543,7 +549,6 @@
         },
         "AlcesClusterwareCompute1": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
                 "Tags": [
                     {
@@ -697,7 +702,6 @@
         },
         "AlcesClusterwareCompute2": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
                 "Tags": [
                     {
@@ -850,7 +854,6 @@
             }
         },
         "AlcesClusterwareCompute3": {
-            "DependsOn": "AlcesClusterwareMasterNode",
             "Type": "AWS::EC2::Instance",
             "Properties": {
                 "Tags": [
@@ -1004,7 +1007,6 @@
             }
         },
         "AlcesClusterwareCompute4": {
-            "DependsOn": "AlcesClusterwareMasterNode",
             "Type": "AWS::EC2::Instance",
             "Properties": {
                 "Tags": [
@@ -1159,7 +1161,6 @@
         },
         "AlcesClusterwareCompute5": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
                 "Tags": [
                     {
