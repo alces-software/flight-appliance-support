@@ -1,6 +1,16 @@
 {
     "Description": "Launch an Alces Clusterware environment with 1 login node and 5 compute nodes, complete with SGE scheduler. Stack includes all necessary networking components to host an Alces Clusterware environment.",
     "Parameters": {
+	"AvailabilityZone": {
+		"Description": "Select current availability zone",
+		"Type": "String",
+		"AllowedValues": [
+			"eu-west-1",
+			"eu-central-1",
+			"us-west-1"
+				],
+			"Default": "eu-west-1"
+	},
         "ClusterName": {
             "Description": "Choose a cluster name",
             "Type": "String",
@@ -88,6 +98,17 @@
         }
     },
     "Mappings": {
+	"Region2Region": {
+	    "eu-west-1": {
+		    "Region": "eu-west-1"
+	    },
+	    "eu-central-1": {
+		    "Region": "eu-central-1"
+	    },
+	    "us-west-1": {
+		    "Region": "us-west-1"
+	    }
+	},
         "AWSInstanceType2Arch": {
             "t2.micro": {
                 "Arch": "64"
@@ -614,15 +635,18 @@
         "ComputeGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
-                "AvailabilityZones": {
-                    "Fn::GetAZs": ""
-                },
-                "DesiredCapacity": 5,
+                "DesiredCapacity": {
+			"Ref": "ComputeNumber"
+		},
                 "LaunchConfigurationName": {
                     "Ref": "ComputeConfig"
                 },
-                "MinSize": 1,
-                "MaxSize": 10,
+                "MinSize": {
+		       "Ref": "ComputeNumber"
+		},	       
+                "MaxSize": {
+			"Ref": "ComputeNumber"
+		},
                 "VPCZoneIdentifier": [
                     {
                         "Ref": "ClusterwarePublicNet"
