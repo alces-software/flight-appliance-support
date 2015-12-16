@@ -51,7 +51,8 @@
         },
         "ComputeNumber": {
             "Description": "Enter the number of compute nodes you wish to deploy",
-            "Type": "Number",
+            "Type": "String",
+            "AllowedPattern": "[0-9]",
             "Default": "3"
         },
         "ComputeType": {
@@ -586,148 +587,47 @@
         "ComputeConfig": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
-                "KeyName": {
-                    "Ref": "AdminKey"
-                },
+                "AssociatePublicIpAddress": false,
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
                         {
                             "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "AWSInstanceType2Arch",
+                                {
+                                    "Ref": "ComputeType"
+                                },
+                                "Arch"
+                            ]
                         }
                     ]
                 },
-                "UserData": {
-                    "Fn::Base64": {
-                        "Fn::Join": [
-                            "",
-                            [
-                                "#cloud-config",
-                                "\n",
-                                "write_files:",
-                                "\n",
-                                "- content: |",
-                                "\n",
-                                "    cluster:",
-                                "\n",
-                                "      uuid: '",
-                                {
-                                    "Ref": "ClusterUUID"
-                                },
-                                "'",
-                                "\n",
-                                "      token: '",
-                                {
-                                    "Ref": "ClusterwareToken"
-                                },
-                                "'",
-                                "\n",
-                                "      name: ",
-                                {
-                                    "Ref": "ClusterName"
-                                },
-                                "\n",
-                                "      role: 'slave'",
-                                "\n",
-                                "      tags:",
-                                "\n",
-                                "        scheduler_roles: ':compute:'",
-                                "\n",
-                                "      quorum: 3",
-                                "\n",
-                                "      aws_access_key: ",
-                                {
-                                    "Ref": "ClusterwareAccessKey"
-                                },
-                                "\n",
-                                "      aws_secret_key: ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ClusterwareAccessKey",
-                                        "SecretAccessKey"
-                                    ]
-                                },
-                                "\n",
-                                "      aws_zone_name: ",
-                                {
-                                    "Ref": "ClusterName"
-                                },
-                                "\n",
-                                "    instance:",
-                                "\n",
-                                "      users:",
-                                "\n",
-                                "      - username: ",
-                                {
-                                    "Ref": "ClusterUser"
-                                },
-                                "\n",
-                                "        uid: 509",
-                                "\n",
-                                "        group: ",
-                                {
-                                    "Ref": "ClusterUser"
-                                },
-                                "\n",
-                                "        gid: 509",
-                                "\n",
-                                "        groups:",
-                                "\n",
-                                "          - gridware",
-                                "\n",
-                                "          - admins:388",
-                                "\n",
-                                "        ssh_public_key: |",
-                                "\n",
-                                "          ",
-                                {
-                                    "Ref": "ClusterUserKey"
-                                },
-                                "\n",
-                                "  owner: root:root",
-                                "\n",
-                                "  path: /opt/clusterware/etc/config.yml",
-                                "\n",
-                                "  permissions: '0640'",
-                                "\n"
-                            ]
-                        ]
-                    }
-                },
-                "NetworkInterfaces": [
-                    {
-                        "AssociatePublicIpAddress": "false",
-                        "DeviceIndex": "0",
-                        "GroupSet": [
-                            {
-                                "Ref": "AlcesClusterwareSecurityGroup"
-                            }
-                        ],
-                        "SubnetId": {
-                            "Ref": "ClusterwarePublicNet"
-                        }
-                    }
-                ],
                 "InstanceType": {
                     "Ref": "ComputeType"
-                }
-            },
-            "ComputeGroup": {
-                "Type": "AWS::AutoScaling::AutoScalingGroup",
-                "Properties": {
-                    "LaunchConfigurationName": {
-                        "Ref": "ComputeConfig"
-                    },
-                    "MinSize": {
-                        "Ref": "ComputeNumber"
-                    },
-                    "MaxSize": {
-                        "Ref": "ComputeNumber"
-                    },
-                    "DesiredCapacity": {
-                        "Ref": "ComputeNumber"
+                },
+                "SecurityGroups": []
+            }
+        },
+        "ComputeGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "AvailabilityZones": {
+                    "Fn::GetAZs": ""
+                },
+                "DesiredCapacity": 5,
+                "LaunchConfigurationName": {
+                    "Ref": "ComputeConfig"
+                },
+                "MinSize": 1,
+                "MaxSize": 10,
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "ClusterwarePublicNet"
                     }
-                }
+                ]
             }
         }
     }
