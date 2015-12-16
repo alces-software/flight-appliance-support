@@ -13,3 +13,4 @@ The following deployment types are currently available:
 
 * **Gridscheduler compute environments**
   * [5 node Gridscheduler compute environment](#)
+  * [Autoscaling compute node Gridscheduler compute environment](#)
