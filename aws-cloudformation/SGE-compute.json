@@ -1,16 +1,16 @@
 {
     "Description": "Launch an Alces Clusterware environment with 1 login node and 5 compute nodes, complete with SGE scheduler. Stack includes all necessary networking components to host an Alces Clusterware environment.",
     "Parameters": {
-	"AvailabilityZone": {
-		"Description": "Select current availability zone",
-		"Type": "String",
-		"AllowedValues": [
-			"eu-west-1",
-			"eu-central-1",
-			"us-west-1"
-				],
-			"Default": "eu-west-1"
-	},
+        "AvailabilityZone": {
+            "Description": "Select current availability zone",
+            "Type": "String",
+            "AllowedValues": [
+                "eu-west-1",
+                "eu-central-1",
+                "us-west-1"
+            ],
+            "Default": "eu-west-1"
+        },
         "ClusterName": {
             "Description": "Choose a cluster name",
             "Type": "String",
@@ -79,6 +79,11 @@
                 "r3.xlarge"
             ]
         },
+	"SpotPrice": {
+	    "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing.",
+	    "Type": "String",
+	    "Default": "0.10"
+	},
         "ClusterwareDepots": {
             "Description": "Select the Clusterware Depot to install",
             "Type": "String",
@@ -98,17 +103,17 @@
         }
     },
     "Mappings": {
-	"Region2Region": {
-	    "eu-west-1": {
-		    "Region": "eu-west-1"
-	    },
-	    "eu-central-1": {
-		    "Region": "eu-central-1"
-	    },
-	    "us-west-1": {
-		    "Region": "us-west-1"
-	    }
-	},
+        "Region2Region": {
+            "eu-west-1": {
+                "Region": "eu-west-1"
+            },
+            "eu-central-1": {
+                "Region": "eu-central-1"
+            },
+            "us-west-1": {
+                "Region": "us-west-1"
+            }
+        },
         "AWSInstanceType2Arch": {
             "t2.micro": {
                 "Arch": "64"
@@ -629,6 +634,9 @@
                 "InstanceType": {
                     "Ref": "ComputeType"
                 },
+		"SpotPrice": {
+			"Ref": "SpotPrice"
+		},
                 "SecurityGroups": [],
                 "UserData": {
                     "Fn::Base64": {
@@ -636,6 +644,7 @@
                             "",
                             [
                                 "#cloud-config",
+                                "\n",
                                 "write_files:",
                                 "\n",
                                 "- content: |",
@@ -726,27 +735,24 @@
                         ]
                     }
                 }
-
-
-}
-            
+            }
         },
         "ComputeGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
-	    "DependsOn": "ClusterwareRoute53",
+            "DependsOn": "ClusterwareRoute53",
             "Properties": {
                 "DesiredCapacity": {
-			"Ref": "ComputeNumber"
-		},
+                    "Ref": "ComputeNumber"
+                },
                 "LaunchConfigurationName": {
                     "Ref": "ComputeConfig"
                 },
                 "MinSize": {
-		       "Ref": "ComputeNumber"
-		},	       
+                    "Ref": "ComputeNumber"
+                },
                 "MaxSize": {
-			"Ref": "ComputeNumber"
-		},
+                    "Ref": "ComputeNumber"
+                },
                 "VPCZoneIdentifier": [
                     {
                         "Ref": "ClusterwarePublicNet"
