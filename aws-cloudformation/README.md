@@ -13,4 +13,4 @@ The following deployment types are currently available:
 
 * **Gridscheduler compute environments**
   * [5 node Gridscheduler compute environment](https://github.com/alces-software/clusterware-deployment-methods/blob/master/aws-cloudformation/5-node.json)
-  * [Autoscaling compute node Gridscheduler compute environment](https://github.com/alces-software/clusterware-deployment-methods/blob/master/aws-cloudformation/SGE-compute.json)
+  * [Autoscaling compute node Gridscheduler compute environment with Spot pricing](https://github.com/alces-software/clusterware-deployment-methods/blob/master/aws-cloudformation/SGE-compute.json)
