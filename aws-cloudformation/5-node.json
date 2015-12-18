@@ -201,7 +201,7 @@
                 }
             }
         },
-        "ClusterwareVPC": {
+        "ClusterwareClusterwareRoute53VPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
                 "CidrBlock": "10.75.0.0/16",
@@ -364,7 +364,9 @@
                         "VPCId": {
                             "Ref": "ClusterwareVPC"
                         },
-                        "VPCRegion": "eu-west-1"
+                        "VPCRegion": {
+                            "Ref": "AWS::Region"
+                       }
                     }
                 ]
             }
@@ -567,7 +569,7 @@
         },
         "AlcesClusterwareCompute1": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "AlcesClusterwareMasterNode",
+	    "DependsOn": "ClusterwareRoute53",
             "Properties": {
                 "Tags": [
                     {
@@ -594,7 +596,7 @@
                 },
                 "NetworkInterfaces": [
                     {
-                        "AssociatePublicIpAddress": "true",
+                        "AssociatePublicIpAddress": "false",
                         "DeviceIndex": "0",
                         "GroupSet": [
                             {
@@ -721,7 +723,7 @@
         },
         "AlcesClusterwareCompute2": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "AlcesClusterwareMasterNode",
+	    "DependsOn": "ClusterwareRoute53",
             "Properties": {
                 "Tags": [
                     {
@@ -875,7 +877,7 @@
         },
         "AlcesClusterwareCompute3": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "AlcesClusterwareMasterNode",
+	    "DependsOn": "ClusterwareRoute53",
             "Properties": {
                 "Tags": [
                     {
@@ -1029,7 +1031,7 @@
         },
         "AlcesClusterwareCompute4": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "AlcesClusterwareMasterNode",
+	    "DependsOn": "ClusterwareRoute53",
             "Properties": {
                 "Tags": [
                     {
@@ -1183,7 +1185,7 @@
         },
         "AlcesClusterwareCompute5": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "AlcesClusterwareMasterNode",
+	    "DependsOn": "ClusterwareRoute53",
             "Properties": {
                 "Tags": [
                     {
