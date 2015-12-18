@@ -82,7 +82,7 @@
         }
     },
     "Mappings": {
-        "AWSMasterNodeType2Arch": {
+        "AWSInstanceType2Arch": {
             "t2.micro": {
                 "Arch": "64"
             },
@@ -415,7 +415,7 @@
                         },
                         {
                             "Fn::FindInMap": [
-                                "AWSMasterNodeType2Arch",
+                                "AWSInstanceType2Arch",
                                 {
                                     "Ref": "MasterNodeType"
                                 },
@@ -583,7 +583,7 @@
                         },
                         {
                             "Fn::FindInMap": [
-                                "AWSMasterNodeType2Arch",
+                                "AWSInstanceType2Arch",
                                 {
                                     "Ref": "ComputeType"
                                 },
@@ -737,7 +737,7 @@
                         },
                         {
                             "Fn::FindInMap": [
-                                "AWSMasterNodeType2Arch",
+                                "AWSInstanceType2Arch",
                                 {
                                     "Ref": "ComputeType"
                                 },
@@ -891,7 +891,7 @@
                         },
                         {
                             "Fn::FindInMap": [
-                                "AWSMasterNodeType2Arch",
+                                "AWSInstanceType2Arch",
                                 {
                                     "Ref": "ComputeType"
                                 },
@@ -1045,7 +1045,7 @@
                         },
                         {
                             "Fn::FindInMap": [
-                                "AWSMasterNodeType2Arch",
+                                "AWSInstanceType2Arch",
                                 {
                                     "Ref": "ComputeType"
                                 },
@@ -1199,7 +1199,7 @@
                         },
                         {
                             "Fn::FindInMap": [
-                                "AWSMasterNodeType2Arch",
+                                "AWSInstanceType2Arch",
                                 {
                                     "Ref": "ComputeType"
                                 },
