@@ -615,7 +615,7 @@
                     }
                 ],
                 "InstanceType": {
-                    "Ref": "MasterNodeType"
+                    "Ref": "ComputeType"
                 },
                 "KeyName": {
                     "Ref": "AdminKey"
@@ -769,7 +769,7 @@
                     }
                 ],
                 "InstanceType": {
-                    "Ref": "MasterNodeType"
+                    "Ref": "ComputeType"
                 },
                 "KeyName": {
                     "Ref": "AdminKey"
@@ -923,7 +923,7 @@
                     }
                 ],
                 "InstanceType": {
-                    "Ref": "MasterNodeType"
+                    "Ref": "ComputeType"
                 },
                 "KeyName": {
                     "Ref": "AdminKey"
@@ -1077,7 +1077,7 @@
                     }
                 ],
                 "InstanceType": {
-                    "Ref": "MasterNodeType"
+                    "Ref": "ComputeType"
                 },
                 "KeyName": {
                     "Ref": "AdminKey"
@@ -1231,7 +1231,7 @@
                     }
                 ],
                 "InstanceType": {
-                    "Ref": "MasterNodeType"
+                    "Ref": "ComputeType"
                 },
                 "KeyName": {
                     "Ref": "AdminKey"
