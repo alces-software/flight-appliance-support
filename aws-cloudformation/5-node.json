@@ -201,7 +201,7 @@
                 }
             }
         },
-        "ClusterwareClusterwareRoute53VPC": {
+        "ClusterwareVPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
                 "CidrBlock": "10.75.0.0/16",
@@ -211,6 +211,7 @@
         },
         "ClusterwarePublicNet": {
             "Type": "AWS::EC2::Subnet",
+            "DependsOn": "ClusterwareVPC",
             "Properties": {
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
@@ -223,6 +224,7 @@
         },
         "ClusterwareAttachGW": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
+            "DependsOn": "ClusterwareVPC",
             "Properties": {
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
@@ -234,6 +236,7 @@
         },
         "ClusterwareRouteTable": {
             "Type": "AWS::EC2::RouteTable",
+            "DependsOn": "ClusterwareVPC",
             "Properties": {
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
@@ -320,6 +323,7 @@
         },
         "AlcesClusterwareSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
+            "DependsOn": "ClusterwareVPC",
             "Properties": {
                 "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
                 "VpcId": {
@@ -355,6 +359,7 @@
         },
         "ClusterwareRoute53": {
             "Type": "AWS::Route53::HostedZone",
+            "DependsOn": "ClusterwareVPC",
             "Properties": {
                 "Name": {
                     "Ref": "ClusterName"
@@ -373,6 +378,7 @@
         },
 	"Route53RecordAdd": {
 		"Type": "AWS::Route53::RecordSet",
+                "DependsOn": "ClusterwareRoute53",
 		"Properties": { 
 			"HostedZoneId": {
 				"Ref": "ClusterwareRoute53"
