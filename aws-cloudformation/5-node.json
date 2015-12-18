@@ -438,7 +438,7 @@
                         }
                     }
                 ],
-                "MasterNodeType": {
+                "InstanceType": {
                     "Ref": "MasterNodeType"
                 },
                 "KeyName": {
@@ -606,7 +606,7 @@
                         }
                     }
                 ],
-                "MasterNodeType": {
+                "InstanceType": {
                     "Ref": "MasterNodeType"
                 },
                 "KeyName": {
@@ -760,7 +760,7 @@
                         }
                     }
                 ],
-                "MasterNodeType": {
+                "InstanceType": {
                     "Ref": "MasterNodeType"
                 },
                 "KeyName": {
@@ -914,7 +914,7 @@
                         }
                     }
                 ],
-                "MasterNodeType": {
+                "InstanceType": {
                     "Ref": "MasterNodeType"
                 },
                 "KeyName": {
@@ -1068,7 +1068,7 @@
                         }
                     }
                 ],
-                "MasterNodeType": {
+                "InstanceType": {
                     "Ref": "MasterNodeType"
                 },
                 "KeyName": {
@@ -1222,7 +1222,7 @@
                         }
                     }
                 ],
-                "MasterNodeType": {
+                "InstanceType": {
                     "Ref": "MasterNodeType"
                 },
                 "KeyName": {
