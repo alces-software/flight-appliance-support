@@ -199,8 +199,8 @@ resources:
     properties:
       cooldown: 60
       desired_capacity: { get_param: compute_number }
-      max_size: 20
-      min_size: 0
+      max_size: 500 
+      min_size: 1
       resource:
         type: OS::Nova::Server
         properties:
