@@ -54,7 +54,7 @@ parameters:
       Compute node instance type
     description: Compute node type 
     constraints:
-    - allowed_values: [ m1.small, m1.medium, m1.large, m1.xlarge ]
+    - allowed_values: [ c1.small, m1.small, m1.medium, m1.large, m1.xlarge ]
       description: >
         Compute node instance type to launch
 
