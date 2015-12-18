@@ -245,6 +245,7 @@
         },
         "ClusterwareRoute": {
             "Type": "AWS::EC2::Route",
+            "DependsOn": "ClusterwareGateway",
             "Properties": {
                 "RouteTableId": {
                     "Ref": "ClusterwareRouteTable"
@@ -257,6 +258,7 @@
         },
         "ClusterwareNetACL": {
             "Type": "AWS::EC2::NetworkAcl",
+            "DependsOn": "ClusterwareVPC",
             "Properties": {
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
@@ -407,7 +409,7 @@
 		},
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": "ClusterwareRoute53",
+            "DependsOn": "Route53RecordAdd",
             "Properties": {
                 "Tags": [
                     {
@@ -575,7 +577,7 @@
         },
         "AlcesClusterwareCompute1": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "ClusterwareRoute53",
+	    "DependsOn": "Route53RecordAdd",
             "Properties": {
                 "Tags": [
                     {
@@ -729,7 +731,7 @@
         },
         "AlcesClusterwareCompute2": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "ClusterwareRoute53",
+	    "DependsOn": "Route53RecordAdd",
             "Properties": {
                 "Tags": [
                     {
@@ -883,7 +885,7 @@
         },
         "AlcesClusterwareCompute3": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "ClusterwareRoute53",
+	    "DependsOn": "Route53RecordAdd",
             "Properties": {
                 "Tags": [
                     {
@@ -1037,7 +1039,7 @@
         },
         "AlcesClusterwareCompute4": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "ClusterwareRoute53",
+	    "DependsOn": "Route53RecordAdd",
             "Properties": {
                 "Tags": [
                     {
@@ -1191,7 +1193,7 @@
         },
         "AlcesClusterwareCompute5": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "ClusterwareRoute53",
+	    "DependsOn": "Route53RecordAdd",
             "Properties": {
                 "Tags": [
                     {
