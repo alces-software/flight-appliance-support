@@ -220,11 +220,12 @@
             }
         },
         "ClusterwareGateway": {
-            "Type": "AWS::EC2::InternetGateway"
+            "Type": "AWS::EC2::InternetGateway",
+            "DependsOn": "ClusterwareVPC"
         },
         "ClusterwareAttachGW": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
-            "DependsOn": "ClusterwareVPC",
+            "DependsOn": "ClusterwareGateway",
             "Properties": {
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
