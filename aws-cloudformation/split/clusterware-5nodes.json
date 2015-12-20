@@ -1,0 +1,941 @@
+{
+    "Description": "Launch an Alces ClusterWare COMPUTE node on a pre-created ClusterWare base against a pre-created ClusterWare master.",
+    "Parameters": {
+        "ClusterUser": {
+            "Description": "Choose a username for the cluster user",
+            "Type": "String",
+	    "MinLength": "3",
+	    "MaxLength": "16",
+	    "AllowedPattern": "[-a-z0-9]*",
+            "Default": "alces-cluster",
+	    "ConstraintDescription": "Username can only contain alphanumeric characters and dashes"
+        },
+        "ClusterUserKey": {
+            "Description": "Enter a public SSH key for cluster user access",
+            "Type": "String",
+            "Default": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZzUmsgywX4nsvpviq2aqnDX4kSgGF8nWjUMvD7KRV4uuOhtR56dgHwBSXne0PrR+KMmFt8ExH9valnZqYnL6sTG3vB8sFtdXrnXmx+1DjgqWc4Liq3RehJ589K1x8U6692Zoc9ecNZHd/I+r0SPUf2PGypFc4G28BPee/qdIuDDFSu4TWQv2E+f1mv14qRYQK9p7E+f+8UBJ2EBLmAwOeKV+uVGUtSZQvl8nTZDONzY88qHDHpjwu5zbk4l0pDXznNY3tO7A4TMnhoKr0I1Q0KX6I/S11Jq52pubfPlmq4Xdcefg0Ou0M7NXozhsgEhM5KYTs/qkNrMCXTPJLGSbL clouduser"
+        },
+        "ComputeNodeType": {
+            "Description": "Select the Clusterware compute node instance flavour",
+            "Type": "String",
+            "Default": "t2.small",
+            "AllowedValues": [
+                "t2.micro",
+                "t2.small",
+                "t2.large"
+            ]
+        },
+        "AdminKey": {
+            "Description": "Choose an existing AWS key for administrator access",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "ClusterwareBaseStackName": {
+          "Description": "Name of an active CloudFormation stack that contains the ClusterWare base environment to be used.",
+          "Type": "String",
+          "MinLength" : 1,
+          "MaxLength" : 255,
+          "AllowedPattern" : "^[a-zA-Z][-a-zA-Z0-9]*$",
+          "Default" : "ClusterwareBase"
+        },
+        "ClusterwareMasterStackName": {
+          "Description": "Name of an active CloudFormation stack that contains the ClusterWare master node to be used.",
+          "Type": "String",
+          "MinLength" : 1,
+          "MaxLength" : 255,
+          "AllowedPattern" : "^[a-zA-Z][-a-zA-Z0-9]*$",
+          "Default" : "ClusterwareMaster"
+        },
+        "NodeName1": {
+          "Description": "Name of compute node 1",
+          "Type": "String",
+          "MinLength" : 1,
+          "MaxLength" : 20,
+          "AllowedPattern" : "^[a-zA-Z][-a-zA-Z0-9]*$",
+          "Default" : "node1"
+        },
+        "NodeName2": {
+          "Description": "Name of compute node 2",
+          "Type": "String",
+          "MinLength" : 1,
+          "MaxLength" : 20,
+          "AllowedPattern" : "^[a-zA-Z][-a-zA-Z0-9]*$",
+          "Default" : "node2"
+        },
+        "NodeName3": {
+          "Description": "Name of compute node 3",
+          "Type": "String",
+          "MinLength" : 1,
+          "MaxLength" : 20,
+          "AllowedPattern" : "^[a-zA-Z][-a-zA-Z0-9]*$",
+          "Default" : "node3"
+        },
+        "NodeName4": {
+          "Description": "Name of compute node 4",
+          "Type": "String",
+          "MinLength" : 1,
+          "MaxLength" : 20,
+          "AllowedPattern" : "^[a-zA-Z][-a-zA-Z0-9]*$",
+          "Default" : "node4"
+        },
+        "NodeName5": {
+          "Description": "Name of compute node 5",
+          "Type": "String",
+          "MinLength" : 1,
+          "MaxLength" : 20,
+          "AllowedPattern" : "^[a-zA-Z][-a-zA-Z0-9]*$",
+          "Default" : "node5"
+        }
+    },
+    "Mappings": {
+        "AWSInstanceType2Arch": {
+            "t2.micro": {
+                "Arch": "64"
+            },
+            "t2.small": {
+                "Arch": "64"
+            },
+            "t2.large": {
+                "Arch": "64"
+            },
+	    "c4.large": {
+		"Arch": "64"
+	    },
+	    "c4.xlarge": {
+		"Arch": "64"
+	    },
+	    "r3.large": {
+		"Arch": "64"
+	    },
+	    "r3.xlarge": {
+		"Arch": "64"
+	    }
+        },
+        "AWSRegionArch2AMI": {
+            "eu-west-1": {
+                "64": "ami-a3882bd0"
+            },
+	    "eu-central-1": {
+		    "64": "ami-f2fce09e"
+	    },
+	    "us-west-1": {
+		    "64": "ami-ca5b30aa"
+	    }
+        }
+    },
+    "Resources": {
+        "CWBaseInfo": {
+          "Type": "Custom::CWBaseInfo",
+          "Properties": {
+            "ServiceToken": { "Fn::GetAtt" : ["LookupStackOutputs", "Arn"] },
+            "StackName": {
+              "Ref": "ClusterwareBaseStackName"
+            }
+          }
+        },
+        "CWMasterInfo": {
+          "Type": "Custom::CWMasterInfo",
+          "Properties": {
+            "ServiceToken": { "Fn::GetAtt" : ["LookupStackOutputs", "Arn"] },
+            "StackName": {
+              "Ref": "ClusterwareMasterStackName"
+            }
+          }
+        },
+        "LookupStackOutputs": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "ZipFile":  { "Fn::Join": ["\n", [
+                "var response = require('cfn-response');",
+                "exports.handler = function(event, context) {",
+                "    console.log('REQUEST RECEIVED:\\n', JSON.stringify(event));",
+                "    if (event.RequestType == 'Delete') {",
+                "        response.send(event, context, response.SUCCESS);",
+                "        return;",
+                "    }",
+                "    var stackName = event.ResourceProperties.StackName;",
+                "    var responseData = {};",
+                "    if (stackName) {",
+                "        var aws = require('aws-sdk');",
+                "        var cfn = new aws.CloudFormation();",
+                "        cfn.describeStacks({StackName: stackName}, function(err, data) {",
+                "            if (err) {",
+                "                responseData = {Error: 'DescribeStacks call failed'};",
+                "                console.log(responseData.Error + ':\\n', err);",
+                "                response.send(event, context, response.FAILED, responseData);",
+                "            }",
+                "            else {",
+                "                data.Stacks[0].Outputs.forEach(function(output) {",
+                "                    responseData[output.OutputKey] = output.OutputValue;",
+                "                });",
+                "                response.send(event, context, response.SUCCESS, responseData);",
+                "            }",
+                "        });",
+                "    } else {",
+                "        responseData = {Error: 'Stack name not specified'};",
+                "        console.log(responseData.Error);",
+                "        response.send(event, context, response.FAILED, responseData);",
+                "    }",
+                "};"
+            ]]}
+          },
+          "Handler": "index.handler",
+          "Runtime": "nodejs",
+          "Timeout": "30",
+          "Role": { "Fn::GetAtt" : ["LambdaExecutionRole", "Arn"] }
+          }
+        },
+        "LambdaExecutionRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [{
+                "Effect": "Allow",
+                "Principal": {"Service": ["lambda.amazonaws.com"]},
+                "Action": ["sts:AssumeRole"]
+              }]
+            },
+            "Path": "/",
+            "Policies": [{
+              "PolicyName": "root",
+              "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [{
+                  "Effect": "Allow",
+                  "Action": ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
+                  "Resource": "arn:aws:logs:*:*:*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": ["cloudformation:DescribeStacks"],
+                  "Resource": "*"
+                }]
+              }
+            }]
+          }
+        },
+        "AlcesClusterwareCompute1": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Alces Clusterware Compute Node 1"
+                    }
+                ],
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSRegionArch2AMI",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "AWSInstanceType2Arch",
+                                {
+                                    "Ref": "ComputeNodeType"
+                                },
+                                "Arch"
+                            ]
+                        }
+                    ]
+                },
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "false",
+                        "DeviceIndex": "0",
+                        "GroupSet": [{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareSecurityGroup" ] }],
+                        "SubnetId": { "Fn::GetAtt": [ "CWBaseInfo", "ClusterwarePublicNet" ] }
+                    }
+                ],
+                "InstanceType": {
+                    "Ref": "ComputeNodeType"
+                },
+                "KeyName": {
+                    "Ref": "AdminKey"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#cloud-config",
+                                "\n",
+                                "hostname: ",
+                                {
+                                    "Ref": "NodeName1"
+				}, 
+                                "\n",
+                                "fqdn: ",
+				{
+                                    "Ref": "NodeName1"
+                                },
+				".",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterName" ] },
+                                ".alces.network",
+                                "\n",
+                                "write_files:","\n",
+                                "- content: |","\n",
+                                "    #!/bin/bash","\n",
+                                "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
+                                "  owner: root:root","\n",
+                                "  path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure","\n",
+                                "  permissions: '0755'","\n",
+                                "- content: |",
+                                "\n",
+                                "    cluster:",
+                                "\n",
+                                "      uuid: '",
+								{ "Fn::GetAtt": [ "CWMasterInfo", "ClusterUUID" ] },
+                                "'",
+                                "\n",
+                                "      token: '",
+								{ "Fn::GetAtt": [ "CWMasterInfo", "ClusterwareToken" ] },
+                                "'",
+                                "\n",
+                                "      name: ",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterName" ] },
+                                "\n",
+                                "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterMasterIP" ] },
+                                "\n",
+                                "      tags:",
+                                "\n",
+                                "        scheduler_roles: ':compute:'",
+                                "\n",
+                                "      quorum: 3",
+                                "\n",
+                                "      aws_access_key: ",
+								{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareAccessKey" ] },
+                                "\n",
+                                "      aws_secret_key: ",
+								{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareSecretKey" ] },
+                                "\n",
+                                "      aws_zone_name: cluster",
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        uid: 509",
+                                "\n",
+                                "        group: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        gid: 509",
+                                "\n",
+                                "        groups:",
+                                "\n",
+                                "          - gridware",
+                                "\n",
+                                "          - admins:388",
+                                "\n",
+                                "        ssh_public_key: |",
+                                "\n",
+                                "          ",
+                                {
+                                    "Ref": "ClusterUserKey"
+                                },
+                                "\n",
+                                "  owner: root:root",
+                                "\n",
+                                "  path: /opt/clusterware/etc/config.yml",
+                                "\n",
+                                "  permissions: '0640'",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "AlcesClusterwareCompute2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Alces Clusterware Compute Node 2"
+                    }
+                ],
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSRegionArch2AMI",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "AWSInstanceType2Arch",
+                                {
+                                    "Ref": "ComputeNodeType"
+                                },
+                                "Arch"
+                            ]
+                        }
+                    ]
+                },
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "false",
+                        "DeviceIndex": "0",
+                        "GroupSet": [{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareSecurityGroup" ] }],
+                        "SubnetId": { "Fn::GetAtt": [ "CWBaseInfo", "ClusterwarePublicNet" ] }
+                    }
+                ],
+                "InstanceType": {
+                    "Ref": "ComputeNodeType"
+                },
+                "KeyName": {
+                    "Ref": "AdminKey"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#cloud-config",
+                                "\n",
+                                "hostname: ",
+                                {
+                                    "Ref": "NodeName2"
+				}, 
+                                "\n",
+                                "fqdn: ",
+				{
+                                    "Ref": "NodeName2"
+                                },
+				".",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterName" ] },
+                                ".alces.network",
+                                "\n",
+                                "write_files:","\n",
+                                "- content: |","\n",
+                                "    #!/bin/bash","\n",
+                                "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
+                                "  owner: root:root","\n",
+                                "  path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure","\n",
+                                "  permissions: '0755'","\n",
+                                "- content: |",
+                                "\n",
+                                "    cluster:",
+                                "\n",
+                                "      uuid: '",
+								{ "Fn::GetAtt": [ "CWMasterInfo", "ClusterUUID" ] },
+                                "'",
+                                "\n",
+                                "      token: '",
+								{ "Fn::GetAtt": [ "CWMasterInfo", "ClusterwareToken" ] },
+                                "'",
+                                "\n",
+                                "      name: ",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterName" ] },
+                                "\n",
+                                "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterMasterIP" ] },
+                                "\n",
+                                "      tags:",
+                                "\n",
+                                "        scheduler_roles: ':compute:'",
+                                "\n",
+                                "      quorum: 3",
+                                "\n",
+                                "      aws_access_key: ",
+								{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareAccessKey" ] },
+                                "\n",
+                                "      aws_secret_key: ",
+								{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareSecretKey" ] },
+                                "\n",
+                                "      aws_zone_name: cluster",
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        uid: 509",
+                                "\n",
+                                "        group: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        gid: 509",
+                                "\n",
+                                "        groups:",
+                                "\n",
+                                "          - gridware",
+                                "\n",
+                                "          - admins:388",
+                                "\n",
+                                "        ssh_public_key: |",
+                                "\n",
+                                "          ",
+                                {
+                                    "Ref": "ClusterUserKey"
+                                },
+                                "\n",
+                                "  owner: root:root",
+                                "\n",
+                                "  path: /opt/clusterware/etc/config.yml",
+                                "\n",
+                                "  permissions: '0640'",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "AlcesClusterwareCompute3": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Alces Clusterware Compute Node 3"
+                    }
+                ],
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSRegionArch2AMI",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "AWSInstanceType2Arch",
+                                {
+                                    "Ref": "ComputeNodeType"
+                                },
+                                "Arch"
+                            ]
+                        }
+                    ]
+                },
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "false",
+                        "DeviceIndex": "0",
+                        "GroupSet": [{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareSecurityGroup" ] }],
+                        "SubnetId": { "Fn::GetAtt": [ "CWBaseInfo", "ClusterwarePublicNet" ] }
+                    }
+                ],
+                "InstanceType": {
+                    "Ref": "ComputeNodeType"
+                },
+                "KeyName": {
+                    "Ref": "AdminKey"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#cloud-config",
+                                "\n",
+                                "hostname: ",
+                                {
+                                    "Ref": "NodeName3"
+				}, 
+                                "\n",
+                                "fqdn: ",
+				{
+                                    "Ref": "NodeName3"
+                                },
+				".",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterName" ] },
+                                ".alces.network",
+                                "\n",
+                                "write_files:","\n",
+                                "- content: |","\n",
+                                "    #!/bin/bash","\n",
+                                "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
+                                "  owner: root:root","\n",
+                                "  path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure","\n",
+                                "  permissions: '0755'","\n",
+                                "- content: |",
+                                "\n",
+                                "    cluster:",
+                                "\n",
+                                "      uuid: '",
+								{ "Fn::GetAtt": [ "CWMasterInfo", "ClusterUUID" ] },
+                                "'",
+                                "\n",
+                                "      token: '",
+								{ "Fn::GetAtt": [ "CWMasterInfo", "ClusterwareToken" ] },
+                                "'",
+                                "\n",
+                                "      name: ",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterName" ] },
+                                "\n",
+                                "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterMasterIP" ] },
+                                "\n",
+                                "      tags:",
+                                "\n",
+                                "        scheduler_roles: ':compute:'",
+                                "\n",
+                                "      quorum: 3",
+                                "\n",
+                                "      aws_access_key: ",
+								{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareAccessKey" ] },
+                                "\n",
+                                "      aws_secret_key: ",
+								{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareSecretKey" ] },
+                                "\n",
+                                "      aws_zone_name: cluster",
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        uid: 509",
+                                "\n",
+                                "        group: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        gid: 509",
+                                "\n",
+                                "        groups:",
+                                "\n",
+                                "          - gridware",
+                                "\n",
+                                "          - admins:388",
+                                "\n",
+                                "        ssh_public_key: |",
+                                "\n",
+                                "          ",
+                                {
+                                    "Ref": "ClusterUserKey"
+                                },
+                                "\n",
+                                "  owner: root:root",
+                                "\n",
+                                "  path: /opt/clusterware/etc/config.yml",
+                                "\n",
+                                "  permissions: '0640'",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "AlcesClusterwareCompute4": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Alces Clusterware Compute Node 4"
+                    }
+                ],
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSRegionArch2AMI",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "AWSInstanceType2Arch",
+                                {
+                                    "Ref": "ComputeNodeType"
+                                },
+                                "Arch"
+                            ]
+                        }
+                    ]
+                },
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "false",
+                        "DeviceIndex": "0",
+                        "GroupSet": [{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareSecurityGroup" ] }],
+                        "SubnetId": { "Fn::GetAtt": [ "CWBaseInfo", "ClusterwarePublicNet" ] }
+                    }
+                ],
+                "InstanceType": {
+                    "Ref": "ComputeNodeType"
+                },
+                "KeyName": {
+                    "Ref": "AdminKey"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#cloud-config",
+                                "\n",
+                                "hostname: ",
+                                {
+                                    "Ref": "NodeName4"
+				}, 
+                                "\n",
+                                "fqdn: ",
+				{
+                                    "Ref": "NodeName4"
+                                },
+				".",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterName" ] },
+                                ".alces.network",
+                                "\n",
+                                "write_files:","\n",
+                                "- content: |","\n",
+                                "    #!/bin/bash","\n",
+                                "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
+                                "  owner: root:root","\n",
+                                "  path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure","\n",
+                                "  permissions: '0755'","\n",
+                                "- content: |",
+                                "\n",
+                                "    cluster:",
+                                "\n",
+                                "      uuid: '",
+								{ "Fn::GetAtt": [ "CWMasterInfo", "ClusterUUID" ] },
+                                "'",
+                                "\n",
+                                "      token: '",
+								{ "Fn::GetAtt": [ "CWMasterInfo", "ClusterwareToken" ] },
+                                "'",
+                                "\n",
+                                "      name: ",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterName" ] },
+                                "\n",
+                                "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterMasterIP" ] },
+                                "\n",
+                                "      tags:",
+                                "\n",
+                                "        scheduler_roles: ':compute:'",
+                                "\n",
+                                "      quorum: 3",
+                                "\n",
+                                "      aws_access_key: ",
+								{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareAccessKey" ] },
+                                "\n",
+                                "      aws_secret_key: ",
+								{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareSecretKey" ] },
+                                "\n",
+                                "      aws_zone_name: cluster",
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        uid: 509",
+                                "\n",
+                                "        group: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        gid: 509",
+                                "\n",
+                                "        groups:",
+                                "\n",
+                                "          - gridware",
+                                "\n",
+                                "          - admins:388",
+                                "\n",
+                                "        ssh_public_key: |",
+                                "\n",
+                                "          ",
+                                {
+                                    "Ref": "ClusterUserKey"
+                                },
+                                "\n",
+                                "  owner: root:root",
+                                "\n",
+                                "  path: /opt/clusterware/etc/config.yml",
+                                "\n",
+                                "  permissions: '0640'",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "AlcesClusterwareCompute5": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Alces Clusterware Compute Node 5"
+                    }
+                ],
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSRegionArch2AMI",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "AWSInstanceType2Arch",
+                                {
+                                    "Ref": "ComputeNodeType"
+                                },
+                                "Arch"
+                            ]
+                        }
+                    ]
+                },
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "false",
+                        "DeviceIndex": "0",
+                        "GroupSet": [{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareSecurityGroup" ] }],
+                        "SubnetId": { "Fn::GetAtt": [ "CWBaseInfo", "ClusterwarePublicNet" ] }
+                    }
+                ],
+                "InstanceType": {
+                    "Ref": "ComputeNodeType"
+                },
+                "KeyName": {
+                    "Ref": "AdminKey"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#cloud-config",
+                                "\n",
+                                "hostname: ",
+                                {
+                                    "Ref": "NodeName5"
+				}, 
+                                "\n",
+                                "fqdn: ",
+				{
+                                    "Ref": "NodeName5"
+                                },
+				".",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterName" ] },
+                                ".alces.network",
+                                "\n",
+                                "write_files:","\n",
+                                "- content: |","\n",
+                                "    #!/bin/bash","\n",
+                                "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
+                                "  owner: root:root","\n",
+                                "  path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure","\n",
+                                "  permissions: '0755'","\n",
+                                "- content: |",
+                                "\n",
+                                "    cluster:",
+                                "\n",
+                                "      uuid: '",
+								{ "Fn::GetAtt": [ "CWMasterInfo", "ClusterUUID" ] },
+                                "'",
+                                "\n",
+                                "      token: '",
+								{ "Fn::GetAtt": [ "CWMasterInfo", "ClusterwareToken" ] },
+                                "'",
+                                "\n",
+                                "      name: ",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterName" ] },
+                                "\n",
+                                "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                { "Fn::GetAtt": [ "CWMasterInfo", "ClusterMasterIP" ] },
+                                "\n",
+                                "      tags:",
+                                "\n",
+                                "        scheduler_roles: ':compute:'",
+                                "\n",
+                                "      quorum: 3",
+                                "\n",
+                                "      aws_access_key: ",
+								{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareAccessKey" ] },
+                                "\n",
+                                "      aws_secret_key: ",
+								{ "Fn::GetAtt": [ "CWBaseInfo", "ClusterwareSecretKey" ] },
+                                "\n",
+                                "      aws_zone_name: cluster",
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        uid: 509",
+                                "\n",
+                                "        group: ",
+                                {
+                                    "Ref": "ClusterUser"
+                                },
+                                "\n",
+                                "        gid: 509",
+                                "\n",
+                                "        groups:",
+                                "\n",
+                                "          - gridware",
+                                "\n",
+                                "          - admins:388",
+                                "\n",
+                                "        ssh_public_key: |",
+                                "\n",
+                                "          ",
+                                {
+                                    "Ref": "ClusterUserKey"
+                                },
+                                "\n",
+                                "  owner: root:root",
+                                "\n",
+                                "  path: /opt/clusterware/etc/config.yml",
+                                "\n",
+                                "  permissions: '0640'",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "Outputs": {
+    }
+}
