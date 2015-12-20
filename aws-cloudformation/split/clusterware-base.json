@@ -1,0 +1,295 @@
+{
+    "Description": "Alces Clusterware environment",
+    "Parameters": {
+        "NetworkCIDR": {
+            "Description": "Enter an address range that is permitted to access the Clusterware master node. Leave blank if unknown",
+            "Type": "String",
+            "Default": "0.0.0.0/0",
+            "AllowedPattern": "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/[0-9]{1,2}",
+            "ConstraintDescription": "Please specify a valid IP range, e.g. 101.21.2.0/16"
+        }
+    },
+    "Resources": {
+        "ClusterwareUser": {
+            "Type": "AWS::IAM::User"
+        },
+        "ClusterwarePolicyGroup": {
+            "Type": "AWS::IAM::Group"
+        },
+        "ClusterwarePolicyGroupAdd": {
+            "Type": "AWS::IAM::UserToGroupAddition",
+            "Properties": {
+                "GroupName": {
+                    "Ref": "ClusterwarePolicyGroup"
+                },
+                "Users": [
+                    {
+                        "Ref": "ClusterwareUser"
+                    }
+                ]
+            }
+        },
+        "ClusterwarePolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "ClusterwarePolicy",
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "route53:ChangeResourceRecordSets"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:route53:::hostedzone/",
+                                        {
+                                            "Ref": "ClusterwareRoute53"
+                                        }
+                                    ]
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Groups": [
+                    {
+                        "Ref": "ClusterwarePolicyGroup"
+                    }
+                ]
+            }
+        },
+        "ClusterwarePolicyListZones": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "ClusterwarePolicyListZones",
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "route53:ListHostedZones"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                "*"
+                            ]
+                        }
+                    ]
+                },
+                "Groups": [
+                    {
+                        "Ref": "ClusterwarePolicyGroup"
+                    }
+                ]
+            }
+        },
+        "ClusterwareAccessKey": {
+            "Type": "AWS::IAM::AccessKey",
+            "Properties": {
+                "UserName": {
+                    "Ref": "ClusterwareUser"
+                }
+            }
+        },
+        "ClusterwareVPC": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": "10.75.0.0/16",
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true"
+            }
+        },
+        "ClusterwarePublicNet": {
+            "Type": "AWS::EC2::Subnet",
+            "DependsOn": "ClusterwareVPC",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "ClusterwareVPC"
+                },
+                "CidrBlock": "10.75.0.0/24"
+            }
+        },
+        "ClusterwareGateway": {
+            "Type": "AWS::EC2::InternetGateway",
+            "DependsOn": "ClusterwareVPC"
+        },
+        "ClusterwareAttachGW": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "DependsOn": "ClusterwareGateway",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "ClusterwareVPC"
+                },
+                "InternetGatewayId": {
+                    "Ref": "ClusterwareGateway"
+                }
+            }
+        },
+        "ClusterwareRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "DependsOn": "ClusterwareVPC",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "ClusterwareVPC"
+                }
+            }
+        },
+        "ClusterwareRoute": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": "ClusterwareGateway",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "ClusterwareRouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "ClusterwareGateway"
+                }
+            }
+        },
+        "ClusterwareNetACL": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "DependsOn": "ClusterwareVPC",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "ClusterwareVPC"
+                }
+            }
+        },
+        "InboundSSHACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "ClusterwareNetACL"
+                },
+                "RuleNumber": "100",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": {
+                    "Ref": "NetworkCIDR"
+                },
+                "PortRange": {
+                    "From": "1",
+                    "To": "65535"
+                }
+            }
+        },
+        "OutboundACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "ClusterwareNetACL"
+                },
+                "RuleNumber": "101",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {
+                    "From": "1",
+                    "To": "65535"
+                }
+            }
+        },
+        "ClusterwareSubnetLink": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "ClusterwarePublicNet"
+                },
+                "NetworkAclId": {
+                    "Ref": "ClusterwareNetACL"
+                }
+            }
+        },
+        "SubnetToRouteTable": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "ClusterwareRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "ClusterwarePublicNet"
+                }
+            }
+        },
+        "ClusterwareSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "DependsOn": "ClusterwareVPC",
+            "Properties": {
+                "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
+                "VpcId": {
+                    "Ref": "ClusterwareVPC"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "NetworkCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "-1",
+                        "FromPort": "0",
+                        "ToPort": "65535",
+                        "CidrIp": {
+                            "Ref": "NetworkCIDR"
+                        }
+                    }
+                ],
+                "SecurityGroupEgress": [
+                    {
+                        "IpProtocol": "-1",
+                        "FromPort": "0",
+                        "ToPort": "65535",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+        "ClusterwareRoute53": {
+            "Type": "AWS::Route53::HostedZone",
+            "DependsOn": "ClusterwareVPC",
+            "Properties": {
+                "Name": "cluster",
+                "VPCs": [
+                    {
+                        "VPCId": {
+                            "Ref": "ClusterwareVPC"
+                        },
+                        "VPCRegion": {
+                            "Ref": "AWS::Region"
+                       }
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+      "ClusterwareAccessKey" : {
+        "Description" : "ClusterwareAccessKey",
+        "Value" :  { "Ref" : "ClusterwareAccessKey" }
+      },
+      "ClusterwareSecretKey" : {
+        "Description" : "ClusterwareSecretKey",
+        "Value" : { "Fn::GetAtt": ["ClusterwareAccessKey","SecretAccessKey"] }
+      },
+      "ClusterwareSecurityGroup" : {
+        "Description" : "ClusterwareSecurityGroup",
+        "Value" :  { "Ref" : "ClusterwareSecurityGroup" }
+      },
+      "ClusterwarePublicNet" : {
+        "Description" : "ClusterwarePublicNet",
+        "Value" :  { "Ref" : "ClusterwarePublicNet" }
+      },
+      "ClusterwareRoute53" : {
+        "Description" : "ClusterwareRoute53",
+        "Value" :  { "Ref" : "ClusterwareRoute53" }
+      }
+    }
+}
