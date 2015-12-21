@@ -474,7 +474,7 @@
         },
         "AlcesClusterwareCompute1": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "AlcesClusterwareMasterNode",
+	      "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
                 "Tags": [
                     {
@@ -538,6 +538,18 @@
                                 "\n",
                                 "- content: |",
                                 "\n",
+                                "     #!/bin/bash",
+                                "\n",
+                                "     echo 'Not doing it. Nope. Go away. Bad things.'",
+                                "\n",
+                                "   owner: root:root",
+                                "\n",
+                                "   path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure",
+                                "\n",
+                                "   permissions: '0755'",
+                                "\n",
+                                "- content: |",
+                                "\n",
                                 "    cluster:",
                                 "\n",
                                 "      uuid: '",
@@ -567,6 +579,19 @@
                                 "        scheduler_roles: ':compute:'",
                                 "\n",
                                 "      quorum: 3",
+                                "\n",
+                                "      aws_access_key: ",
+                                {
+                                    "Ref": "ClusterwareAccessKey"
+                                },
+                                "\n",
+                                "      aws_secret_key: ",
+                                {
+                                    "Fn::GetAtt": [
+                                        "ClusterwareAccessKey",
+                                        "SecretAccessKey"
+                                    ]
+                                },
                                 "\n",
                                 "      aws_zone_name: ",
                                 {
@@ -618,7 +643,7 @@
         },
         "AlcesClusterwareCompute2": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "Route53RecordAdd",
+	      "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
                 "Tags": [
                     {
@@ -670,15 +695,27 @@
                             [
                                 "#cloud-config",
                                 "\n",
-                                "hostname: node2",
+                                "hostname: node1",
                                 "\n",
-                                "fqdn: node2.",
+                                "fqdn: node1.",
                                 {
                                     "Ref": "ClusterName"
                                 },
                                 ".alces.network",
                                 "\n",
                                 "write_files:",
+                                "\n",
+                                "- content: |",
+                                "\n",
+                                "     #!/bin/bash",
+                                "\n",
+                                "     echo 'Not doing it. Nope. Go away. Bad things.'",
+                                "\n",
+                                "   owner: root:root",
+                                "\n",
+                                "   path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure",
+                                "\n",
+                                "   permissions: '0755'",
                                 "\n",
                                 "- content: |",
                                 "\n",
@@ -702,6 +739,9 @@
                                 },
                                 "\n",
                                 "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                { "FN::GetAtt": ["ClusterwareMasterNode", "PrivateIp"]},
                                 "\n",
                                 "      tags:",
                                 "\n",
@@ -772,7 +812,7 @@
         },
         "AlcesClusterwareCompute3": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "Route53RecordAdd",
+	      "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
                 "Tags": [
                     {
@@ -824,15 +864,27 @@
                             [
                                 "#cloud-config",
                                 "\n",
-                                "hostname: node3",
+                                "hostname: node1",
                                 "\n",
-                                "fqdn: node3.",
+                                "fqdn: node1.",
                                 {
                                     "Ref": "ClusterName"
                                 },
                                 ".alces.network",
                                 "\n",
                                 "write_files:",
+                                "\n",
+                                "- content: |",
+                                "\n",
+                                "     #!/bin/bash",
+                                "\n",
+                                "     echo 'Not doing it. Nope. Go away. Bad things.'",
+                                "\n",
+                                "   owner: root:root",
+                                "\n",
+                                "   path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure",
+                                "\n",
+                                "   permissions: '0755'",
                                 "\n",
                                 "- content: |",
                                 "\n",
@@ -856,6 +908,9 @@
                                 },
                                 "\n",
                                 "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                { "FN::GetAtt": ["ClusterwareMasterNode", "PrivateIp"]},
                                 "\n",
                                 "      tags:",
                                 "\n",
@@ -926,7 +981,7 @@
         },
         "AlcesClusterwareCompute4": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "Route53RecordAdd",
+	      "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
                 "Tags": [
                     {
@@ -978,15 +1033,27 @@
                             [
                                 "#cloud-config",
                                 "\n",
-                                "hostname: node4",
+                                "hostname: node1",
                                 "\n",
-                                "fqdn: node4.",
+                                "fqdn: node1.",
                                 {
                                     "Ref": "ClusterName"
                                 },
                                 ".alces.network",
                                 "\n",
                                 "write_files:",
+                                "\n",
+                                "- content: |",
+                                "\n",
+                                "     #!/bin/bash",
+                                "\n",
+                                "     echo 'Not doing it. Nope. Go away. Bad things.'",
+                                "\n",
+                                "   owner: root:root",
+                                "\n",
+                                "   path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure",
+                                "\n",
+                                "   permissions: '0755'",
                                 "\n",
                                 "- content: |",
                                 "\n",
@@ -1010,6 +1077,9 @@
                                 },
                                 "\n",
                                 "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                { "FN::GetAtt": ["ClusterwareMasterNode", "PrivateIp"]},
                                 "\n",
                                 "      tags:",
                                 "\n",
@@ -1080,7 +1150,7 @@
         },
         "AlcesClusterwareCompute5": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "Route53RecordAdd",
+	      "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
                 "Tags": [
                     {
@@ -1132,15 +1202,27 @@
                             [
                                 "#cloud-config",
                                 "\n",
-                                "hostname: node5",
+                                "hostname: node1",
                                 "\n",
-                                "fqdn: node5.",
+                                "fqdn: node1.",
                                 {
                                     "Ref": "ClusterName"
                                 },
                                 ".alces.network",
                                 "\n",
                                 "write_files:",
+                                "\n",
+                                "- content: |",
+                                "\n",
+                                "     #!/bin/bash",
+                                "\n",
+                                "     echo 'Not doing it. Nope. Go away. Bad things.'",
+                                "\n",
+                                "   owner: root:root",
+                                "\n",
+                                "   path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure",
+                                "\n",
+                                "   permissions: '0755'",
                                 "\n",
                                 "- content: |",
                                 "\n",
@@ -1164,6 +1246,9 @@
                                 },
                                 "\n",
                                 "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                { "FN::GetAtt": ["ClusterwareMasterNode", "PrivateIp"]},
                                 "\n",
                                 "      tags:",
                                 "\n",
@@ -1231,8 +1316,7 @@
                     }
                 }
             }
-        }
-    },
+        },
     "Outputs": {
         "URL": {
             "Value": {
