@@ -668,9 +668,9 @@
                             [
                                 "#cloud-config",
                                 "\n",
-                                "hostname: node1",
+                                "hostname: node2",
                                 "\n",
-                                "fqdn: node1.",
+                                "fqdn: node2.",
                                 {
                                     "Ref": "ClusterName"
                                 },
@@ -837,9 +837,9 @@
                             [
                                 "#cloud-config",
                                 "\n",
-                                "hostname: node1",
+                                "hostname: node3",
                                 "\n",
-                                "fqdn: node1.",
+                                "fqdn: node3.",
                                 {
                                     "Ref": "ClusterName"
                                 },
@@ -1006,9 +1006,9 @@
                             [
                                 "#cloud-config",
                                 "\n",
-                                "hostname: node1",
+                                "hostname: node4",
                                 "\n",
-                                "fqdn: node1.",
+                                "fqdn: node4.",
                                 {
                                     "Ref": "ClusterName"
                                 },
@@ -1175,9 +1175,9 @@
                             [
                                 "#cloud-config",
                                 "\n",
-                                "hostname: node1",
+                                "hostname: node5",
                                 "\n",
-                                "fqdn: node1.",
+                                "fqdn: node5.",
                                 {
                                     "Ref": "ClusterName"
                                 },
