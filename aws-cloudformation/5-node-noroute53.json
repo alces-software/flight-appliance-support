@@ -384,19 +384,6 @@
                                     "Ref": "ClusterwareDepots"
                                 },
                                 "\n",
-                                "      aws_access_key: ",
-                                {
-                                    "Ref": "ClusterwareAccessKey"
-                                },
-                                "\n",
-                                "      aws_secret_key: ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ClusterwareAccessKey",
-                                        "SecretAccessKey"
-                                    ]
-                                },
-                                "\n",
                                 "      aws_zone_name: ",
                                 {
                                     "Ref": "ClusterName"
@@ -552,19 +539,6 @@
                                 "        scheduler_roles: ':compute:'",
                                 "\n",
                                 "      quorum: 3",
-                                "\n",
-                                "      aws_access_key: ",
-                                {
-                                    "Ref": "ClusterwareAccessKey"
-                                },
-                                "\n",
-                                "      aws_secret_key: ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ClusterwareAccessKey",
-                                        "SecretAccessKey"
-                                    ]
-                                },
                                 "\n",
                                 "      aws_zone_name: ",
                                 {
@@ -722,19 +696,6 @@
                                 "\n",
                                 "      quorum: 3",
                                 "\n",
-                                "      aws_access_key: ",
-                                {
-                                    "Ref": "ClusterwareAccessKey"
-                                },
-                                "\n",
-                                "      aws_secret_key: ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ClusterwareAccessKey",
-                                        "SecretAccessKey"
-                                    ]
-                                },
-                                "\n",
                                 "      aws_zone_name: ",
                                 {
                                     "Ref": "ClusterName"
@@ -890,19 +851,6 @@
                                 "        scheduler_roles: ':compute:'",
                                 "\n",
                                 "      quorum: 3",
-                                "\n",
-                                "      aws_access_key: ",
-                                {
-                                    "Ref": "ClusterwareAccessKey"
-                                },
-                                "\n",
-                                "      aws_secret_key: ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ClusterwareAccessKey",
-                                        "SecretAccessKey"
-                                    ]
-                                },
                                 "\n",
                                 "      aws_zone_name: ",
                                 {
@@ -1060,19 +1008,6 @@
                                 "\n",
                                 "      quorum: 3",
                                 "\n",
-                                "      aws_access_key: ",
-                                {
-                                    "Ref": "ClusterwareAccessKey"
-                                },
-                                "\n",
-                                "      aws_secret_key: ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ClusterwareAccessKey",
-                                        "SecretAccessKey"
-                                    ]
-                                },
-                                "\n",
                                 "      aws_zone_name: ",
                                 {
                                     "Ref": "ClusterName"
@@ -1228,19 +1163,6 @@
                                 "        scheduler_roles: ':compute:'",
                                 "\n",
                                 "      quorum: 3",
-                                "\n",
-                                "      aws_access_key: ",
-                                {
-                                    "Ref": "ClusterwareAccessKey"
-                                },
-                                "\n",
-                                "      aws_secret_key: ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ClusterwareAccessKey",
-                                        "SecretAccessKey"
-                                    ]
-                                },
                                 "\n",
                                 "      aws_zone_name: ",
                                 {
