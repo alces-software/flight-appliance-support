@@ -10,7 +10,7 @@
         "ClusterUUID": {
             "Description": "Enter a unique cluster UUID - or leave default",
             "Type": "String",
-            "AllowedPattern": "[a-z0-9]{8}-[a-z0-9]-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}",
+            "AllowedPattern": "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}",
             "Default": "11111111-2222-3333-4444-555555555555",
             "ConstraintDescription": "Please specify a valid UUID"
         },
@@ -107,7 +107,7 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "64": "ami-8eb914fd"
+                "64": "ami-3fb21f4c"
             },
 	    "eu-central-1": {
 		    "64": "ami-f2fce09e"
@@ -572,7 +572,7 @@
                                 "      role: 'slave'",
                                 "\n",
                                 "      master: ",
-                                { "FN::GetAtt": ["ClusterwareMasterNode", "PrivateIp"]},
+                                { "Fn::GetAtt": ["AlcesClusterwareMasterNode", "PrivateIp"]},
                                 "\n",
                                 "      tags:",
                                 "\n",
@@ -741,7 +741,7 @@
                                 "      role: 'slave'",
                                 "\n",
                                 "      master: ",
-                                { "FN::GetAtt": ["ClusterwareMasterNode", "PrivateIp"]},
+                                { "Fn::GetAtt": ["AlcesClusterwareMasterNode", "PrivateIp"]},
                                 "\n",
                                 "      tags:",
                                 "\n",
@@ -910,7 +910,7 @@
                                 "      role: 'slave'",
                                 "\n",
                                 "      master: ",
-                                { "FN::GetAtt": ["ClusterwareMasterNode", "PrivateIp"]},
+                                { "Fn::GetAtt": ["AlcesClusterwareMasterNode", "PrivateIp"]},
                                 "\n",
                                 "      tags:",
                                 "\n",
@@ -1079,7 +1079,7 @@
                                 "      role: 'slave'",
                                 "\n",
                                 "      master: ",
-                                { "FN::GetAtt": ["ClusterwareMasterNode", "PrivateIp"]},
+                                { "Fn::GetAtt": ["AlcesClusterwareMasterNode", "PrivateIp"]},
                                 "\n",
                                 "      tags:",
                                 "\n",
@@ -1248,7 +1248,7 @@
                                 "      role: 'slave'",
                                 "\n",
                                 "      master: ",
-                                { "FN::GetAtt": ["ClusterwareMasterNode", "PrivateIp"]},
+                                { "Fn::GetAtt": ["AlcesClusterwareMasterNode", "PrivateIp"]},
                                 "\n",
                                 "      tags:",
                                 "\n",
@@ -1316,7 +1316,8 @@
                     }
                 }
             }
-        },
+        }
+      },
     "Outputs": {
         "URL": {
             "Value": {
