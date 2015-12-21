@@ -190,7 +190,7 @@
         },
         "ClusterwareRoute": {
             "Type": "AWS::EC2::Route",
-            "DependsOn": "ClusterwareGateway",
+            "DependsOn": "ClusterwareAttachGW",
             "Properties": {
                 "RouteTableId": {
                     "Ref": "ClusterwareRouteTable"
@@ -304,57 +304,9 @@
                 ]
             }
         },
-        "ClusterwareRoute53": {
-            "Type": "AWS::Route53::HostedZone",
-            "DependsOn": "ClusterwareVPC",
-            "Properties": {
-                "Name": {
-                    "Ref": "ClusterName"
-                },
-                "VPCs": [
-                    {
-                        "VPCId": {
-                            "Ref": "ClusterwareVPC"
-                        },
-                        "VPCRegion": {
-                            "Ref": "AWS::Region"
-                       }
-                    }
-                ]
-            }
-        },
-	"Route53RecordAdd": {
-		"Type": "AWS::Route53::RecordSet",
-                "DependsOn": "ClusterwareRoute53",
-		"Properties": {
-			"HostedZoneId": {
-				"Ref": "ClusterwareRoute53"
-			},
-			"Name": {
-				"Fn::Join": [ "", [
-					"_serf._tcp.",
-					{ "Ref": "ClusterUUID" },
-					".",
-					{ "Ref": "ClusterName" }
-				] ]
-			},
-			"Type": "SRV",
-			"TTL": "60",
-			"ResourceRecords": [ {
-				"Fn::Join": [ "", [
-					"0 0 7496 ",
-					{ "Fn::GetAtt": [
-						"AlcesClusterwareMasterNode",
-						"PrivateIp"
-					]
-					}
-				] ]
-			} ]
-		}
-		},
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": "ClusterwareRoute53",
+            "DependsOn": "AlcesClusterwareSecurityGroup",
             "Properties": {
                 "Tags": [
                     {
@@ -522,7 +474,7 @@
         },
         "AlcesClusterwareCompute1": {
             "Type": "AWS::EC2::Instance",
-	    "DependsOn": "Route53RecordAdd",
+	    "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
                 "Tags": [
                     {
@@ -607,24 +559,14 @@
                                 "\n",
                                 "      role: 'slave'",
                                 "\n",
+                                "      master: ",
+                                { "FN::GetAtt": ["ClusterwareMasterNode", "PrivateIp"]},
+                                "\n",
                                 "      tags:",
                                 "\n",
                                 "        scheduler_roles: ':compute:'",
                                 "\n",
                                 "      quorum: 3",
-                                "\n",
-                                "      aws_access_key: ",
-                                {
-                                    "Ref": "ClusterwareAccessKey"
-                                },
-                                "\n",
-                                "      aws_secret_key: ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ClusterwareAccessKey",
-                                        "SecretAccessKey"
-                                    ]
-                                },
                                 "\n",
                                 "      aws_zone_name: ",
                                 {
