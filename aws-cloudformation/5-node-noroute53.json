@@ -118,33 +118,6 @@
         }
     },
     "Resources": {
-        "ClusterwareUser": {
-            "Type": "AWS::IAM::User"
-        },
-        "ClusterwarePolicyGroup": {
-            "Type": "AWS::IAM::Group"
-        },
-        "ClusterwarePolicyGroupAdd": {
-            "Type": "AWS::IAM::UserToGroupAddition",
-            "Properties": {
-                "GroupName": {
-                    "Ref": "ClusterwarePolicyGroup"
-                },
-                "Users": [
-                    {
-                        "Ref": "ClusterwareUser"
-                    }
-                ]
-            }
-        },
-        "ClusterwareAccessKey": {
-            "Type": "AWS::IAM::AccessKey",
-            "Properties": {
-                "UserName": {
-                    "Ref": "ClusterwareUser"
-                }
-            }
-        },
         "ClusterwareVPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
