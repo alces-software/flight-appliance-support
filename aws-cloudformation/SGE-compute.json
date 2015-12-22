@@ -150,25 +150,6 @@
         }
     },
     "Resources": {
-        "ClusterwareUser": {
-            "Type": "AWS::IAM::User"
-        },
-        "ClusterwarePolicyGroup": {
-            "Type": "AWS::IAM::Group"
-        },
-        "ClusterwarePolicyGroupAdd": {
-            "Type": "AWS::IAM::UserToGroupAddition",
-            "Properties": {
-                "GroupName": {
-                    "Ref": "ClusterwarePolicyGroup"
-                },
-                "Users": [
-                    {
-                        "Ref": "ClusterwareUser"
-                    }
-                ]
-            }
-        },
         "ClusterwareVPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
@@ -506,7 +487,7 @@
 		"SpotPrice": {
 			"Ref": "SpotPrice"
 		},
-                "SecurityGroups": [],
+                "SecurityGroups": { "Ref": "AlcesClusterwareSecurityGroup" },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
