@@ -139,7 +139,7 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "64": "ami-a3882bd0"
+                "64": "ami-f0b21f83"
             },
             "eu-central-1": {
                 "64": "ami-f2fce09e"
@@ -255,6 +255,7 @@
         },
         "ClusterwareAttachGW": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
+            "DependsOn": "ClusterwareGateway",
             "Properties": {
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
@@ -266,6 +267,7 @@
         },
         "ClusterwareRouteTable": {
             "Type": "AWS::EC2::RouteTable",
+            "DependsOn": "ClusterwareVPC",
             "Properties": {
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
@@ -274,6 +276,7 @@
         },
         "ClusterwareRoute": {
             "Type": "AWS::EC2::Route",
+            "DependsOn": "ClusterwareAttachGW",
             "Properties": {
                 "RouteTableId": {
                     "Ref": "ClusterwareRouteTable"
@@ -444,7 +447,7 @@
         },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": "ClusterwareRoute53",
+            "DependsOn": "AlcesClusterwareSecurityGroup",
             "Properties": {
                 "Tags": [
                     {
@@ -462,7 +465,7 @@
                             "Fn::FindInMap": [
                                 "AWSInstanceType2Arch",
                                 {
-                                    "Ref": "InstanceType"
+                                    "Ref": "MasterNodeType"
                                 },
                                 "Arch"
                             ]
@@ -484,7 +487,7 @@
                     }
                 ],
                 "InstanceType": {
-                    "Ref": "InstanceType"
+                    "Ref": "MasterNodeType"
                 },
                 "KeyName": {
                     "Ref": "AdminKey"
@@ -547,19 +550,6 @@
                                 "          url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/depots/",
                                 {
                                     "Ref": "ClusterwareDepots"
-                                },
-                                "\n",
-                                "      aws_access_key: ",
-                                {
-                                    "Ref": "ClusterwareAccessKey"
-                                },
-                                "\n",
-                                "      aws_secret_key: ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ClusterwareAccessKey",
-                                        "SecretAccessKey"
-                                    ]
                                 },
                                 "\n",
                                 "      aws_zone_name: ",
@@ -643,94 +633,78 @@
                         "Fn::Join": [
                             "",
                             [
-                                "#cloud-config",
-                                "\n",
-                                "write_files:",
-                                "\n",
-                                "- content: |",
-                                "\n",
-                                "    cluster:",
-                                "\n",
-                                "      uuid: '",
-                                {
-                                    "Ref": "ClusterUUID"
-                                },
-                                "'",
-                                "\n",
-                                "      token: '",
-                                {
-                                    "Ref": "ClusterwareToken"
-                                },
-                                "'",
-                                "\n",
-                                "      name: ",
-                                {
-                                    "Ref": "ClusterName"
-                                },
-                                "\n",
-                                "      role: 'slave'",
-                                "\n",
-                                "      tags:",
-                                "\n",
-                                "        scheduler_roles: ':compute:'",
-                                "\n",
-                                "      quorum: 3",
-                                "\n",
-                                "      aws_access_key: ",
-                                {
-                                    "Ref": "ClusterwareAccessKey"
-                                },
-                                "\n",
-                                "      aws_secret_key: ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ClusterwareAccessKey",
-                                        "SecretAccessKey"
-                                    ]
-                                },
-                                "\n",
-                                "      aws_zone_name: ",
-                                {
-                                    "Ref": "ClusterName"
-                                },
-                                "\n",
-                                "    instance:",
-                                "\n",
-                                "      users:",
-                                "\n",
-                                "      - username: ",
-                                {
-                                    "Ref": "ClusterUser"
-                                },
-                                "\n",
-                                "        uid: 509",
-                                "\n",
-                                "        group: ",
-                                {
-                                    "Ref": "ClusterUser"
-                                },
-                                "\n",
-                                "        gid: 509",
-                                "\n",
-                                "        groups:",
-                                "\n",
-                                "          - gridware",
-                                "\n",
-                                "          - admins:388",
-                                "\n",
-                                "        ssh_public_key: |",
-                                "\n",
-                                "          ",
-                                {
-                                    "Ref": "ClusterUserKey"
-                                },
-                                "\n",
-                                "  owner: root:root",
-                                "\n",
-                                "  path: /opt/clusterware/etc/config.yml",
-                                "\n",
-                                "  permissions: '0640'",
-                                "\n"
+                              "#cloud-config",
+                              "\n",
+                              "write_files:","\n",
+                              "- content: |","\n",
+                              "    #!/bin/bash","\n",
+                              "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
+                              "  owner: root:root","\n",
+                              "  path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure","\n",
+                              "  permissions: '0755'","\n",
+                              "- content: |",
+                              "\n",
+                              "    cluster:",
+                              "\n",
+                              "      uuid: '",
+              { "Ref": "ClusterUUID" },
+                              "'",
+                              "\n",
+                              "      token: '",
+              { "Ref": "ClusterwareToken" },
+                              "'",
+                              "\n",
+                              "      name: ",
+                              { "Ref": "ClusterName" },
+                              "\n",
+                              "      role: 'slave'",
+                              "\n",
+                              "      master: ",
+                              { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "PrivateIp" ] },
+                              "\n",
+                              "      tags:",
+                              "\n",
+                              "        scheduler_roles: ':compute:'",
+                              "\n",
+                              "      quorum: 3",
+                              "\n",
+                              "    instance:",
+                              "\n",
+                              "      users:",
+                              "\n",
+                              "      - username: ",
+                              {
+                                  "Ref": "ClusterUser"
+                              },
+                              "\n",
+                              "        uid: 509",
+                              "\n",
+                              "        group: ",
+                              {
+                                  "Ref": "ClusterUser"
+                              },
+                              "\n",
+                              "        gid: 509",
+                              "\n",
+                              "        groups:",
+                              "\n",
+                              "          - gridware",
+                              "\n",
+                              "          - admins:388",
+                              "\n",
+                              "        ssh_public_key: |",
+                              "\n",
+                              "          ",
+                              {
+                                  "Ref": "ClusterUserKey"
+                              },
+                              "\n",
+                              "  owner: root:root",
+                              "\n",
+                              "  path: /opt/clusterware/etc/config.yml",
+                              "\n",
+                              "  permissions: '0640'",
+                              "\n"
                             ]
                         ]
                     }
