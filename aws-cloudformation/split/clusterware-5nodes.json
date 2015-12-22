@@ -112,7 +112,7 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "64": "ami-f0b21f83"
+                "64": "ami-014fe272"
             },
 	    "eu-central-1": {
 		    "64": "ami-f2fce09e"
@@ -265,7 +265,7 @@
                                 "hostname: ",
                                 {
                                     "Ref": "NodeName1"
-				}, 
+				},
                                 "\n",
                                 "fqdn: ",
 				{
@@ -409,7 +409,7 @@
                                 "hostname: ",
                                 {
                                     "Ref": "NodeName2"
-				}, 
+				},
                                 "\n",
                                 "fqdn: ",
 				{
@@ -553,7 +553,7 @@
                                 "hostname: ",
                                 {
                                     "Ref": "NodeName3"
-				}, 
+				},
                                 "\n",
                                 "fqdn: ",
 				{
@@ -697,7 +697,7 @@
                                 "hostname: ",
                                 {
                                     "Ref": "NodeName4"
-				}, 
+				},
                                 "\n",
                                 "fqdn: ",
 				{
@@ -841,7 +841,7 @@
                                 "hostname: ",
                                 {
                                     "Ref": "NodeName5"
-				}, 
+				},
                                 "\n",
                                 "fqdn: ",
 				{
