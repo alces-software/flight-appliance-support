@@ -169,70 +169,6 @@
                 ]
             }
         },
-        "ClusterwarePolicy": {
-            "Type": "AWS::IAM::Policy",
-            "Properties": {
-                "PolicyName": "ClusterwarePolicy",
-                "PolicyDocument": {
-                    "Statement": [
-                        {
-                            "Action": [
-                                "route53:ChangeResourceRecordSets"
-                            ],
-                            "Effect": "Allow",
-                            "Resource": {
-                                "Fn::Join": [
-                                    "",
-                                    [
-                                        "arn:aws:route53:::hostedzone/",
-                                        {
-                                            "Ref": "ClusterwareRoute53"
-                                        }
-                                    ]
-                                ]
-                            }
-                        }
-                    ]
-                },
-                "Groups": [
-                    {
-                        "Ref": "ClusterwarePolicyGroup"
-                    }
-                ]
-            }
-        },
-        "ClusterwarePolicyListZones": {
-            "Type": "AWS::IAM::Policy",
-            "Properties": {
-                "PolicyName": "ClusterwarePolicyListZones",
-                "PolicyDocument": {
-                    "Statement": [
-                        {
-                            "Action": [
-                                "route53:ListHostedZones"
-                            ],
-                            "Effect": "Allow",
-                            "Resource": [
-                                "*"
-                            ]
-                        }
-                    ]
-                },
-                "Groups": [
-                    {
-                        "Ref": "ClusterwarePolicyGroup"
-                    }
-                ]
-            }
-        },
-        "ClusterwareAccessKey": {
-            "Type": "AWS::IAM::AccessKey",
-            "Properties": {
-                "UserName": {
-                    "Ref": "ClusterwareUser"
-                }
-            }
-        },
         "ClusterwareVPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
@@ -384,63 +320,6 @@
                         "FromPort": "0",
                         "ToPort": "65535",
                         "CidrIp": "0.0.0.0/0"
-                    }
-                ]
-            }
-        },
-        "ClusterwareRoute53": {
-            "Type": "AWS::Route53::HostedZone",
-            "Properties": {
-                "Name": {
-                    "Ref": "ClusterName"
-                },
-                "VPCs": [
-                    {
-                        "VPCId": {
-                            "Ref": "ClusterwareVPC"
-                        },
-                        "VPCRegion": "eu-west-1"
-                    }
-                ]
-            }
-        },
-        "Route53RecordAdd": {
-            "Type": "AWS::Route53::RecordSet",
-            "Properties": {
-                "HostedZoneId": {
-                    "Ref": "ClusterwareRoute53"
-                },
-                "Name": {
-                    "Fn::Join": [
-                        "",
-                        [
-                            "_serf._tcp.",
-                            {
-                                "Ref": "ClusterUUID"
-                            },
-                            ".",
-                            {
-                                "Ref": "ClusterName"
-                            }
-                        ]
-                    ]
-                },
-                "Type": "SRV",
-                "TTL": "60",
-                "ResourceRecords": [
-                    {
-                        "Fn::Join": [
-                            "",
-                            [
-                                "0 0 7496 ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "AlcesClusterwareMasterNode",
-                                        "PrivateIp"
-                                    ]
-                                }
-                            ]
-                        ]
                     }
                 ]
             }
@@ -713,7 +592,7 @@
         },
         "ComputeGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
-            "DependsOn": "ClusterwareRoute53",
+            "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
                 "DesiredCapacity": {
                     "Ref": "ComputeNumber"
