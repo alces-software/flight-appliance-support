@@ -76,8 +76,7 @@
         "VolumeSize": {
             "Description": "Enter a volume size for the shared scratch volume",
             "Type": "String",
-            "Default": "50",
-            "AllowedPattern": "[0-9]{4}"
+            "Default": "50"
         },
         "NetworkCIDR": {
             "Description": "Enter an address range that is permitted to access the Clusterware master node. Leave blank if unknown",
@@ -124,6 +123,16 @@
         }
     },
     "Resources": {
+        "DataVolume": {
+            "Type": "AWS::EC2::Volume",
+            "Properties": {
+                "DeleteOnTermination": "true",
+                "Size": { "Ref": "VolumeSize" },
+                "VolumeType": "io1",
+                "Iops": "1000",
+                "AvailabilityZone": { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "AvailabilityZone" ] }
+          }
+        },  
         "ClusterwareVPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
@@ -349,6 +358,20 @@
                                 "\n",
                                 "- content: |",
                                 "\n",
+                                "    #!/bin/bash",
+                                "\n",
+                                "    mkfs.ext4 /dev/sdh",
+                                "\n",
+                                "    mkdir -p /data",
+                                "\n",
+                                "    mount /dev/sdh /data",
+                                "\n",
+                                "    echo \"/dev/sdh /data ext4 defaults,nofail 0 2\" >> /etc/fstab",
+                                "\n",
+                                "  permissions: '0755'",
+                                "\n",
+                                "- content: |",
+                                "\n",
                                 "    cluster:",
                                 "\n",
                                 "      uuid: '",
@@ -431,11 +454,22 @@
                                 "  path: /opt/clusterware/etc/config.yml",
                                 "\n",
                                 "  permissions: '0640'",
-                                "\n"
+                                "\n",
+                                "runcmd:",
+                                "\n",
+                                " - [ sh, /tmp/ebsconfig.sh ]"
                             ]
                         ]
                     }
                 }
+            }
+        },
+        "DataVolAttach": {
+            "Type": "AWS::EC2::VolumeAttachment",
+            "Properties": {
+                "InstanceId": { "Ref": "AlcesClusterwareMasterNode" },
+                "VolumeId": { "Ref": "DataVolume" },
+                "Device": "/dev/sdh"
             }
         },
         "AlcesClusterwareCompute1": {
