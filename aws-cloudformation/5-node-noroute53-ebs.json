@@ -357,15 +357,17 @@
                                 "\n",
                                 "    #!/bin/bash",
                                 "\n",
-                                "    mkfs.ext4 /dev/sdh",
+                                "    mkfs.ext4 /dev/xvdh",
                                 "\n",
                                 "    mkdir -p /data",
                                 "\n",
-                                "    mount /dev/sdh /data",
+                                "    mount /dev/xvdh /data",
                                 "\n",
-                                "    echo \"/dev/sdh /data ext4 defaults,nofail 0 2\" >> /etc/fstab",
+                                "    echo \"/dev/xvdh /data ext4 defaults,nofail 0 2\" >> /etc/fstab",
                                 "\n",
                                 "    echo \"/data 10.75.0.0/16(rw,no_root_squash,no_subtree_check,sync)\" >> /etc/exports", 
+                                "\n",
+                                "  path: /tmp/ebsconfig.sh",
                                 "\n",
                                 "  permissions: '0755'",
                                 "\n",
@@ -468,7 +470,7 @@
             "Properties": {
                 "InstanceId": { "Ref": "AlcesClusterwareMasterNode" },
                 "VolumeId": { "Ref": "DataVolume" },
-                "Device": "/dev/sdh"
+                "Device": "/dev/xvdh"
             }
         },
         "AlcesClusterwareCompute1": {
