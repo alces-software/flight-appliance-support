@@ -112,7 +112,7 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "64": "ami-00de7173"
+                "64": "ami-63db7410"
             },
 	    "eu-central-1": {
 		    "64": "ami-f2fce09e"
@@ -361,7 +361,7 @@
                                 "\n",
                                 "    mkdir -p /data",
                                 "\n",
-                                "    sudo mount /dev/xvdh /data",
+                                "    mount /dev/xvdh /data",
                                 "\n",
                                 "    echo \"/dev/xvdh /data ext4 defaults,nofail 0 2\" >> /etc/fstab",
                                 "\n",
@@ -541,7 +541,7 @@
                               "\n",
                               "    mkdir /data",
                               "\n",
-                              "    sudo mount login1:/data /data",
+                              "    mount login1:/data /data",
                               "\n",
                               "    echo \"login1:/data ext4 defaults,nofail 0 2\" >> /etc/fstab",
                               "\n",
@@ -695,7 +695,7 @@
                               "\n",
                               "    mkdir /data",
                               "\n",
-                              "    sudo mount login1:/data /data",
+                              "    mount login1:/data /data",
                               "\n",
                               "    echo \"login1:/data ext4 defaults,nofail 0 2\" >> /etc/fstab",
                               "\n",
@@ -849,7 +849,7 @@
                               "\n",
                               "    mkdir /data",
                               "\n",
-                              "    sudo mount login1:/data /data",
+                              "    mount login1:/data /data",
                               "\n",
                               "    echo \"login1:/data ext4 defaults,nofail 0 2\" >> /etc/fstab",
                               "\n",
@@ -1003,7 +1003,7 @@
                               "\n",
                               "    mkdir /data",
                               "\n",
-                              "    sudo mount login1:/data /data",
+                              "    mount login1:/data /data",
                               "\n",
                               "    echo \"login1:/data ext4 defaults,nofail 0 2\" >> /etc/fstab",
                               "\n",
@@ -1157,7 +1157,7 @@
                               "\n",
                               "    mkdir /data",
                               "\n",
-                              "    sudo mount login1:/data /data",
+                              "    mount login1:/data /data",
                               "\n",
                               "    echo \"login1:/data ext4 defaults,nofail 0 2\" >> /etc/fstab",
                               "\n",
