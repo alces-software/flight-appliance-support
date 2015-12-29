@@ -365,6 +365,8 @@
                                 "\n",
                                 "    echo \"/dev/sdh /data ext4 defaults,nofail 0 2\" >> /etc/fstab",
                                 "\n",
+                                "    echo \"/data 10.75.0.0/16(rw,no_root_squash,no_subtree_check,sync)\" >> /etc/exports", 
+                                "\n",
                                 "  permissions: '0755'",
                                 "\n",
                                 "- content: |",
@@ -531,6 +533,20 @@
                               ".alces.network",
                               "\n",
                               "write_files:","\n",
+                              "- content: |",
+                              "\n",
+                              "    #!/bin/bash",
+                              "\n",
+                              "    mkdir /data",
+                              "\n",
+                              "    mount login1:/data /data",
+                              "\n",
+                              "    echo \"login1:/data ext4 defaults,nofail 0 2\" >> /etc/fstab",
+                              "\n",
+                              "  path: /tmp/ebsconfig.sh",
+                              "\n",
+                              "  permissions: '0755'",
+                              "\n",
                               "- content: |","\n",
                               "    #!/bin/bash","\n",
                               "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
@@ -599,7 +615,10 @@
                               "  path: /opt/clusterware/etc/config.yml",
                               "\n",
                               "  permissions: '0640'",
-                              "\n"
+                              "\n",
+                              "runcmd:",
+                              "\n",
+                              " - [ sh, /tmp/ebsconfig.sh ]"
                             ]
                         ]
                     }
@@ -668,6 +687,20 @@
                               ".alces.network",
                               "\n",
                               "write_files:","\n",
+                              "- content: |",
+                              "\n",
+                              "    #!/bin/bash",
+                              "\n",
+                              "    mkdir /data",
+                              "\n",
+                              "    mount login1:/data /data",
+                              "\n",
+                              "    echo \"login1:/data ext4 defaults,nofail 0 2\" >> /etc/fstab",
+                              "\n",
+                              "  path: /tmp/ebsconfig.sh",
+                              "\n",
+                              "  permissions: '0755'",
+                              "\n",
                               "- content: |","\n",
                               "    #!/bin/bash","\n",
                               "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
@@ -736,7 +769,10 @@
                               "  path: /opt/clusterware/etc/config.yml",
                               "\n",
                               "  permissions: '0640'",
-                              "\n"
+                              "\n",
+                              "runcmd:",
+                              "\n",
+                              " - [ sh, /tmp/ebsconfig.sh ]"
                             ]
                         ]
                     }
@@ -805,6 +841,20 @@
                               ".alces.network",
                               "\n",
                               "write_files:","\n",
+                              "- content: |",
+                              "\n",
+                              "    #!/bin/bash",
+                              "\n",
+                              "    mkdir /data",
+                              "\n",
+                              "    mount login1:/data /data",
+                              "\n",
+                              "    echo \"login1:/data ext4 defaults,nofail 0 2\" >> /etc/fstab",
+                              "\n",
+                              "  path: /tmp/ebsconfig.sh",
+                              "\n",
+                              "  permissions: '0755'",
+                              "\n",
                               "- content: |","\n",
                               "    #!/bin/bash","\n",
                               "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
@@ -873,7 +923,10 @@
                               "  path: /opt/clusterware/etc/config.yml",
                               "\n",
                               "  permissions: '0640'",
-                              "\n"
+                              "\n",
+                              "runcmd:",
+                              "\n",
+                              " - [ sh, /tmp/ebsconfig.sh ]"
                             ]
                         ]
                     }
@@ -942,6 +995,20 @@
                               ".alces.network",
                               "\n",
                               "write_files:","\n",
+                              "- content: |",
+                              "\n",
+                              "    #!/bin/bash",
+                              "\n",
+                              "    mkdir /data",
+                              "\n",
+                              "    mount login1:/data /data",
+                              "\n",
+                              "    echo \"login1:/data ext4 defaults,nofail 0 2\" >> /etc/fstab",
+                              "\n",
+                              "  path: /tmp/ebsconfig.sh",
+                              "\n",
+                              "  permissions: '0755'",
+                              "\n",
                               "- content: |","\n",
                               "    #!/bin/bash","\n",
                               "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
@@ -1010,7 +1077,10 @@
                               "  path: /opt/clusterware/etc/config.yml",
                               "\n",
                               "  permissions: '0640'",
-                              "\n"
+                              "\n",
+                              "runcmd:",
+                              "\n",
+                              " - [ sh, /tmp/ebsconfig.sh ]"
                             ]
                         ]
                     }
@@ -1079,6 +1149,20 @@
                               ".alces.network",
                               "\n",
                               "write_files:","\n",
+                              "- content: |",
+                              "\n",
+                              "    #!/bin/bash",
+                              "\n",
+                              "    mkdir /data",
+                              "\n",
+                              "    mount login1:/data /data",
+                              "\n",
+                              "    echo \"login1:/data ext4 defaults,nofail 0 2\" >> /etc/fstab",
+                              "\n",
+                              "  path: /tmp/ebsconfig.sh",
+                              "\n",
+                              "  permissions: '0755'",
+                              "\n",
                               "- content: |","\n",
                               "    #!/bin/bash","\n",
                               "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
@@ -1147,7 +1231,10 @@
                               "  path: /opt/clusterware/etc/config.yml",
                               "\n",
                               "  permissions: '0640'",
-                              "\n"
+                              "\n",
+                              "runcmd:",
+                              "\n",
+                              " - [ sh, /tmp/ebsconfig.sh ]"
                             ]
                         ]
                     }
