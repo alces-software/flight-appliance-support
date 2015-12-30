@@ -103,49 +103,16 @@
         }
     },
     "Mappings": {
-        "Region2Region": {
-            "eu-west-1": {
-                "Region": "eu-west-1"
-            },
-            "eu-central-1": {
-                "Region": "eu-central-1"
-            },
-            "us-west-1": {
-                "Region": "us-west-1"
-            }
-        },
-        "AWSInstanceType2Arch": {
-            "t2.micro": {
-                "Arch": "64"
-            },
-            "t2.small": {
-                "Arch": "64"
-            },
-            "t2.large": {
-                "Arch": "64"
-            },
-            "c4.large": {
-                "Arch": "64"
-            },
-            "c4.xlarge": {
-                "Arch": "64"
-            },
-            "r3.large": {
-                "Arch": "64"
-            },
-            "r3.xlarge": {
-                "Arch": "64"
-            }
-        },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "64": "ami-8c8926ff"
+                "clusterwarecentos6": "ami-8c8926ff",
+                "clusterwarecentos7": "ami-62852a11"
             },
             "eu-central-1": {
-                "64": "ami-f2fce09e"
+                    "clusterwarecentos6": "ami-f2fce09e"
             },
             "us-west-1": {
-                "64": "ami-ca5b30aa"
+                    "clusterwarecentos6": "ami-ca5b30aa"
             }
         }
     },
@@ -318,18 +285,8 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "AWSInstanceType2Arch",
-                                {
-                                    "Ref": "MasterNodeType"
-                                },
-                                "Arch"
-                            ]
-                        }
+                        { "Ref": "AWS::Region" },
+                        { "Ref": "ClusterType" }
                     ]
                 },
                 "NetworkInterfaces": [
@@ -467,18 +424,8 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "AWSInstanceType2Arch",
-                                {
-                                    "Ref": "ComputeType"
-                                },
-                                "Arch"
-                            ]
-                        }
+                        { "Ref": "AWS::Region" },
+                        { "Ref": "ClusterType" }
                     ]
                 },
                 "InstanceType": {

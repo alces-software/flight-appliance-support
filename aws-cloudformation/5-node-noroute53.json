@@ -1,6 +1,14 @@
 {
     "Description": "Launch an Alces Clusterware environment with 1 login node and 5 compute nodes, complete with SGE scheduler. Stack includes all necessary networking components to host an Alces Clusterware environment.",
     "Parameters": {
+        "ClusterType": {
+            "Description": "Select an OS platform for the cluster",
+            "Type": "String",
+            "AllowedValues": [
+                "clusterwarecentos6",
+                "clusterwarecentos7"
+            ]
+        },
         "ClusterName": {
             "Description": "Choose a cluster name",
             "Type": "String",
@@ -82,38 +90,16 @@
         }
     },
     "Mappings": {
-        "AWSInstanceType2Arch": {
-            "t2.micro": {
-                "Arch": "64"
-            },
-            "t2.small": {
-                "Arch": "64"
-            },
-            "t2.large": {
-                "Arch": "64"
-            },
-	    "c4.large": {
-		"Arch": "64"
-	    },
-	    "c4.xlarge": {
-		"Arch": "64"
-	    },
-	    "r3.large": {
-		"Arch": "64"
-	    },
-	    "r3.xlarge": {
-		"Arch": "64"
-	    }
-        },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "64": "ami-8c8926ff"
+                "clusterwarecentos6": "ami-8c8926ff",
+                "clusterwarecentos7": "ami-62852a11"
             },
 	    "eu-central-1": {
-		    "64": "ami-f2fce09e"
+		    "clusterwarecentos6": "ami-f2fce09e"
 	    },
 	    "us-west-1": {
-		    "64": "ami-ca5b30aa"
+		    "clusterwarecentos6": "ami-ca5b30aa"
 	    }
         }
     },
@@ -290,18 +276,8 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "AWSInstanceType2Arch",
-                                {
-                                    "Ref": "MasterNodeType"
-                                },
-                                "Arch"
-                            ]
-                        }
+                        { "Ref": "AWS::Region" },
+                        { "Ref": "ClusterType" }
                     ]
                 },
                 "NetworkInterfaces": [
@@ -445,18 +421,8 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "AWSInstanceType2Arch",
-                                {
-                                    "Ref": "ComputeType"
-                                },
-                                "Arch"
-                            ]
-                        }
+                        { "Ref": "AWS::Region" },
+                        { "Ref": "ClusterType" }
                     ]
                 },
                 "NetworkInterfaces": [
@@ -582,18 +548,8 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "AWSInstanceType2Arch",
-                                {
-                                    "Ref": "ComputeType"
-                                },
-                                "Arch"
-                            ]
-                        }
+                        { "Ref": "AWS::Region" },
+                        { "Ref": "ClusterType" }
                     ]
                 },
                 "NetworkInterfaces": [
@@ -719,18 +675,8 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "AWSInstanceType2Arch",
-                                {
-                                    "Ref": "ComputeType"
-                                },
-                                "Arch"
-                            ]
-                        }
+                        { "Ref": "AWS::Region" },
+                        { "Ref": "ClusterType" }
                     ]
                 },
                 "NetworkInterfaces": [
@@ -856,18 +802,8 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "AWSInstanceType2Arch",
-                                {
-                                    "Ref": "ComputeType"
-                                },
-                                "Arch"
-                            ]
-                        }
+                        { "Ref": "AWS::Region" },
+                        { "Ref": "ClusterType" }
                     ]
                 },
                 "NetworkInterfaces": [
@@ -993,18 +929,8 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "AWSInstanceType2Arch",
-                                {
-                                    "Ref": "ComputeType"
-                                },
-                                "Arch"
-                            ]
-                        }
+                        { "Ref": "AWS::Region" },
+                        { "Ref": "ClusterType" }
                     ]
                 },
                 "NetworkInterfaces": [
