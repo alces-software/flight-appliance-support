@@ -74,7 +74,7 @@
             ]
         },
         "VolumeSize": {
-            "Description": "Enter a volume size for the shared scratch volume",
+            "Description": "Enter a volume size for the shared scratch volume in GB",
             "Type": "String",
             "Default": "50"
         },
