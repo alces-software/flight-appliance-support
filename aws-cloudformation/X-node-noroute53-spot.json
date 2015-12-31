@@ -105,14 +105,13 @@
     "Mappings": {
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "clusterwarecentos6": "ami-8c8926ff",
-                "clusterwarecentos7": "ami-62852a11"
+                "centos7": "ami-62852a11"
             },
             "eu-central-1": {
-                    "clusterwarecentos6": "ami-f2fce09e"
+                    "centos7": "ami-f2fce09e"
             },
             "us-west-1": {
-                    "clusterwarecentos6": "ami-ca5b30aa"
+                    "centos7": "ami-ca5b30aa"
             }
         }
     },
@@ -286,7 +285,7 @@
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
                         { "Ref": "AWS::Region" },
-                        { "Ref": "ClusterType" }
+                        "centos7"
                     ]
                 },
                 "NetworkInterfaces": [
@@ -417,6 +416,12 @@
                 }
             }
         },
+        "PlacementGroup": {
+            "Type": "AWS::EC2::PlacementGroup",
+            "Properties": {
+                "Strategy": "cluster"
+            }
+        },
         "ComputeConfig": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
@@ -425,7 +430,7 @@
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
                         { "Ref": "AWS::Region" },
-                        { "Ref": "ClusterType" }
+                        "centos7"
                     ]
                 },
                 "InstanceType": {
