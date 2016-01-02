@@ -1,5 +1,5 @@
 {
-    "Description": "Launch an Alces Clusterware environment with 1 login node and 5 compute nodes, complete with SGE scheduler. Stack includes all necessary networking components to host an Alces Clusterware environment.",
+    "Description": "Launch an Alces ClusterWare environment with a single SGE master node together with compute nodes using EC2 spot pricing.",
     "Parameters": {
         "AvailabilityZone": {
             "Description": "Select current availability zone",
@@ -72,7 +72,7 @@
 	"SpotPrice": {
 	    "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing.",
 	    "Type": "String",
-	    "Default": "0.10"
+	    "Default": "0.15"
 	},
         "ClusterwareDepots": {
             "Description": "Select the Clusterware Depot to install",
@@ -271,7 +271,7 @@
                         "Value": "Alces Clusterware Master"
                     }
                 ],
-                "PlacementGroup": {
+                "PlacementGroupName": {
                     "Ref": "PlacementGroup"
                 },
                 "ImageId": {
