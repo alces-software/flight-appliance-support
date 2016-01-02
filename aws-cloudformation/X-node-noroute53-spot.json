@@ -542,5 +542,22 @@
                 ]
             }
         }
+    },
+    "Outputs": {
+        "AccessIP": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "AlcesClusterwareMasterNode",
+                    "PublicIp"
+                ]
+            },
+            "Description": "Access the cluster via the above IP address and username with public key provided"
+        },
+        "ClusterUser": {
+            "Value": {
+                "Ref": "ClusterUser"
+            },
+            "Description": "Cluster user username, access with user SSH key provided"
+        }
     }
 }
