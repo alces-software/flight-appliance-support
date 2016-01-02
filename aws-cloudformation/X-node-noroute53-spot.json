@@ -45,16 +45,6 @@
             "Type": "String",
             "Default": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZzUmsgywX4nsvpviq2aqnDX4kSgGF8nWjUMvD7KRV4uuOhtR56dgHwBSXne0PrR+KMmFt8ExH9valnZqYnL6sTG3vB8sFtdXrnXmx+1DjgqWc4Liq3RehJ589K1x8U6692Zoc9ecNZHd/I+r0SPUf2PGypFc4G28BPee/qdIuDDFSu4TWQv2E+f1mv14qRYQK9p7E+f+8UBJ2EBLmAwOeKV+uVGUtSZQvl8nTZDONzY88qHDHpjwu5zbk4l0pDXznNY3tO7A4TMnhoKr0I1Q0KX6I/S11Jq52pubfPlmq4Xdcefg0Ou0M7NXozhsgEhM5KYTs/qkNrMCXTPJLGSbL clouduser"
         },
-        "MasterNodeType": {
-            "Description": "Select the Clusterware master node instance flavour",
-            "Type": "String",
-            "Default": "t2.small",
-            "AllowedValues": [
-                "t2.micro",
-                "t2.small",
-                "t2.large"
-            ]
-        },
         "AdminKey": {
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
@@ -65,7 +55,7 @@
             "AllowedPattern": "[0-9]",
             "Default": "3"
         },
-        "ComputeType": {
+        "InstanceFlavour": {
             "Description": "Select the Clusterware compute node instance flavour",
             "Type": "String",
             "Default": "t2.small",
@@ -105,7 +95,7 @@
     "Mappings": {
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-b05ef1c3"
+                "centos7": "ami-8c8926ff"
             },
             "eu-central-1": {
                     "centos7": "ami-f2fce09e"
@@ -281,6 +271,9 @@
                         "Value": "Alces Clusterware Master"
                     }
                 ],
+                "PlacementGroup": {
+                    "Ref": "PlacementGroup"
+                },
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
@@ -303,7 +296,7 @@
                     }
                 ],
                 "InstanceType": {
-                    "Ref": "MasterNodeType"
+                    "Ref": "InstanceFlavour"
                 },
                 "KeyName": {
                     "Ref": "AdminKey"
@@ -434,7 +427,7 @@
                     ]
                 },
                 "InstanceType": {
-                    "Ref": "ComputeType"
+                    "Ref": "InstanceFlavour"
                 },
 		"SpotPrice": {
 			"Ref": "SpotPrice"
@@ -529,6 +522,9 @@
             "Properties": {
                 "DesiredCapacity": {
                     "Ref": "ComputeNumber"
+                },
+                "PlacementGroup": { 
+                    "Ref": "PlacementGroup"
                 },
                 "LaunchConfigurationName": {
                     "Ref": "ComputeConfig"
