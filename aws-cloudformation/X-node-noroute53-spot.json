@@ -419,6 +419,7 @@
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
                 "AssociatePublicIpAddress": false,
+                "KeyName": { "Ref": "AdminKey" },
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
@@ -523,15 +524,13 @@
                 "DesiredCapacity": {
                     "Ref": "ComputeNumber"
                 },
-                "PlacementGroup": { 
+                "PlacementGroup": {
                     "Ref": "PlacementGroup"
                 },
                 "LaunchConfigurationName": {
                     "Ref": "ComputeConfig"
                 },
-                "MinSize": {
-                    "Ref": "ComputeNumber"
-                },
+                "MinSize": "1",
                 "MaxSize": {
                     "Ref": "ComputeNumber"
                 },
