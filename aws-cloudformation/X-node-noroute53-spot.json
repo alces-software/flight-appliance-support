@@ -58,15 +58,13 @@
         "InstanceFlavour": {
             "Description": "Select the Clusterware compute node instance flavour",
             "Type": "String",
-            "Default": "t2.small",
+            "Default": "Medium-4.cores-15gb",
             "AllowedValues": [
-                "t2.micro",
-                "t2.small",
-                "t2.large",
-                "c4.large",
-                "c4.xlarge",
-                "r3.large",
-                "r3.xlarge"
+                "XSmall-1.core-3.75gb",
+                "Small-2.cores-15.25gb",
+                "Medium-4.cores-15gb",
+                "Large-8.cores-61gb",
+                "XLarge-16.cores-122gb"
             ]
         },
 	"SpotPrice": {
@@ -93,9 +91,26 @@
         }
     },
     "Mappings": {
+        "InstanceType2Flavour": {
+            "XSmall-1.core-3.75gb": {
+                "instanceflavour": "m3.medium"
+            },
+            "Small-2.cores-15.25gb": {
+                "instanceflavour": "r3.large"
+            },
+            "Medium-4.cores-15gb": {
+                "instanceflavour": "m3.xlarge"
+            },
+            "Large-8.cores-61gb": {
+                "instanceflavour": "r3.2xlarge"
+            },
+            "XLarge-16.cores-122gb": {
+                "instanceflavour": "r3.4xlarge"
+            }
+        },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-8c8926ff"
+                "centos7": "ami-dc6bc5af"
             },
             "eu-central-1": {
                     "centos7": "ami-f2fce09e"
@@ -296,7 +311,11 @@
                     }
                 ],
                 "InstanceType": {
-                    "Ref": "InstanceFlavour"
+                    "Fn::FindInMap": [
+                        "InstanceType2Flavour",
+                        { "Ref": "InstanceFlavour" },
+                        "instanceflavour"
+                    ]
                 },
                 "KeyName": {
                     "Ref": "AdminKey"
@@ -423,7 +442,11 @@
                     ]
                 },
                 "InstanceType": {
-                    "Ref": "InstanceFlavour"
+                    "Fn::FindInMap": [
+                        "InstanceType2Flavour",
+                        { "Ref": "InstanceFlavour" },
+                        "instanceflavour"
+                    ]
                 },
 		"SpotPrice": {
 			"Ref": "SpotPrice"
