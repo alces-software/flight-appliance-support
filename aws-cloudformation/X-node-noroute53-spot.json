@@ -535,12 +535,6 @@
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": { "Ref": "ClusterName" } 
-                    }
-                ],
                 "DesiredCapacity": {
                     "Ref": "ComputeNumber"
                 },
