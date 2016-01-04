@@ -283,7 +283,7 @@
                 },
                 "NetworkInterfaces": [
                     {
-                        "AssociatePublicIpAddress": "true",
+                        "AssociatePublicIpAddress": "True",
                         "DeviceIndex": "0",
                         "GroupSet": [
                             {
