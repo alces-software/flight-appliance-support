@@ -100,7 +100,7 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-dc6bc5af"
+                "centos7": "ami-bc6bc5cf"
             },
             "eu-central-1": {
                     "centos7": "ami-f2fce09e"
@@ -114,6 +114,12 @@
         "ClusterwareVPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Ref": "ClusterName" } 
+                    }
+                ],
                 "CidrBlock": "10.75.0.0/16",
                 "EnableDnsSupport": "true",
                 "EnableDnsHostnames": "true"
@@ -234,6 +240,12 @@
         "AlcesClusterwareSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Ref": "ClusterName" } 
+                    }
+                ],
                 "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
@@ -523,6 +535,12 @@
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Ref": "ClusterName" } 
+                    }
+                ],
                 "DesiredCapacity": {
                     "Ref": "ComputeNumber"
                 },
