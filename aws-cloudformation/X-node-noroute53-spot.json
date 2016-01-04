@@ -1,16 +1,6 @@
 {
     "Description": "Launch an Alces ClusterWare environment with a single SGE master node together with compute nodes using EC2 spot pricing.",
     "Parameters": {
-        "AvailabilityZone": {
-            "Description": "Select current availability zone",
-            "Type": "String",
-            "AllowedValues": [
-                "eu-west-1",
-                "eu-central-1",
-                "us-west-1"
-            ],
-            "Default": "eu-west-1"
-        },
         "ClusterName": {
             "Description": "Choose a cluster name",
             "Type": "String",
