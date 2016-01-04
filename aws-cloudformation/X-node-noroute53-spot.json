@@ -93,13 +93,13 @@
     "Mappings": {
         "InstanceType2Flavour": {
             "XSmall-1.core-3.75gb": {
-                "instanceflavour": "m3.medium"
+                "instanceflavour": "m4.medium"
             },
             "Small-2.cores-15.25gb": {
                 "instanceflavour": "r3.large"
             },
             "Medium-4.cores-15gb": {
-                "instanceflavour": "m3.xlarge"
+                "instanceflavour": "m4.xlarge"
             },
             "Large-8.cores-61gb": {
                 "instanceflavour": "r3.2xlarge"
