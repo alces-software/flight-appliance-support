@@ -361,11 +361,6 @@
                                     "Ref": "ClusterwareDepots"
                                 },
                                 "\n",
-                                "      aws_zone_name: ",
-                                {
-                                    "Ref": "ClusterName"
-                                },
-                                "\n",
                                 "    instance:",
                                 "\n",
                                 "      users:",
@@ -442,12 +437,6 @@
                               "#cloud-config",
                               "\n",
                               "write_files:","\n",
-                              "- content: |","\n",
-                              "    #!/bin/bash","\n",
-                              "    echo 'Not doing it. Nope. Go away. Bad things.'","\n",
-                              "  owner: root:root","\n",
-                              "  path: /opt/clusterware/etc/handlers/clusterable-aws-compat/configure","\n",
-                              "  permissions: '0755'","\n",
                               "- content: |",
                               "\n",
                               "    cluster:",
