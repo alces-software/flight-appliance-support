@@ -1,4 +1,4 @@
-How to deploy Alces Clusterware environments using various public and private cloud environments. 
+How to deploy Alces Clusterware environments using various public and private cloud environments. [Find out more about Alces ClusterWare](https://github.com/alces-software/clusterware)
 
 #Quick-start
 *Deploy a dynamic ClusterWare research compute environment using Amazon AWS*
