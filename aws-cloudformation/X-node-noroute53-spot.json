@@ -140,7 +140,7 @@
         },
         "ClusterwareAttachGW": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
-            "DependsOn": "ClusterwareGateway",
+            "DependsOn": "ClusterwareVPC",
             "Properties": {
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
@@ -281,7 +281,7 @@
         },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": "AlcesClusterwareSecurityGroup",
+            "DependsOn": "ClusterwareAttachGW",
             "Properties": {
                 "Tags": [
                     {
