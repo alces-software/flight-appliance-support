@@ -100,10 +100,10 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-bc6bc5cf"
+                "centos7": "ami-e460ce97"
             },
             "eu-central-1": {
-                    "centos7": "ami-f2fce09e"
+                    "centos7": "ami-e460ce97"
             },
             "us-west-1": {
                     "centos7": "ami-ca5b30aa"
@@ -135,7 +135,8 @@
             }
         },
         "ClusterwareGateway": {
-            "Type": "AWS::EC2::InternetGateway"
+            "Type": "AWS::EC2::InternetGateway",
+            "DependsOn": "ClusterwareVPC"
         },
         "ClusterwareAttachGW": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
