@@ -82,25 +82,25 @@
     },
     "Mappings": {
         "InstanceType2Flavour": {
-            "XSmall-1.core-3.75gb": {
-                "instanceflavour": "m4.medium"
+            "8.cores-15gb-2.9ghz": {
+                "instanceflavour": "c4.2xlarge"
             },
-            "Small-2.cores-15.25gb": {
-                "instanceflavour": "r3.large"
+            "16.cores-64gb-2.4ghz": {
+                "instanceflavour": "m4.4xlarge"
             },
-            "Medium-4.cores-15gb": {
-                "instanceflavour": "m4.xlarge"
+            "32.cores-422gb-2.5ghz": {
+                "instanceflavour": "r3.8xlarge"
             },
-            "Large-8.cores-61gb": {
-                "instanceflavour": "r3.2xlarge"
+            "36.cores-60gb-2.9ghz": {
+                "instanceflavour": "c4.8xlarge"
             },
-            "XLarge-16.cores-122gb": {
-                "instanceflavour": "r3.4xlarge"
+            "40.cores-160gb-2.4ghz": {
+                "instanceflavour": "m4.10xlarge"
             }
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-e460ce97"
+                "centos7": "ami-ad3d93de"
             },
             "eu-central-1": {
                     "centos7": "ami-e460ce97"
@@ -331,12 +331,6 @@
                                 "#cloud-config",
                                 "\n",
                                 "hostname: login1",
-                                "\n",
-                                "fqdn: login1.",
-                                {
-                                    "Ref": "ClusterName"
-                                },
-                                ".alces.network",
                                 "\n",
                                 "write_files:",
                                 "\n",
