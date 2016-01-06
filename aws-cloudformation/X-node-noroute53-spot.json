@@ -48,13 +48,13 @@
         "InstanceFlavour": {
             "Description": "Select the Clusterware compute node instance flavour",
             "Type": "String",
-            "Default": "Medium-4.cores-15gb",
+            "Default": "16.cores-64gb-2.4ghz",
             "AllowedValues": [
-                "XSmall-1.core-3.75gb",
-                "Small-2.cores-15.25gb",
-                "Medium-4.cores-15gb",
-                "Large-8.cores-61gb",
-                "XLarge-16.cores-122gb"
+                "8.cores-15gb-2.9ghz",
+                "16.cores-64gb-2.4ghz",
+                "32.cores-60gb-2.5ghz",
+                "36.cores-60gb-2.9ghz",
+                "40.cores-160gb-2.4ghz"
             ]
         },
 	"SpotPrice": {
@@ -92,7 +92,7 @@
                 "instanceflavour": "r3.8xlarge"
             },
             "36.cores-60gb-2.9ghz": {
-                "instanceflavour": "c4.8xlarge"
+                "instanceflavour": "c3.8xlarge"
             },
             "40.cores-160gb-2.4ghz": {
                 "instanceflavour": "m4.10xlarge"
@@ -100,7 +100,7 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-ad3d93de"
+                "centos7": "ami-bc01afcf"
             },
             "eu-central-1": {
                     "centos7": "ami-e460ce97"
