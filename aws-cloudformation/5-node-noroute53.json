@@ -5,8 +5,8 @@
             "Description": "Select an OS platform for the cluster",
             "Type": "String",
             "AllowedValues": [
-                "clusterwarecentos6",
-                "clusterwarecentos7"
+                "centos6",
+                "centos7"
             ]
         },
         "ClusterName": {
@@ -92,14 +92,13 @@
     "Mappings": {
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "clusterwarecentos6": "ami-8c8926ff",
-                "clusterwarecentos7": "ami-62852a11"
+                "centos6": "ami-5d228c2e"
             },
 	    "eu-central-1": {
-		    "clusterwarecentos6": "ami-f2fce09e"
+		    "centos6": "ami-f2fce09e"
 	    },
 	    "us-west-1": {
-		    "clusterwarecentos6": "ami-ca5b30aa"
+		    "centos6": "ami-ca5b30aa"
 	    }
         }
     },
