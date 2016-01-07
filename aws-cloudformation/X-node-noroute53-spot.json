@@ -48,19 +48,17 @@
         "InstanceFlavour": {
             "Description": "Select the Clusterware compute node instance flavour",
             "Type": "String",
-            "Default": "16.cores-64gb-2.4ghz",
+            "Default": "4.cores-32gb-2.5ghz",
             "AllowedValues": [
-                "8.cores-15gb-2.9ghz",
-                "16.cores-64gb-2.4ghz",
-                "32.cores-244gb-2.5ghz",
-                "36.cores-60gb-2.9ghz",
-                "40.cores-160gb-2.4ghz"
+                "2.cores-16gb-2.5ghz",
+                "4.cores-32gb-2.5ghz",
+                "8.cores-61gb-2.5ghz"
             ]
         },
 	"SpotPrice": {
 	    "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing.",
 	    "Type": "String",
-	    "Default": "0.15"
+	    "Default": "0.50"
 	},
         "ClusterwareDepots": {
             "Description": "Select the Clusterware Depot to install",
@@ -68,7 +66,7 @@
             "Default": "benchmark",
             "AllowedValues": [
                 "benchmark",
-                "chemistry",
+                "chem",
                 "bio"
             ]
         },
@@ -82,25 +80,19 @@
     },
     "Mappings": {
         "InstanceType2Flavour": {
-            "8.cores-15gb-2.9ghz": {
-                "instanceflavour": "c4.2xlarge"
+            "2.cores-16gb-2.5ghz": {
+                "instanceflavour": "r3.large"
             },
-            "16.cores-64gb-2.4ghz": {
-                "instanceflavour": "m4.4xlarge"
+            "4.cores-32gb-2.5ghz": {
+                "instanceflavour": "r3.xlarge"
             },
-            "32.cores-244gb-2.5ghz": {
-                "instanceflavour": "r3.8xlarge"
-            },
-            "36.cores-60gb-2.9ghz": {
-                "instanceflavour": "c3.8xlarge"
-            },
-            "40.cores-160gb-2.4ghz": {
-                "instanceflavour": "m4.10xlarge"
-            }
+            "8.cores-61gb-2.5ghz": {
+                "instanceflavour": "r3.2xlarge"
+           }
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-bc01afcf"
+                "centos7": "ami-c2cc65b1"
             },
             "eu-central-1": {
                     "centos7": "ami-e460ce97"
