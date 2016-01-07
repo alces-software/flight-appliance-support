@@ -52,7 +52,7 @@
             "AllowedValues": [
                 "8.cores-15gb-2.9ghz",
                 "16.cores-64gb-2.4ghz",
-                "32.cores-60gb-2.5ghz",
+                "32.cores-244gb-2.5ghz",
                 "36.cores-60gb-2.9ghz",
                 "40.cores-160gb-2.4ghz"
             ]
@@ -88,7 +88,7 @@
             "16.cores-64gb-2.4ghz": {
                 "instanceflavour": "m4.4xlarge"
             },
-            "32.cores-422gb-2.5ghz": {
+            "32.cores-244gb-2.5ghz": {
                 "instanceflavour": "r3.8xlarge"
             },
             "36.cores-60gb-2.9ghz": {
