@@ -1,5 +1,5 @@
 {
-    "Description": "Launch an Alces ClusterWare environment with a single SGE master node together with compute nodes using EC2 spot pricing.",
+    "Description": "Launch an Alces ClusterWare environment with a single master node and 3 on-demand compute node instances complete with SGE scheduler.",
     "Parameters": {
         "ClusterName": {
             "Description": "Choose a cluster name",
@@ -25,12 +25,6 @@
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "ComputeNumber": {
-            "Description": "Enter the number of compute nodes you wish to deploy",
-            "Type": "String",
-            "AllowedPattern": "[0-9]",
-            "Default": "3"
-        },
         "InstanceFlavour": {
             "Description": "Select the Clusterware compute node instance flavour",
             "Type": "String",
@@ -40,11 +34,6 @@
                 "large"
             ]
         },
-	"SpotPrice": {
-	    "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing.",
-	    "Type": "String",
-	    "Default": "0.50"
-	},
         "ClusterwareDepots": {
             "Description": "Select the Clusterware Depot to install",
             "Type": "String",
@@ -91,7 +80,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "ClusterName" } 
+                        "Value": { "Ref": "ClusterName" }
                     }
                 ],
                 "CidrBlock": "10.75.0.0/16",
@@ -218,7 +207,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "ClusterName" } 
+                        "Value": { "Ref": "ClusterName" }
                     }
                 ],
                 "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
@@ -263,9 +252,6 @@
                         "Value": "Alces Clusterware Master"
                     }
                 ],
-                "PlacementGroupName": {
-                    "Ref": "PlacementGroup"
-                },
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
@@ -305,6 +291,10 @@
                                 "#cloud-config",
                                 "\n",
                                 "hostname: login1",
+                                "\n",
+                                "fqdn: login1.",
+                                { "Ref": "ClusterName" },
+                                ".alces.network",
                                 "\n",
                                 "write_files:",
                                 "\n",
@@ -386,17 +376,16 @@
                 }
             }
         },
-        "PlacementGroup": {
-            "Type": "AWS::EC2::PlacementGroup",
+        "AlcesClusterwareCompute1": {
+            "Type": "AWS::EC2::Instance",
+	      "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
-                "Strategy": "cluster"
-            }
-        },
-        "ComputeConfig": {
-            "Type": "AWS::AutoScaling::LaunchConfiguration",
-            "Properties": {
-                "AssociatePublicIpAddress": false,
-                "KeyName": { "Ref": "AdminKey" },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Alces Clusterware Compute 1"
+                    }
+                ],
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
@@ -404,6 +393,20 @@
                         "centos7"
                     ]
                 },
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "false",
+                        "DeviceIndex": "0",
+                        "GroupSet": [
+                            {
+                                "Ref": "AlcesClusterwareSecurityGroup"
+                            }
+                        ],
+                        "SubnetId": {
+                            "Ref": "ClusterwarePublicNet"
+                        }
+                    }
+                ],
                 "InstanceType": {
                     "Fn::FindInMap": [
                         "InstanceType2Flavour",
@@ -411,10 +414,9 @@
                         "instanceflavour"
                     ]
                 },
-		"SpotPrice": {
-			"Ref": "SpotPrice"
-		},
-                "SecurityGroups": [ { "Ref": "AlcesClusterwareSecurityGroup" } ],
+                "KeyName": {
+                    "Ref": "AdminKey"
+                },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -422,8 +424,14 @@
                             [
                               "#cloud-config",
                               "\n",
-                              "write_files:","\n",
-                              "- content: |",
+                              "hostname: node1",
+                              "\n",
+                              "fqdn: node1",
+                              ".",
+                              { "Ref": "ClusterName" },
+                              ".alces.network",
+                              "\n",
+                              "write_files:",
                               "\n",
                               "    cluster:",
                               "\n",
@@ -488,46 +496,262 @@
                 }
             }
         },
-        "ComputeGroup": {
-            "Type": "AWS::AutoScaling::AutoScalingGroup",
-            "DependsOn": "AlcesClusterwareMasterNode",
+        "AlcesClusterwareCompute2": {
+            "Type": "AWS::EC2::Instance",
+	      "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
-                "DesiredCapacity": {
-                    "Ref": "ComputeNumber"
-                },
-                "PlacementGroup": {
-                    "Ref": "PlacementGroup"
-                },
-                "LaunchConfigurationName": {
-                    "Ref": "ComputeConfig"
-                },
-                "MinSize": "1",
-                "MaxSize": {
-                    "Ref": "ComputeNumber"
-                },
-                "VPCZoneIdentifier": [
+                "Tags": [
                     {
-                        "Ref": "ClusterwarePublicNet"
+                        "Key": "Name",
+                        "Value": "Alces Clusterware Compute 2"
                     }
-                ]
+                ],
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSRegionArch2AMI",
+                        { "Ref": "AWS::Region" },
+                        "centos7"
+                    ]
+                },
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "false",
+                        "DeviceIndex": "0",
+                        "GroupSet": [
+                            {
+                                "Ref": "AlcesClusterwareSecurityGroup"
+                            }
+                        ],
+                        "SubnetId": {
+                            "Ref": "ClusterwarePublicNet"
+                        }
+                    }
+                ],
+                "InstanceType": {
+                    "Fn::FindInMap": [
+                        "InstanceType2Flavour",
+                        { "Ref": "InstanceFlavour" },
+                        "instanceflavour"
+                    ]
+                },
+                "KeyName": {
+                    "Ref": "AdminKey"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                              "#cloud-config",
+                              "\n",
+                              "hostname: node2",
+                              "\n",
+                              "fqdn: node2",
+                              ".",
+                              { "Ref": "ClusterName" },
+                              ".alces.network",
+                              "\n",
+                              "write_files:",
+                              "\n",
+                              "    cluster:",
+                              "\n",
+                              "      uuid: '11111111-2222-3333-444444444444'",
+                              "\n",
+                              "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
+                              "\n",
+                              "      name: ",
+                              { "Ref": "ClusterName" },
+                              "\n",
+                              "      role: 'slave'",
+                              "\n",
+                              "      master: ",
+                              { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "PrivateIp" ] },
+                              "\n",
+                              "      tags:",
+                              "\n",
+                              "        scheduler_roles: ':compute:'",
+                              "\n",
+                              "      quorum: 3",
+                              "\n",
+                              "    instance:",
+                              "\n",
+                              "      users:",
+                              "\n",
+                              "      - username: ",
+                              {
+                                  "Ref": "ClusterUser"
+                              },
+                              "\n",
+                              "        uid: 509",
+                              "\n",
+                              "        group: ",
+                              {
+                                  "Ref": "ClusterUser"
+                              },
+                              "\n",
+                              "        gid: 509",
+                              "\n",
+                              "        groups:",
+                              "\n",
+                              "          - gridware",
+                              "\n",
+                              "          - admins:388",
+                              "\n",
+                              "        ssh_public_key: |",
+                              "\n",
+                              "          ",
+                              {
+                                  "Ref": "ClusterUserKey"
+                              },
+                              "\n",
+                              "  owner: root:root",
+                              "\n",
+                              "  path: /opt/clusterware/etc/config.yml",
+                              "\n",
+                              "  permissions: '0640'",
+                              "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "AlcesClusterwareCompute3": {
+            "Type": "AWS::EC2::Instance",
+	      "DependsOn": "AlcesClusterwareMasterNode",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Alces Clusterware Compute 3"
+                    }
+                ],
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSRegionArch2AMI",
+                        { "Ref": "AWS::Region" },
+                        "centos7"
+                    ]
+                },
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "false",
+                        "DeviceIndex": "0",
+                        "GroupSet": [
+                            {
+                                "Ref": "AlcesClusterwareSecurityGroup"
+                            }
+                        ],
+                        "SubnetId": {
+                            "Ref": "ClusterwarePublicNet"
+                        }
+                    }
+                ],
+                "InstanceType": {
+                    "Fn::FindInMap": [
+                        "InstanceType2Flavour",
+                        { "Ref": "InstanceFlavour" },
+                        "instanceflavour"
+                    ]
+                },
+                "KeyName": {
+                    "Ref": "AdminKey"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                              "#cloud-config",
+                              "\n",
+                              "hostname: node3",
+                              "\n",
+                              "fqdn: node3",
+                              ".",
+                              { "Ref": "ClusterName" },
+                              ".alces.network",
+                              "\n",
+                              "write_files:",
+                              "\n",
+                              "    cluster:",
+                              "\n",
+                              "      uuid: '11111111-2222-3333-444444444444'",
+                              "\n",
+                              "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
+                              "\n",
+                              "      name: ",
+                              { "Ref": "ClusterName" },
+                              "\n",
+                              "      role: 'slave'",
+                              "\n",
+                              "      master: ",
+                              { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "PrivateIp" ] },
+                              "\n",
+                              "      tags:",
+                              "\n",
+                              "        scheduler_roles: ':compute:'",
+                              "\n",
+                              "      quorum: 3",
+                              "\n",
+                              "    instance:",
+                              "\n",
+                              "      users:",
+                              "\n",
+                              "      - username: ",
+                              {
+                                  "Ref": "ClusterUser"
+                              },
+                              "\n",
+                              "        uid: 509",
+                              "\n",
+                              "        group: ",
+                              {
+                                  "Ref": "ClusterUser"
+                              },
+                              "\n",
+                              "        gid: 509",
+                              "\n",
+                              "        groups:",
+                              "\n",
+                              "          - gridware",
+                              "\n",
+                              "          - admins:388",
+                              "\n",
+                              "        ssh_public_key: |",
+                              "\n",
+                              "          ",
+                              {
+                                  "Ref": "ClusterUserKey"
+                              },
+                              "\n",
+                              "  owner: root:root",
+                              "\n",
+                              "  path: /opt/clusterware/etc/config.yml",
+                              "\n",
+                              "  permissions: '0640'",
+                              "\n"
+                            ]
+                        ]
+                    }
+                }
             }
         }
-    },
-    "Outputs": {
-        "AccessIP": {
-            "Value": {
-                "Fn::GetAtt": [
-                    "AlcesClusterwareMasterNode",
-                    "PublicIp"
-                ]
+      },
+        "Outputs": {
+            "AccessIP": {
+                "Value": {
+                    "Fn::GetAtt": [
+                        "AlcesClusterwareMasterNode",
+                        "PublicIp"
+                    ]
+                },
+                "Description": "Access the cluster via the above IP address and username with public key provided"
             },
-            "Description": "Access the cluster via the above IP address and username with public key provided"
-        },
-        "ClusterUser": {
-            "Value": {
-                "Ref": "ClusterUser"
-            },
-            "Description": "Cluster user username, access with user SSH key provided"
+            "ClusterUser": {
+                "Value": {
+                    "Ref": "ClusterUser"
+                },
+                "Description": "Cluster user username, access with user SSH key provided"
+            }
         }
-    }
 }
