@@ -3,7 +3,7 @@ How to deploy Alces Clusterware environments using various public and private cl
 #Quick-start
 *Deploy a dynamic ClusterWare research compute environment using Amazon AWS*
 
-**[Deploy now](https://github.com/alces-software/clusterware-deployment-methods/wiki/AWS:-Deploy-an-SGE-compute-cluster)**
+**[Deploy now](https://github.com/alces-software/clusterware-deployment-methods/wiki/AWS:-Deploy-an-SGE-spot-compute-cluster)**
 
 ##Platforms available
 * AWS (CentOS6/7)
