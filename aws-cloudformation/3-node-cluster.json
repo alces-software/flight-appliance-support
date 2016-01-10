@@ -610,9 +610,7 @@
                 "Description": "Access the cluster via the above IP address and username with public key provided"
             },
             "ClusterUser": {
-                "Value": {
-                    "Ref": "ClusterUser"
-                },
+                "Value": "alces",
                 "Description": "Cluster user username, access with user SSH key provided"
             }
         }

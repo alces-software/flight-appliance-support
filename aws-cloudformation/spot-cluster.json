@@ -448,10 +448,8 @@
             "Description": "Access the cluster via the above IP address and username with public key provided"
         },
         "ClusterUser": {
-            "Value": {
-                "Ref": "ClusterUser"
-            },
-            "Description": "Cluster user username, access with user SSH key provided"
+            "Value": "alces",
+            "Description": "Cluster username, access with AWS SSH key provided"
         }
     }
 }
