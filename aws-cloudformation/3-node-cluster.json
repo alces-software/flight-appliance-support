@@ -7,21 +7,7 @@
             "AllowedPattern": "[a-z0-9]*",
             "Default": "awscluster"
         },
-        "ClusterUser": {
-            "Description": "Choose a username for the cluster user",
-            "Type": "String",
-            "MinLength": "3",
-            "MaxLength": "16",
-            "AllowedPattern": "[-a-z0-9]*",
-            "Default": "alces-cluster",
-            "ConstraintDescription": "Username can only contain alphanumeric characters and dashes"
-        },
-        "ClusterUserKey": {
-            "Description": "Enter a public SSH key for cluster user access",
-            "Type": "String",
-            "Default": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZzUmsgywX4nsvpviq2aqnDX4kSgGF8nWjUMvD7KRV4uuOhtR56dgHwBSXne0PrR+KMmFt8ExH9valnZqYnL6sTG3vB8sFtdXrnXmx+1DjgqWc4Liq3RehJ589K1x8U6692Zoc9ecNZHd/I+r0SPUf2PGypFc4G28BPee/qdIuDDFSu4TWQv2E+f1mv14qRYQK9p7E+f+8UBJ2EBLmAwOeKV+uVGUtSZQvl8nTZDONzY88qHDHpjwu5zbk4l0pDXznNY3tO7A4TMnhoKr0I1Q0KX6I/S11Jq52pubfPlmq4Xdcefg0Ou0M7NXozhsgEhM5KYTs/qkNrMCXTPJLGSbL clouduser"
-        },
-        "AdminKey": {
+        "KeyPair": {
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
@@ -281,7 +267,7 @@
                     ]
                 },
                 "KeyName": {
-                    "Ref": "AdminKey"
+                    "Ref": "KeyPair"
                 },
                 "UserData": {
                     "Fn::Base64": {
@@ -331,37 +317,6 @@
                                 "          url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/depots/",
                                 {
                                     "Ref": "ClusterwareDepots"
-                                },
-                                "\n",
-                                "    instance:",
-                                "\n",
-                                "      users:",
-                                "\n",
-                                "      - username: ",
-                                {
-                                    "Ref": "ClusterUser"
-                                },
-                                "\n",
-                                "        uid: 509",
-                                "\n",
-                                "        group: ",
-                                {
-                                    "Ref": "ClusterUser"
-                                },
-                                "\n",
-                                "        gid: 509",
-                                "\n",
-                                "        groups:",
-                                "\n",
-                                "          - gridware",
-                                "\n",
-                                "          - admins:388",
-                                "\n",
-                                "        ssh_public_key: |",
-                                "\n",
-                                "          ",
-                                {
-                                    "Ref": "ClusterUserKey"
                                 },
                                 "\n",
                                 "  owner: root:root",
@@ -415,7 +370,7 @@
                     ]
                 },
                 "KeyName": {
-                    "Ref": "AdminKey"
+                    "Ref": "KeyPair"
                 },
                 "UserData": {
                     "Fn::Base64": {
@@ -452,37 +407,6 @@
                               "        scheduler_roles: ':compute:'",
                               "\n",
                               "      quorum: 3",
-                              "\n",
-                              "    instance:",
-                              "\n",
-                              "      users:",
-                              "\n",
-                              "      - username: ",
-                              {
-                                  "Ref": "ClusterUser"
-                              },
-                              "\n",
-                              "        uid: 509",
-                              "\n",
-                              "        group: ",
-                              {
-                                  "Ref": "ClusterUser"
-                              },
-                              "\n",
-                              "        gid: 509",
-                              "\n",
-                              "        groups:",
-                              "\n",
-                              "          - gridware",
-                              "\n",
-                              "          - admins:388",
-                              "\n",
-                              "        ssh_public_key: |",
-                              "\n",
-                              "          ",
-                              {
-                                  "Ref": "ClusterUserKey"
-                              },
                               "\n",
                               "  owner: root:root",
                               "\n",
@@ -535,7 +459,7 @@
                     ]
                 },
                 "KeyName": {
-                    "Ref": "AdminKey"
+                    "Ref": "KeyPair"
                 },
                 "UserData": {
                     "Fn::Base64": {
@@ -572,37 +496,6 @@
                               "        scheduler_roles: ':compute:'",
                               "\n",
                               "      quorum: 3",
-                              "\n",
-                              "    instance:",
-                              "\n",
-                              "      users:",
-                              "\n",
-                              "      - username: ",
-                              {
-                                  "Ref": "ClusterUser"
-                              },
-                              "\n",
-                              "        uid: 509",
-                              "\n",
-                              "        group: ",
-                              {
-                                  "Ref": "ClusterUser"
-                              },
-                              "\n",
-                              "        gid: 509",
-                              "\n",
-                              "        groups:",
-                              "\n",
-                              "          - gridware",
-                              "\n",
-                              "          - admins:388",
-                              "\n",
-                              "        ssh_public_key: |",
-                              "\n",
-                              "          ",
-                              {
-                                  "Ref": "ClusterUserKey"
-                              },
                               "\n",
                               "  owner: root:root",
                               "\n",
@@ -655,7 +548,7 @@
                     ]
                 },
                 "KeyName": {
-                    "Ref": "AdminKey"
+                    "Ref": "KeyPair"
                 },
                 "UserData": {
                     "Fn::Base64": {
@@ -692,37 +585,6 @@
                               "        scheduler_roles: ':compute:'",
                               "\n",
                               "      quorum: 3",
-                              "\n",
-                              "    instance:",
-                              "\n",
-                              "      users:",
-                              "\n",
-                              "      - username: ",
-                              {
-                                  "Ref": "ClusterUser"
-                              },
-                              "\n",
-                              "        uid: 509",
-                              "\n",
-                              "        group: ",
-                              {
-                                  "Ref": "ClusterUser"
-                              },
-                              "\n",
-                              "        gid: 509",
-                              "\n",
-                              "        groups:",
-                              "\n",
-                              "          - gridware",
-                              "\n",
-                              "          - admins:388",
-                              "\n",
-                              "        ssh_public_key: |",
-                              "\n",
-                              "          ",
-                              {
-                                  "Ref": "ClusterUserKey"
-                              },
                               "\n",
                               "  owner: root:root",
                               "\n",
