@@ -41,10 +41,10 @@
     "Mappings": {
         "InstanceType2Flavour": {
             "small": {
-                "instanceflavour": "c4.large"
+                "instanceflavour": "t2.small"
             },
             "large": {
-                "instanceflavour": "c4.4xlarge"
+                "instanceflavour": "t2.large"
            }
         },
         "AWSRegionArch2AMI": {
