@@ -60,13 +60,7 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-c2cc65b1"
-            },
-            "eu-central-1": {
-                    "centos7": "ami-e460ce97"
-            },
-            "us-west-1": {
-                    "centos7": "ami-ca5b30aa"
+                "centos7": "ami-f6b61e85"
             }
         }
     },
