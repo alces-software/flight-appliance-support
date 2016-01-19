@@ -154,6 +154,7 @@ resources:
 
   login1_port:
     type: OS::Neutron::Port
+    depends_on: cluster_network
     properties:
       network_id: { get_resource: cluster_network }
       fixed_ips:
