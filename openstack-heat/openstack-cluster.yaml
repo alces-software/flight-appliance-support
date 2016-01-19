@@ -1,46 +1,30 @@
 # Note - some of the defaults below are for an
-# Alces Software OpenStack environment. 
+# Alces Software OpenStack environment.
 # Please verify the configuration below before launching
 # external_network: `public`
-# clusterware image names: `clusterware-el6/7`
 heat_template_version: 2013-05-23
 
 description: >
-  Launch an Alces Clusterware environment, complete with 1
-  login node and 3 compute nodes.
+  Launch an Alces Clusterware SGE compute environment, complete with 1
+  login node and multiple compute nodes.
   The stack includes all necessary separated networking
   to create a private research environment.
   All resources are destroyed on destruction of the stack
 
 parameters:
-  cluster_name:
-    type: string
-    label: Cluster name
-    description: Cluster name
-    default: hpc1
-
-  cluster_user:
-    type: string
-    label: Cluster user username
-    description: Cluster user username
-    default: alces-cluster
-
-  cluster_user_key:
-    type: string
-    label: Cluster user public SSH key
-    description: Enter the cluster user public SSH key, e.g. `ssh-rsa 1234 user` 
-
   admin_key:
     type: string
     label: Cluster admin key
     description: Enter the name of an OpenStack nova keypair for administrator access
+    constraints:
+      - custom_constraint: nova.keypair
 
   cluster_type:
     type: string
-    label: Cluster type
-    description: Choose a cluster variant
+    label: ClusterWare image to use
+    description: Select the ClusterWare image to use
     constraints:
-    - allowed_values: [ clusterware-el6, clusterware-el7 ]
+      - custom_constraint: glance.image
 
   compute_number:
     type: string
@@ -52,17 +36,15 @@ parameters:
     type: string
     label: >
       Compute node instance type
-    description: Compute node type 
+    description: Compute node type
     constraints:
-    - allowed_values: [ c1.small, m1.small, m1.medium, m1.large, m1.xlarge ]
-      description: >
-        Compute node instance type to launch
+    - custom_constraint: nova.flavor
 
   gridware_depot:
     type: string
     label: Gridware Depot to install
     constraints:
-    - allowed_values: [ bio, chem, benchmark ]
+    - allowed_values: [ none, bio, chem, benchmark ]
 
 resources:
   cluster_uuid:
@@ -80,7 +62,7 @@ resources:
   cluster_network:
     type: OS::Neutron::Net
     properties:
-      name: { get_param: cluster_name }
+      name: { get_param: 'OS::stack_name' }
 
   cluster_subnet:
     type: OS::Neutron::Subnet
@@ -90,7 +72,7 @@ resources:
       gateway_ip: 10.75.0.254
       dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
       allocation_pools:
-        - start: 10.75.0.2 
+        - start: 10.75.0.2
           end: 10.75.0.253
 
   router:
@@ -108,7 +90,7 @@ resources:
   cluster_sg:
     type: OS::Neutron::SecurityGroup
     properties:
-      name: { get_param: cluster_name }
+      name: { get_param: 'OS::stack_name' }
       description: Enable ping/SSH
       rules:
       - protocol: icmp
@@ -124,21 +106,16 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://gist.githubusercontent.com/vlj91/93b04ab2a29b25dd91ed/raw/2c62cc53142624df19a0d8d6d8a23b485100e5f3/login.sh > login.sh
-            sh login.sh
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/login.sh | /bin/bash
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
             sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
-                -e "s/%CUNAME%/%CLUSTER_USER%/g" \
-                -e "s,%CUKEY%,%CWUKEY%,g" \
                 -e "s/%UUID%/%CWUUID%/g" \
                 -e "s/%TOKEN%/%CWTOKEN%/g" \
                 -e "s,%INSTALL%,%DEPOT%,g" \
                 -i /opt/clusterware/etc/config.yml
           params:
-            "%CLUSTER_NAME%": { get_param: cluster_name }
-            "%CLUSTER_USER%": { get_param: cluster_user }
-            "%CWUKEY%": { get_param: cluster_user_key }
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
             "%CWUUID%": { get_resource: cluster_uuid }
             "%CWTOKEN%": { get_resource: cluster_token }
             "%DEPOT%": { get_param: gridware_depot }
@@ -151,20 +128,15 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://gist.githubusercontent.com/vlj91/7bfc57d11365ac2ef697/raw/c4999aad43b0028f77f461717ea0626586cd15e5/compute.sh > compute.sh
-            sh compute.sh
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/compute.sh | /bin/bash
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
             sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
-                -e "s/%CUNAME%/%CLUSTER_USER%/g" \
-                -e "s,%CUKEY%,%CWUKEY%,g" \
                 -e "s/%UUID%/%CWUUID%/g" \
                 -e "s/%TOKEN%/%CWTOKEN%/g" \
                 -i /opt/clusterware/etc/config.yml
           params:
-            "%CLUSTER_NAME%": { get_param: cluster_name }
-            "%CLUSTER_USER%": { get_param: cluster_user }
-            "%CWUKEY": { get_param: cluster_user_key }
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
             "%CWUUID%": { get_resource: cluster_uuid }
             "%CWTOKEN%": { get_resource: cluster_token }
 
@@ -172,7 +144,7 @@ resources:
     type: OS::Nova::Server
     properties:
       name: login1
-      image: { get_param: cluster_type } 
+      image: { get_param: cluster_type }
       flavor: { get_param: compute_flavour }
       key_name: { get_param: admin_key }
       networks:
@@ -193,25 +165,25 @@ resources:
       floating_network: public
       port_id: { get_resource: login1_port }
 
-  group:
-    type: OS::Heat::AutoScalingGroup
-    depends_on: login1_access
+  compute_group:
+    type: OS::Heat::ResourceGroup
     properties:
-      cooldown: 60
-      desired_capacity: { get_param: compute_number }
-      max_size: 500 
-      min_size: 1
-      resource:
+      count: { get_param: compute_number }
+      resource_def:
         type: OS::Nova::Server
         properties:
+          name: node%index%
           flavor: { get_param: compute_flavour }
           image: { get_param: cluster_type }
           user_data_format: RAW
           user_data: { get_resource: node_config }
-          metadata: {"scale_group": { get_param: cluster_name }}
           networks: [{ network: { get_resource: cluster_network } }]
 
 outputs:
   login1_public_ip:
     description: Floating IP address of login1 in public network
     value: { get_attr: [ login1_access, floating_ip_address ] }
+
+  user_account:
+    description: User account to access environment with
+    value: "alces"

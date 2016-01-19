@@ -9,7 +9,6 @@ Alces Clusterware OpenStack deployments support user created or Alces created im
 
 The latest Alces images can be downloaded from:
 
-* [CentOS 6.7 Clusterware](#)
 * [CentOS 7.1 Clusterware](#)
 
 ##Current deployment types
