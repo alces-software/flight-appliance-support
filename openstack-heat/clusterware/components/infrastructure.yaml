@@ -1,0 +1,200 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Launch the required networking and 
+  base components for a ClusterWare environment.
+
+parameters:
+  admin_key:
+    type: string
+    label: Cluster admin key
+    description: Select the keypair used for administrator access
+    constraints:
+      - custom_constraints: nova.keypair
+
+  cluster_type:
+    type: string
+    label: ClusterWare image to use
+    description: Select the ClusterWare image to use
+    constraints:
+      - custom_constraint: glance.image
+
+   storage_type:
+     type: string
+     label: Storage Manager image to use
+     description: Select the Alces Storage Manager image to use
+     constraints:
+       - custom_constraint: glance.image
+
+resources:
+  cluster_uuid:
+    type: OS::Heat::RandomString
+    properties:
+      length: 24
+      sequence: digits
+
+  cluster_token:
+    type: OS::Heat::RandomString
+    properties:
+      length: 20
+      sequence: lettersdigits
+
+  cluster_network:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: 'OS::stack_name' }
+
+  cluster_subnet: 
+    type: OS::Neutron::Subnet
+    properties: 
+      network_id: { get_resource: cluster_network }
+      cidr: 10.75.0.0/16
+      gateway_ip: 10.75.0.254
+      dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
+      allocation_pools:
+        - start: 17.75.0.2
+          end: 10.75.0.253
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: public
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: cluster_subnet }
+
+  cluster_sg:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: { get_param: 'OS::stack_name' }
+      description: Enable ping/SSH
+      rules:
+      - protocol: icmp
+      - protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+
+  login_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/login.sh | /bin/bash 
+            chown root:root /opt/clusterware/etc/config.yml 
+            chmod 0640 /opt/clusterware/etc/config.yml 
+            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \ 
+                -e "s/%UUID%/%CWUUID%/g" \ 
+                -e "s/%TOKEN%/%CWTOKEN%/g" \ 
+                -i /opt/clusterware/etc/config.yml 
+          params: 
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' } 
+            "%CWUUID%": { get_resource: cluster_uuid } 
+            "%CWTOKEN%": { get_resource: cluster_token } 
+
+  storage_manager_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/login.sh | /bin/bash 
+            chown root:root /opt/clusterware/etc/config.yml 
+            chmod 0640 /opt/clusterware/etc/config.yml 
+            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \ 
+                -e "s/%UUID%/%CWUUID%/g" \ 
+                -e "s/%TOKEN%/%CWTOKEN%/g" \ 
+                -i /opt/clusterware/etc/config.yml 
+          params: 
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' } 
+            "%CWUUID%": { get_resource: cluster_uuid } 
+            "%CWTOKEN%": { get_resource: cluster_token } 
+
+  node_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/compute.sh | /bin/bash
+            chown root:root /opt/clusterware/etc/config.yml
+            chmod 0640 /opt/clusterware/etc/config.yml
+            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
+                -e "s/%UUID%/%CWUUID%/g" \
+                -e "s/%TOKEN%/%CWTOKEN%/g" \
+                -i /opt/clusterware/etc/config.yml
+          params:
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
+            "%CWUUID%": { get_resource: cluster_uuid }
+            "%CWTOKEN%": { get_resource: cluster_token }
+
+  login_port:
+    type: OS::Neutron::Port
+    depends_on: cluster_network
+    properties:
+      network_id: { get_resource: cluster_network }
+      fixed_ips:
+        - subnet_id: { get_resource: cluster_subnet }
+
+  storage_manager_port:
+    type: OS::Neutron::Port
+    depends_on: cluster_network
+    properties:
+      network_id: { get_resource: cluster_network }
+      fixed_ips:
+        - subnet_id: { get_resource: cluster_subnet }
+
+  login_access:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: public
+      port_id: { get_resource: login_port }
+
+  storage_manager_access:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: public
+      port_id: { get_resource: storage_manager_port }
+
+  login:
+    type: OS::Nova::Server
+    properties:
+      name: login1
+      image: { get_param: cluster_type }
+      flavor: { get_param: compute_flavour }
+      key_name: { get_param: admin_key }
+      networks:
+        - port: { get_resource: login_port }
+      user_data_format: RAW
+      user_data: { get_resource: login_config }
+
+  storage_manager:
+    type: OS::Nova::Server
+    properties:
+      name: storage-manager
+      image: { get_param: cluster_type }
+      flavor: { get_param: compute_flavour }
+      key_name: { get_param: admin_key }
+      networks:
+        - port: { get_resource: storage_manager_port }
+      user_data_format: RAW
+      user_data: { get_resource: storage_manager_config }
+
+outputs:
+  login_public_ip:
+    description: Access IP address for cluster login node
+    value: { get_attr: [ login_access, floating_ip_address ] }
+
+  storage_manager_public_ip:
+    description: Access IP address for cluster login node
+    value: { get_attr: [ storage_manager_access, floating_ip_address ] }
