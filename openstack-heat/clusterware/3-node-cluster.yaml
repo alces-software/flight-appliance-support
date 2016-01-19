@@ -1,0 +1,184 @@
+# Note - some of the defaults below are for an
+# Alces Software OpenStack environment.
+# Please verify the configuration below before launching
+# external_network: `public`
+heat_template_version: 2013-05-23
+
+description: >
+  Launch an Alces Clusterware SGE compute environment, complete with 1
+  login node and 3 compute nodes.
+  The stack includes all necessary separated networking
+  to create a private research environment.
+  All resources are destroyed on destruction of the stack
+
+parameters:
+  admin_key:
+    type: string
+    label: Cluster admin key
+    description: Enter the name of an OpenStack nova keypair for administrator access
+    constraints:
+      - custom_constraint: nova.keypair
+
+  cluster_type:
+    type: string
+    label: ClusterWare image to use
+    description: Select the ClusterWare image to use
+    constraints:
+      - custom_constraint: glance.image
+
+  compute_flavour:
+    type: string
+    label: >
+      Compute node instance type
+    description: Compute node type
+    constraints:
+    - custom_constraint: nova.flavor
+
+  gridware_depot:
+    type: string
+    label: Gridware Depot to install
+    constraints:
+    - allowed_values: [ none, bio, chem, benchmark ]
+
+resources:
+  cluster_uuid:
+    type: OS::Heat::RandomString
+    properties:
+      length: 24
+      sequence: digits
+
+  cluster_token:
+    type: OS::Heat::RandomString
+    properties:
+      length: 20
+      sequence: lettersdigits
+
+  cluster_network:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: 'OS::stack_name' }
+
+  cluster_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: cluster_network }
+      cidr: 10.75.0.0/16
+      gateway_ip: 10.75.0.254
+      dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
+      allocation_pools:
+        - start: 10.75.0.2
+          end: 10.75.0.253
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: public
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: cluster_subnet }
+
+  cluster_sg:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: { get_param: 'OS::stack_name' }
+      description: Enable ping/SSH
+      rules:
+      - protocol: icmp
+      - protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+
+  master_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/login.sh | /bin/bash
+            chown root:root /opt/clusterware/etc/config.yml
+            chmod 0640 /opt/clusterware/etc/config.yml
+            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
+                -e "s/%UUID%/%CWUUID%/g" \
+                -e "s/%TOKEN%/%CWTOKEN%/g" \
+                -e "s,%INSTALL%,%DEPOT%,g" \
+                -i /opt/clusterware/etc/config.yml
+          params:
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
+            "%CWUUID%": { get_resource: cluster_uuid }
+            "%CWTOKEN%": { get_resource: cluster_token }
+            "%DEPOT%": { get_param: gridware_depot }
+
+  node_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/compute.sh | /bin/bash
+            chown root:root /opt/clusterware/etc/config.yml
+            chmod 0640 /opt/clusterware/etc/config.yml
+            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
+                -e "s/%UUID%/%CWUUID%/g" \
+                -e "s/%TOKEN%/%CWTOKEN%/g" \
+                -i /opt/clusterware/etc/config.yml
+          params:
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
+            "%CWUUID%": { get_resource: cluster_uuid }
+            "%CWTOKEN%": { get_resource: cluster_token }
+
+  login1:
+    type: OS::Nova::Server
+    properties:
+      name: login1
+      image: { get_param: cluster_type }
+      flavor: { get_param: compute_flavour }
+      key_name: { get_param: admin_key }
+      networks:
+        - port: { get_resource: login1_port }
+      user_data_format: RAW
+      user_data: { get_resource: master_config }
+
+  login1_port:
+    type: OS::Neutron::Port
+    depends_on: cluster_network
+    properties:
+      network_id: { get_resource: cluster_network }
+      fixed_ips:
+        - subnet_id: { get_resource: cluster_subnet }
+
+  login1_access:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: public
+      port_id: { get_resource: login1_port }
+
+  compute_group:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: 3
+      resource_def:
+        type: OS::Nova::Server
+        properties:
+          name: node%index%
+          flavor: { get_param: compute_flavour }
+          image: { get_param: cluster_type }
+          user_data_format: RAW
+          user_data: { get_resource: node_config }
+          networks: [{ network: { get_resource: cluster_network } }]
+
+outputs:
+  login1_public_ip:
+    description: Floating IP address of login1 in public network
+    value: { get_attr: [ login1_access, floating_ip_address ] }
+
+  user_account:
+    description: User account to access environment with
+    value: "alces"
