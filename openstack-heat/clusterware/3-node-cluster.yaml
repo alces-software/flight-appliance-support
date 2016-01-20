@@ -101,20 +101,26 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/clusterware/init/login.sh | /bin/bash
+            cat << EOF > /opt/clusterware/etc/config.yml
+            cluster:
+              uuid: '%UUID%'
+              token: '%TOKEN%'
+              name: '%CLUSTER_NAME%'
+              role: 'master'
+              tags:
+                scheduler_roles: ':master:'
+              quorum: 3
+              gridware:
+                depots:
+                - name: %DEPOT%
+                  url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/depots/%DEPOT%
+            EOF
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
-            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
-                -e "s/%CUNAME%/%CLUSTER_USER%/g" \
-                -e "s,%CUKEY%,%CWUKEY%,g" \
-                -e "s/%UUID%/%CWUUID%/g" \
-                -e "s/%TOKEN%/%CWTOKEN%/g" \
-                -e "s,%INSTALL%,%DEPOT%,g" \
-                -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
-            "%CWUUID%": { get_resource: cluster_uuid }
-            "%CWTOKEN%": { get_resource: cluster_token }
+            "%UUID%": { get_resource: cluster_uuid }
+            "%TOKEN%": { get_resource: cluster_token }
             "%DEPOT%": { get_param: gridware_depot }
 
   node_config:
@@ -125,19 +131,22 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/clusterware/init/compute.sh | /bin/bash
+            cat << EOF > /opt/clusterware/etc/config.yml
+            cluster:
+              uuid: '%UUID%'
+              token: '%TOKEN%'
+              name: '%CLUSTER_NAME%'
+              role: 'slave'
+              tags:
+                scheduler_roles: ':compute:'
+              quorum: 3
+            EOF
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
-            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
-                -e "s/%CUNAME%/%CLUSTER_USER%/g" \
-                -e "s,%CUKEY%,%CWUKEY%,g" \
-                -e "s/%UUID%/%CWUUID%/g" \
-                -e "s/%TOKEN%/%CWTOKEN%/g" \
-                -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
-            "%CWUUID%": { get_resource: cluster_uuid }
-            "%CWTOKEN%": { get_resource: cluster_token }
+            "%UUID%": { get_resource: cluster_uuid }
+            "%TOKEN%": { get_resource: cluster_token }
 
   login1:
     type: OS::Nova::Server
