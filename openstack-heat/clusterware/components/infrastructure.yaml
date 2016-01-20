@@ -19,6 +19,12 @@ parameters:
     constraints:
     - custom_constraint: nova.keypair
 
+  cluster_password:
+    type: string
+    label: Storage manager password
+    description: Password used to access Storage Manager
+    hidden: true
+
   cluster_type:
     type: string
     label: Cluster type
@@ -101,6 +107,7 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
+            echo "alces:%STGPASS%" | chpasswd
             cat << EOF > /opt/clusterware/etc/config.yml
             cluster:
               uuid: '%UUID%'
@@ -109,14 +116,25 @@ resources:
               role: 'master'
               tags:
                 scheduler_roles: ':master:'
+                storage_roles: ':master:'
               quorum: 3
             EOF
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
+            cat << EOF > /etc/xdg/clusterware/login1.target.yml
+            ---
+            name: "Home"
+            type: posix
+            dir: "%#{dir}/"
+            address: "127.0.0.1:25268"
+            EOF
+            chown root:root /etc/xdg/clusterware/login1.target.yml
+            chmod 0640 /etc/xdg/clusterware/login1.target.yml
           params:
             "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
             "%UUID%": { get_resource: cluster_uuid }
             "%TOKEN%": { get_resource: cluster_token }
+            "%STGPASS%": { get_param: cluster_password }
 
   storage_manager_config:
     type: OS::Heat::SoftwareConfig
@@ -126,7 +144,7 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            cat << EOF > /optclusterware/etc/config.yml
+            cat << EOF > /opt/clusterware/etc/config.yml
             cluster:
               uuid: '%UUID%'
               token: '%TOKEN%'
@@ -195,6 +213,10 @@ resources:
       user_data: { get_resource: storage_manager_config }
 
 outputs:
+  cluster_user:
+    description: Cluster user for access to login node and storage manager
+    value: alces
+
   login_public_ip:
     description: Access IP address for cluster login node
     value: { get_attr: [ login_access, floating_ip_address ] }
