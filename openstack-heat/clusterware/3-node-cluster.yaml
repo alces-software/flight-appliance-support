@@ -5,7 +5,7 @@
 heat_template_version: 2013-05-23
 
 description: >
-  Launch an Alces Clusterware SGE compute environment, complete with 1
+  Launch an Alces Clusterware environment, complete with 1
   login node and 3 compute nodes.
   The stack includes all necessary separated networking
   to create a private research environment.
@@ -17,14 +17,14 @@ parameters:
     label: Cluster admin key
     description: Enter the name of an OpenStack nova keypair for administrator access
     constraints:
-      - custom_constraint: nova.keypair
+    - custom_constraint: nova.keypair
 
   cluster_type:
     type: string
-    label: ClusterWare image to use
-    description: Select the ClusterWare image to use
+    label: Cluster type
+    description: Choose an Alces ClusterWare image to use
     constraints:
-      - custom_constraint: glance.image
+    - custom_constraint: glance.image
 
   compute_flavour:
     type: string
@@ -36,9 +36,10 @@ parameters:
 
   gridware_depot:
     type: string
-    label: Gridware Depot to install
+    label: Gridware depot to install
+    description: Selection of applications to install
     constraints:
-    - allowed_values: [ none, bio, chem, benchmark ]
+    - allowed_values: [ "none", "bio", "benchmark", "chem" ]
 
 resources:
   cluster_uuid:
@@ -100,10 +101,12 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/login.sh | /bin/bash
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/clusterware/init/login.sh | /bin/bash
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
             sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
+                -e "s/%CUNAME%/%CLUSTER_USER%/g" \
+                -e "s,%CUKEY%,%CWUKEY%,g" \
                 -e "s/%UUID%/%CWUUID%/g" \
                 -e "s/%TOKEN%/%CWTOKEN%/g" \
                 -e "s,%INSTALL%,%DEPOT%,g" \
@@ -122,10 +125,12 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/compute.sh | /bin/bash
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/clusterware/init/compute.sh | /bin/bash
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
             sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
+                -e "s/%CUNAME%/%CLUSTER_USER%/g" \
+                -e "s,%CUKEY%,%CWUKEY%,g" \
                 -e "s/%UUID%/%CWUUID%/g" \
                 -e "s/%TOKEN%/%CWTOKEN%/g" \
                 -i /opt/clusterware/etc/config.yml
@@ -148,7 +153,6 @@ resources:
 
   login1_port:
     type: OS::Neutron::Port
-    depends_on: cluster_network
     properties:
       network_id: { get_resource: cluster_network }
       fixed_ips:
@@ -156,6 +160,7 @@ resources:
 
   login1_access:
     type: OS::Neutron::FloatingIP
+    depends_on: router
     properties:
       floating_network: public
       port_id: { get_resource: login1_port }
@@ -167,7 +172,7 @@ resources:
       resource_def:
         type: OS::Nova::Server
         properties:
-          name: node%index%
+          name: node0%index%
           flavor: { get_param: compute_flavour }
           image: { get_param: cluster_type }
           user_data_format: RAW
@@ -178,7 +183,3 @@ outputs:
   login1_public_ip:
     description: Floating IP address of login1 in public network
     value: { get_attr: [ login1_access, floating_ip_address ] }
-
-  user_account:
-    description: User account to access environment with
-    value: "alces"
