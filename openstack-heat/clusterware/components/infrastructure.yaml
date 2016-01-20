@@ -101,17 +101,22 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/login.sh | /bin/bash
+            cat << EOF > /opt/clusterware/etc/config.yml
+            cluster:
+              uuid: '%UUID%'
+              token: '%TOKEN%'
+              name: '%CLUSTER_NAME%'
+              role: 'master'
+              tags:
+                scheduler_roles: ':master:'
+              quorum: 3
+            EOF
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
-            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
-                -e "s/%UUID%/%CWUUID%/g" \
-                -e "s/%TOKEN%/%CWTOKEN%/g" \
-                -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
-            "%CWUUID%": { get_resource: cluster_uuid }
-            "%CWTOKEN%": { get_resource: cluster_token }
+            "%UUID%": { get_resource: cluster_uuid }
+            "%TOKEN%": { get_resource: cluster_token }
 
   storage_manager_config:
     type: OS::Heat::SoftwareConfig
@@ -121,37 +126,21 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/storagemanager.sh | /bin/bash
+            cat << EOF > /optclusterware/etc/config.yml
+            cluster:
+              uuid: '%UUID%'
+              token: '%TOKEN%'
+              name: '%CLUSTER_NAME%'
+              role: 'appliance'
+              tags:
+                appliance_roles: ':storage:'
+            EOF
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
-            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
-                -e "s/%UUID%/%CWUUID%/g" \
-                -e "s/%TOKEN%/%CWTOKEN%/g" \
-                -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
-            "%CWUUID%": { get_resource: cluster_uuid }
-            "%CWTOKEN%": { get_resource: cluster_token }
-
-  node_config:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      config:
-        str_replace:
-          template: |
-            #!/bin/bash
-            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/compute.sh | /bin/bash
-            chown root:root /opt/clusterware/etc/config.yml
-            chmod 0640 /opt/clusterware/etc/config.yml
-            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
-                -e "s/%UUID%/%CWUUID%/g" \
-                -e "s/%TOKEN%/%CWTOKEN%/g" \
-                -i /opt/clusterware/etc/config.yml
-          params:
-            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
-            "%CWUUID%": { get_resource: cluster_uuid }
-            "%CWTOKEN%": { get_resource: cluster_token }
+            "%UUID%": { get_resource: cluster_uuid }
+            "%TOKEN%": { get_resource: cluster_token }
 
   login_port:
     type: OS::Neutron::Port

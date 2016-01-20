@@ -55,19 +55,22 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/clusterware/init/compute.sh | /bin/bash
+            cat << EOF > /opt/clusterware/etc/config.yml
+            cluster:
+              uuid: '%UUID%'
+              token: '%TOKEN%'
+              name: '%CLUSTER_NAME%'
+              role: slave
+              tags:
+                scheduler_roles: ':compute:'
+              quorum: 3
+            EOF
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
-            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
-                -e "s/%CUNAME%/%CLUSTER_USER%/g" \
-                -e "s,%CUKEY%,%CWUKEY%,g" \
-                -e "s/%UUID%/%CWUUID%/g" \
-                -e "s/%TOKEN%/%CWTOKEN%/g" \
-                -i /opt/clusterware/etc/config.yml
           params:
             "%CLUSTER_NAME%": { get_param: stack_name }
-            "%CWUUID%": { get_resource: cluster_uuid }
-            "%CWTOKEN%": { get_resource: cluster_token }
+            "%UUID%": { get_param: cluster_uuid }
+            "%TOKEN%": { get_param: cluster_token }
 
   compute_group:
     type: OS::Heat::ResourceGroup
@@ -81,4 +84,4 @@ resources:
           image: { get_param: cluster_type }
           user_data_format: RAW
           user_data: { get_resource: node_config }
-          networks: [{ network: { get_resource: cluster_network } }]
+          networks: [{ network: { get_param: cluster_network } }]
