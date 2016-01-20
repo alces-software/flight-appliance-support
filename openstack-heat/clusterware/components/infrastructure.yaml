@@ -1,30 +1,45 @@
+# Note - some of the defaults below are for an
+# Alces Software OpenStack environment.
+# Please verify the configuration below before launching
+# external_network: `public`
 heat_template_version: 2013-05-23
 
 description: >
-  Launch the required networking and 
-  base components for a ClusterWare environment.
+  Launch an Alces Clusterware environment, complete with 1
+  login node and 3 compute nodes.
+  The stack includes all necessary separated networking
+  to create a private research environment.
+  All resources are destroyed on destruction of the stack
 
 parameters:
   admin_key:
     type: string
     label: Cluster admin key
-    description: Select the keypair used for administrator access
+    description: Enter the name of an OpenStack nova keypair for administrator access
     constraints:
-      - custom_constraints: nova.keypair
+    - custom_constraint: nova.keypair
 
   cluster_type:
     type: string
-    label: ClusterWare image to use
-    description: Select the ClusterWare image to use
+    label: Cluster type
+    description: Choose an Alces ClusterWare image to use
     constraints:
-      - custom_constraint: glance.image
+    - custom_constraint: glance.image
 
-   storage_type:
-     type: string
-     label: Storage Manager image to use
-     description: Select the Alces Storage Manager image to use
-     constraints:
-       - custom_constraint: glance.image
+  storage_manager_image:
+    type: string
+    label: Storage Manager type
+    description: Choose an Alces Storage Manager image to use
+    constraints:
+    - custom_constraint: glance.image
+
+  compute_flavour:
+    type: string
+    label: >
+      Instance type
+    description: Instance type
+    constraints:
+    - custom_constraint: nova.flavor
 
 resources:
   cluster_uuid:
@@ -44,15 +59,15 @@ resources:
     properties:
       name: { get_param: 'OS::stack_name' }
 
-  cluster_subnet: 
+  cluster_subnet:
     type: OS::Neutron::Subnet
-    properties: 
+    properties:
       network_id: { get_resource: cluster_network }
       cidr: 10.75.0.0/16
       gateway_ip: 10.75.0.254
       dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
       allocation_pools:
-        - start: 17.75.0.2
+        - start: 10.75.0.2
           end: 10.75.0.253
 
   router:
@@ -86,17 +101,17 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/login.sh | /bin/bash 
-            chown root:root /opt/clusterware/etc/config.yml 
-            chmod 0640 /opt/clusterware/etc/config.yml 
-            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \ 
-                -e "s/%UUID%/%CWUUID%/g" \ 
-                -e "s/%TOKEN%/%CWTOKEN%/g" \ 
-                -i /opt/clusterware/etc/config.yml 
-          params: 
-            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' } 
-            "%CWUUID%": { get_resource: cluster_uuid } 
-            "%CWTOKEN%": { get_resource: cluster_token } 
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/login.sh | /bin/bash
+            chown root:root /opt/clusterware/etc/config.yml
+            chmod 0640 /opt/clusterware/etc/config.yml
+            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
+                -e "s/%UUID%/%CWUUID%/g" \
+                -e "s/%TOKEN%/%CWTOKEN%/g" \
+                -i /opt/clusterware/etc/config.yml
+          params:
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
+            "%CWUUID%": { get_resource: cluster_uuid }
+            "%CWTOKEN%": { get_resource: cluster_token }
 
   storage_manager_config:
     type: OS::Heat::SoftwareConfig
@@ -106,17 +121,17 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/login.sh | /bin/bash 
-            chown root:root /opt/clusterware/etc/config.yml 
-            chmod 0640 /opt/clusterware/etc/config.yml 
-            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \ 
-                -e "s/%UUID%/%CWUUID%/g" \ 
-                -e "s/%TOKEN%/%CWTOKEN%/g" \ 
-                -i /opt/clusterware/etc/config.yml 
-          params: 
-            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' } 
-            "%CWUUID%": { get_resource: cluster_uuid } 
-            "%CWTOKEN%": { get_resource: cluster_token } 
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/init/storagemanager.sh | /bin/bash
+            chown root:root /opt/clusterware/etc/config.yml
+            chmod 0640 /opt/clusterware/etc/config.yml
+            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
+                -e "s/%UUID%/%CWUUID%/g" \
+                -e "s/%TOKEN%/%CWTOKEN%/g" \
+                -i /opt/clusterware/etc/config.yml
+          params:
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
+            "%CWUUID%": { get_resource: cluster_uuid }
+            "%CWTOKEN%": { get_resource: cluster_token }
 
   node_config:
     type: OS::Heat::SoftwareConfig
@@ -182,7 +197,7 @@ resources:
     type: OS::Nova::Server
     properties:
       name: storage-manager
-      image: { get_param: cluster_type }
+      image: { get_param: storage_manager_image }
       flavor: { get_param: compute_flavour }
       key_name: { get_param: admin_key }
       networks:
@@ -198,3 +213,11 @@ outputs:
   storage_manager_public_ip:
     description: Access IP address for cluster login node
     value: { get_attr: [ storage_manager_access, floating_ip_address ] }
+
+  clusterware_uuid:
+    description: ClusterWare UUID - used to create additional compute nodes
+    value: { get_resource: cluster_uuid }
+
+  clusterware_token:
+    description: ClusterWare token - used to create additional compute nodes
+    value: { get_resource: cluster_token }

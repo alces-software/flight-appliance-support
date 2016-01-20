@@ -1,0 +1,84 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Add compute nodes to an existing Alces Infrastructure
+  Heat template.
+
+parameters:
+  stack_name:
+    type: string
+    label: Existing stack name
+    description: Enter the name of the existing infrastructure stack
+
+  cluster_uuid:
+    type: string
+    label: ClusterWare UUID
+    description: Enter the previously created ClusterWare UUID
+
+  cluster_token:
+    type: string
+    label: ClusterWare token
+    description: Enter the previously created ClusterWare token
+
+  compute_number:
+    type: number
+    label: Number of compute nodes
+    description: Enter the number of compute nodes to deploy
+
+  compute_type:
+    type: string
+    label: Compute node flavour
+    description: Select the compute node flavour
+    constraints:
+    - custom_constraint: nova.flavor
+
+  cluster_type:
+    type: string
+    label: ClusterWare type
+    description: Select the ClusterWare image to use
+    constraints:
+    - custom_constraint: glance.image
+
+  cluster_network:
+    type: string
+    label: Cluster network
+    description: Select the existing cluster network to join
+    constraints:
+    - custom_constraint: neutron.network
+
+resources:
+  node_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            curl https://raw.githubusercontent.com/alces-software/clusterware-deployment-methods/1.0/openstack-heat/clusterware/init/compute.sh | /bin/bash
+            chown root:root /opt/clusterware/etc/config.yml
+            chmod 0640 /opt/clusterware/etc/config.yml
+            sed -e "s/%CWNAME%/%CLUSTER_NAME%/g" \
+                -e "s/%CUNAME%/%CLUSTER_USER%/g" \
+                -e "s,%CUKEY%,%CWUKEY%,g" \
+                -e "s/%UUID%/%CWUUID%/g" \
+                -e "s/%TOKEN%/%CWTOKEN%/g" \
+                -i /opt/clusterware/etc/config.yml
+          params:
+            "%CLUSTER_NAME%": { get_param: stack_name }
+            "%CWUUID%": { get_resource: cluster_uuid }
+            "%CWTOKEN%": { get_resource: cluster_token }
+
+  compute_group:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: compute_number }
+      resource_def:
+        type: OS::Nova::Server
+        properties:
+          name: node0%index%
+          flavor: { get_param: compute_type }
+          image: { get_param: cluster_type }
+          user_data_format: RAW
+          user_data: { get_resource: node_config }
+          networks: [{ network: { get_resource: cluster_network } }]
