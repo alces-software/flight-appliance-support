@@ -1,0 +1,144 @@
+# Note - some of the default values below are for an
+# Alces Software OpenStack environment.
+# Please verify the configuration below before launching
+# external_network: `public`
+heat_template_version: 2013-05-23
+
+description: >
+  Launch an Alces Flight Galaxy Appliance, comprised
+  of a single Galaxy node - providing both webapp
+  and Galaxy Pulsar (compute) services, together 
+  with a private cluster network. 
+
+parameters:
+  admin_key:
+    type: string
+    label: Administrator user key pair
+    description: Select the OpenStack keypair for use with the instance administrator account
+    constraints:
+    - custom_constraint: nova.keypair
+
+  galaxy_image:
+    type: string
+    label: Galaxy image
+    description: Select the Alces Flight Galaxy Appliance image to use
+    constraints:
+    - custom_constraint: glance.image
+
+  instance_flavour:
+    type: string
+    label: Galaxy instance type
+    description: Select the flavour of instance to deploy
+    constraints:
+    - custom_constraint: nova.flavor
+
+resources:
+  cluster_uuid:
+    type: OS::Heat::RandomString
+    properties:
+      length: 24
+      sequence: digits
+
+  cluster_token:
+    type: OS::Heat::RandomString
+    properties:
+      length: 20
+      sequence: lettersdigits
+
+  cluster_network:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: 'OS::stack_name' }
+
+  cluster_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: cluster_network }
+      cidr: 10.75.0.0/16
+      gateway_ip: 10.75.0.254
+      dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
+      allocation_pools:
+        - start: 10.75.0.2
+          end: 10.75.0.253
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: public
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: cluster_subnet }
+
+  cluster_sg:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: { get_param: 'OS::stack_name' }
+      description: Enable ping/SSH
+      rules:
+      - protocol: icmp
+      - protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+
+  master_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            cat << EOF > /opt/clusterware/etc/config.yml
+            cluster:
+              uuid: '%UUID%'
+              token: '%TOKEN%'
+              name: '%CLUSTER_NAME%'
+              role: 'master'
+              tags:
+                galaxy_roles: ':master:compute:'
+            EOF
+            chown root:root /opt/clusterware/etc/config.yml
+            chmod 0640 /opt/clusterware/etc/config.yml
+          params:
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
+            "%UUID%": { get_resource: cluster_uuid }
+            "%TOKEN%": { get_resource: cluster_token }            
+
+  galaxy:
+    type: OS::Nova::Server
+    properties:
+      name: galaxy 
+      image: { get_param: galaxy_image }
+      flavor: { get_param: instance_flavour }
+      key_name: { get_param: admin_key }
+      networks:
+        - port: { get_resource: galaxy_port }
+      user_data_format: RAW
+      user_data: { get_resource: master_config }
+
+  galaxy_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: cluster_network }
+      fixed_ips:
+        - subnet_id: { get_resource: cluster_subnet }
+
+  galaxy_access:
+    type: OS::Neutron::FloatingIP
+    depends_on: router
+    properties:
+      floating_network: public
+      port_id: { get_resource: galaxy_port }
+
+outputs:
+  galaxy_access_ip:
+    description: Galaxy node access IP
+    value: { get_attr: [ galaxy_access, floating_ip_address ] }
+
+  galaxy_admin_user:
+    description: Galaxy administrator user, used to log in to Galaxy instance
+    value: alces
