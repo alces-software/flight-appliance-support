@@ -1,3 +1,5 @@
+.. _deploy-sge-spot-cluster:
+
 Deploy an Alces Clusterware research environment using AWS CloudFormation
 =========================================================================
 

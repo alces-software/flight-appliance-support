@@ -1,22 +1,14 @@
-.. flight-appliance-support-aws documentation master file, created by
-   sphinx-quickstart on Tue Jan 26 09:41:35 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Flight Appliance Support - AWS
 ==============================
+Guides designed to create a simple research compute environment creation process using many popular public and private cloud platforms together with the Alces Flight Appliances.
+
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
+   overview
    deployment
-   getting_started
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   configuration
+   environment_usage
