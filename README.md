@@ -1,13 +1,14 @@
-How to deploy Alces Clusterware environments using various public and private cloud environments. [Find out more about Alces ClusterWare](https://github.com/alces-software/clusterware)
+How to get started deploying and using Alces Flight Appliances to build research compute environments using various public and private cloud environments.
 
 #Quick-start
-*Deploy a dynamic ClusterWare research compute environment using Amazon AWS*
+*Deploy a dynamic HPC research compute environment using Amazon AWS*
 
 **[Deploy now](https://github.com/alces-software/clusterware-deployment-methods/wiki/AWS:-Deploy-an-SGE-spot-compute-cluster)**
 
 ##Platforms available
-* AWS (CentOS6/7)
-* OpenStack (CentOS6/7)
+* AWS - `el7`
+* OpenStack - `el7`
 
 ##Read the documentation
-[Clusterware Deployment Methods Wiki](https://github.com/alces-software/clusterware-deployment-methods/wiki)
+[Alces Flight Appliance Support Documentation](https://github.com/alces-software/flight-appliance-support/wiki)
+
