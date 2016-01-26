@@ -293,25 +293,26 @@
                                 "\n",
                                 "  permissions: '0640'",
                                 "\n"
-                            ]
-                        ]
-                    }
-                }
-            }
+                              ]
+                          ]
+                      }
+                  }
+              }
+          }
         },
-        "Outputs": {
-            "AccessIP": {
-                "Value": {
-                    "Fn::GetAtt": [
-                        "GalaxyInstance",
-                        "PublicIp"
-                    ]
-                },
-                "Description": "Access the Galaxy instance via the above IP address and username with public key provided"
-            },
-            "ClusterUser": {
-                "Value": "alces",
-                "Description": "Cluster admin username, access with AWS keypair provided"
-            }
-        }
-}
+          "Outputs": {
+              "AccessIP": {
+                  "Value": {
+                      "Fn::GetAtt": [
+                          "GalaxyInstance",
+                          "PublicIp"
+                      ]
+                  },
+                  "Description": "Access the instance via the displayed IP address and username with public key provided"
+              },
+              "ClusterUser": {
+                  "Value": "alces",
+                  "Description": "Cluster administrator username, access with user SSH key provided"
+              }
+          }
+  }
