@@ -32,6 +32,11 @@ parameters:
     constraints:
     - custom_constraint: nova.flavor
 
+  compute_number:
+    type: number
+    label: Number of compute nodes
+    description: Number of compute nodes to deploy
+
 resources:
   cluster_uuid:
     type: OS::Heat::RandomString
@@ -99,7 +104,7 @@ resources:
               name: '%CLUSTER_NAME%'
               role: 'master'
               tags:
-                galaxy_roles: ':master:compute:'
+                galaxy_roles: ':master:'
             EOF
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml
@@ -112,6 +117,25 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: script
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            cat << EOF > /opt/clusterware/etc/config.yml
+            cluster:
+              uuid: '%UUID%'
+              token: '%TOKEN%'
+              name: '%CLUSTER_NAME%'
+              role: 'slave'
+              tags:
+                galaxy_roles: ':compute:'
+            EOF
+            chown root:root /opt/clusterware/etc/config.yml
+            chmod 0640 /opt/clusterware/etc/config.yml
+          params:
+            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
+            "%UUID%": { get_resource: cluster_uuid }
+            "%TOKEN%": { get_resource: cluster_token }
 
   galaxy:
     type: OS::Nova::Server
@@ -138,6 +162,20 @@ resources:
     properties:
       floating_network: public
       port_id: { get_resource: galaxy_port }
+
+  pulsar_group:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: compute_number }
+      resource_def:
+        type: OS::Nova::Server
+        properties:
+          name: node0%index%
+          flavor: { get_param: instance_flavour }
+          image: { get_param: galaxy_image }
+          user_data_format: RAW
+          user_data: { get_resource: pulsar_config }
+          networks: [{ network: { get_resource: cluster_network } }]
 
 outputs:
   galaxy_access_ip:
