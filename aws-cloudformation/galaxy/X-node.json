@@ -1,5 +1,5 @@
 {
-    "Description": "Launch an Alces Galaxy research compute environment, configured with Galaxy webapp and Pulsar compute service in a single node",
+    "Description": "Launch an Alces Galaxy research compute environment, configured with Galaxy webapp dedicated compute hosts",
     "Parameters": {
         "ClusterName": {
             "Description": "Choose a cluster name",
