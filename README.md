@@ -3,12 +3,13 @@ How to get started deploying and using Alces Flight Appliances to build research
 #Quick-start
 *Deploy a dynamic HPC research compute environment using Amazon AWS*
 
-**[Deploy now](https://github.com/alces-software/clusterware-deployment-methods/wiki/AWS:-Deploy-an-SGE-spot-compute-cluster)**
+**[Deploy now](http://alces-flight-appliance-docs-aws.readthedocs.org/en/latest/cfn-deploy-sge-spot-cluster.html)**
 
 ##Platforms available
 * AWS - `el7`
 * OpenStack - `el7`
 
 ##Read the documentation
-[Alces Flight Appliance Support Documentation](https://github.com/alces-software/flight-appliance-support/wiki)
+* [Alces Flight Appliance Support Documentation for AWS](http://alces-flight-appliance-docs-aws.readthedocs.org/en/latest/index.html)
+* [Alces Flight Appliance Support Documentation for OpenStack](http://alces-flight-appliance-docs-openstack.readthedocs.org/en/latest/index.html)
 
