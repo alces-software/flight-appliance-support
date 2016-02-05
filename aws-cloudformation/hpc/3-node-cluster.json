@@ -1,12 +1,6 @@
 {
     "Description": "Launch an Alces ClusterWare environment with a single master node and 3 on-demand compute node instances complete with SGE scheduler.",
     "Parameters": {
-        "ClusterName": {
-            "Description": "Choose a cluster name",
-            "Type": "String",
-            "AllowedPattern": "[a-z0-9]*",
-            "Default": "awscluster"
-        },
         "KeyPair": {
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
@@ -60,7 +54,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "ClusterName" }
+                        "Value": { "Ref": "AWS::StackName" }
                     }
                 ],
                 "CidrBlock": "10.75.0.0/16",
@@ -187,7 +181,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "ClusterName" }
+                        "Value": { "Ref": "AWS::StackName" }
                     }
                 ],
                 "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
@@ -273,7 +267,7 @@
                                 "hostname: login1",
                                 "\n",
                                 "fqdn: login1.",
-                                { "Ref": "ClusterName" },
+                                { "Ref": "AWS::StackName" },
                                 ".alces.network",
                                 "\n",
                                 "write_files:",
@@ -288,7 +282,7 @@
                                 "\n",
                                 "      name: ",
                                 {
-                                    "Ref": "ClusterName"
+                                    "Ref": "AWS::StackName"
                                 },
                                 "\n",
                                 "      role: 'master'",
@@ -377,7 +371,7 @@
                               "\n",
                               "fqdn: node1",
                               ".",
-                              { "Ref": "ClusterName" },
+                              { "Ref": "AWS::StackName" },
                               ".alces.network",
                               "\n",
                               "write_files:",
@@ -391,7 +385,7 @@
                               "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
                               "\n",
                               "      name: ",
-                              { "Ref": "ClusterName" },
+                              { "Ref": "AWS::StackName" },
                               "\n",
                               "      role: 'slave'",
                               "\n",
@@ -468,7 +462,7 @@
                               "\n",
                               "fqdn: node2",
                               ".",
-                              { "Ref": "ClusterName" },
+                              { "Ref": "AWS::StackName" },
                               ".alces.network",
                               "\n",
                               "write_files:",
@@ -482,7 +476,7 @@
                               "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
                               "\n",
                               "      name: ",
-                              { "Ref": "ClusterName" },
+                              { "Ref": "AWS::StackName" },
                               "\n",
                               "      role: 'slave'",
                               "\n",
@@ -559,7 +553,7 @@
                               "\n",
                               "fqdn: node3",
                               ".",
-                              { "Ref": "ClusterName" },
+                              { "Ref": "AWS::StackName" },
                               ".alces.network",
                               "\n",
                               "write_files:",
@@ -573,7 +567,7 @@
                               "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
                               "\n",
                               "      name: ",
-                              { "Ref": "ClusterName" },
+                              { "Ref": "AWS::StackName" },
                               "\n",
                               "      role: 'slave'",
                               "\n",

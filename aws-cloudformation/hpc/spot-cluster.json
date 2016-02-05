@@ -1,12 +1,6 @@
 {
     "Description": "Launch an Alces ClusterWare environment with a single SGE master node together with compute nodes using EC2 spot pricing.",
     "Parameters": {
-        "ClusterName": {
-            "Description": "Choose a cluster name",
-            "Type": "String",
-            "AllowedPattern": "[a-z0-9]*",
-            "Default": "awscluster"
-        },
         "KeyPair": {
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
@@ -71,7 +65,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "ClusterName" } 
+                        "Value": { "Ref": "AWS::StackName" } 
                     }
                 ],
                 "CidrBlock": "10.75.0.0/16",
@@ -198,7 +192,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "ClusterName" } 
+                        "Value": { "Ref": "AWS::StackName" } 
                     }
                 ],
                 "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
@@ -298,7 +292,7 @@
                                 "\n",
                                 "      name: ",
                                 {
-                                    "Ref": "ClusterName"
+                                    "Ref": "AWS::StackName"
                                 },
                                 "\n",
                                 "      role: 'master'",
@@ -381,7 +375,7 @@
                               "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
                               "\n",
                               "      name: ",
-                              { "Ref": "ClusterName" },
+                              { "Ref": "AWS::StackName" },
                               "\n",
                               "      role: 'slave'",
                               "\n",
