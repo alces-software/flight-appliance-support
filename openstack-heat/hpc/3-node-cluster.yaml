@@ -39,7 +39,7 @@ parameters:
     label: Gridware depot to install
     description: Selection of applications to install
     constraints:
-    - allowed_values: [ "none", "bio", "benchmark", "chem" ]
+    - allowed_values: [ "none", "bio", "benchmark", "chem", "demo" ]
 
 resources:
   cluster_uuid:

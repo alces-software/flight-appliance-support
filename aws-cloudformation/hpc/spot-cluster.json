@@ -32,7 +32,8 @@
             "AllowedValues": [
                 "benchmark",
                 "chem",
-                "bio"
+                "bio",
+		"demo"
             ]
         },
         "NetworkCIDR": {
