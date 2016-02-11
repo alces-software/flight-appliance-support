@@ -28,7 +28,7 @@
         "ClusterwareDepots": {
             "Description": "Select the Clusterware Depot to install",
             "Type": "String",
-            "Default": "benchmark",
+            "Default": "demo",
             "AllowedValues": [
                 "benchmark",
                 "chem",
