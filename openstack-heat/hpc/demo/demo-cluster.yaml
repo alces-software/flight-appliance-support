@@ -43,8 +43,8 @@ parameters:
     type: string
     label: Gridware depot to install
     description: Selection of applications to install
+    default: "demo"
     constraints:
-    default: demo
     - allowed_values: [ "none", "bio", "benchmark", "chem", "demo" ]
 
 resources:
