@@ -39,14 +39,6 @@ parameters:
     label: Number of compute nodes
     description: Number of compute nodes to deploy
 
-  gridware_depot:
-    type: string
-    label: Gridware depot to install
-    description: Selection of applications to install
-    default: "demo"
-    constraints:
-    - allowed_values: [ "none", "bio", "benchmark", "chem", "demo" ]
-
 resources:
   cluster_uuid:
     type: OS::Heat::RandomString
@@ -116,11 +108,6 @@ resources:
               role: 'master'
               tags:
                 scheduler_roles: ':master:'
-              quorum: 3
-              gridware:
-                depots:
-                - name: %DEPOT%
-                  url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/depots/%DEPOT%
             EOF
             chown root:root /opt/clusterware/etc/config.yml
             chmod 0640 /opt/clusterware/etc/config.yml

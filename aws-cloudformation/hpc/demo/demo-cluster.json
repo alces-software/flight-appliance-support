@@ -25,17 +25,6 @@
 	    "Type": "String",
 	    "Default": "0.50"
 	},
-        "ClusterwareDepots": {
-            "Description": "Select the Clusterware Depot to install",
-            "Type": "String",
-            "Default": "demo",
-            "AllowedValues": [
-                "benchmark",
-                "chem",
-                "bio",
-		"demo"
-            ]
-        },
         "NetworkCIDR": {
             "Description": "Enter an address range that is permitted to access the Clusterware master node. Leave blank if unknown",
             "Type": "String",
@@ -313,20 +302,6 @@
                                 "        scheduler_roles: ':master:'",
                                 "\n",
                                 "      quorum: 3",
-                                "\n",
-                                "      gridware:",
-                                "\n",
-                                "        depots:",
-                                "\n",
-                                "        - name: ",
-                                {
-                                    "Ref": "ClusterwareDepots"
-                                },
-                                "\n",
-                                "          url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/depots/",
-                                {
-                                    "Ref": "ClusterwareDepots"
-                                },
                                 "\n",
                                 "  owner: root:root",
                                 "\n",
