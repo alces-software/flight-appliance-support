@@ -94,59 +94,55 @@ resources:
         port_range_max: 22
 
   master_config:
-    type: OS::Heat::SoftwareConfig
+    type: OS::Heat::CloudConfig
     properties:
-      group: script
-      config:
-        str_replace:
-          template: |
-            #!/bin/bash
-            cat << EOF > /opt/clusterware/etc/config.yml
-            cluster:
-              uuid: '%UUID%'
-              token: '%TOKEN%'
-              name: '%CLUSTER_NAME%'
-              role: 'master'
-              tags:
-                scheduler_roles: ':master:'
-              quorum: 3
-              gridware:
-                depots:
-                - name: %DEPOT%
-                  url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/depots/%DEPOT%
-            EOF
-            chown root:root /opt/clusterware/etc/config.yml
-            chmod 0640 /opt/clusterware/etc/config.yml
-          params:
-            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
-            "%UUID%": { get_resource: cluster_uuid }
-            "%TOKEN%": { get_resource: cluster_token }
-            "%DEPOT%": { get_param: gridware_depot }
+      cloud_config:
+            write_files:
+            - path: /opt/clusterware/etc/config.yml
+              permissions: '0640'
+              owner: root:root
+              content:
+                str_replace:
+                  template: |
+                    cluster:
+                      uuid: '%UUID%'
+                      token: '%TOKEN%'
+                      name: '%CLUSTER_NAME%'
+                      role: 'master'
+                      tags:
+                        scheduler_roles: ':master:'
+                      gridware:
+                        depots:
+                          - name: %DEPOT%
+                            url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/depots/%DEPOT%
+                  params:
+                    "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
+                    "%UUID%": { get_resource: cluster_uuid }
+                    "%TOKEN%": { get_resource: cluster_token }
+                    "%DEPOT%": { get_param: gridware_depot }
 
   node_config:
-    type: OS::Heat::SoftwareConfig
+    type: OS::Heat::CloudConfig
     properties:
-      group: script
-      config:
-        str_replace:
-          template: |
-            #!/bin/bash
-            cat << EOF > /opt/clusterware/etc/config.yml
-            cluster:
-              uuid: '%UUID%'
-              token: '%TOKEN%'
-              name: '%CLUSTER_NAME%'
-              role: 'slave'
-              tags:
-                scheduler_roles: ':compute:'
-              quorum: 3
-            EOF
-            chown root:root /opt/clusterware/etc/config.yml
-            chmod 0640 /opt/clusterware/etc/config.yml
-          params:
-            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
-            "%UUID%": { get_resource: cluster_uuid }
-            "%TOKEN%": { get_resource: cluster_token }
+      cloud_config:
+            write_files:
+            - path: /opt/clusterware/etc/config.yml
+              permissions: '0640'
+              owner: root:root
+              content:
+                str_replace:
+                  template: |
+                    cluster:
+                      uuid: '%UUID%'
+                      token: '%TOKEN%'
+                      name: '%CLUSTER_NAME%'
+                      role: 'slave'
+                      tags:
+                        scheduler_roles: ':compute:'
+                  params:
+                    "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
+                    "%UUID%": { get_resource: cluster_uuid }
+                    "%TOKEN%": { get_resource: cluster_token }
 
   login1:
     type: OS::Nova::Server

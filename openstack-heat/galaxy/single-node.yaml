@@ -85,28 +85,27 @@ resources:
         port_range_max: 22
 
   master_config:
-    type: OS::Heat::SoftwareConfig
+    type: OS::Heat::CloudConfig
     properties:
-      group: script
-      config:
-        str_replace:
-          template: |
-            #!/bin/bash
-            cat << EOF > /opt/clusterware/etc/config.yml
-            cluster:
-              uuid: '%UUID%'
-              token: '%TOKEN%'
-              name: '%CLUSTER_NAME%'
-              role: 'master'
-              tags:
-                galaxy_roles: ':master:compute:'
-            EOF
-            chown root:root /opt/clusterware/etc/config.yml
-            chmod 0640 /opt/clusterware/etc/config.yml
-          params:
-            "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
-            "%UUID%": { get_resource: cluster_uuid }
-            "%TOKEN%": { get_resource: cluster_token }            
+      cloud_config:
+            write_files:
+            - path: /opt/clusterware/etc/config.yml
+              permissions: '0640'
+              owner: root:root
+              content:
+                str_replace:
+                  template: |
+                    cluster:
+                      uuid: '%UUID%'
+                      token: '%TOKEN%'
+                      name: '%CLUSTER_NAME%'
+                      role: 'master'
+                      tags:
+                        galaxy_roles: ':master:compute:'
+                  params:
+                    "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
+                    "%UUID%": { get_resource: cluster_uuid }
+                    "%TOKEN%": { get_resource: cluster_token }
 
   galaxy:
     type: OS::Nova::Server
