@@ -11,6 +11,11 @@
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
+        "StorageSize": {
+            "Description": "Enter the size in GB of shared storage to deploy",
+            "Type": "String",
+            "Default": "500"
+        },
         "ComputeNumber": {
             "Description": "Enter the number of compute nodes you wish to deploy",
             "Type": "String",
@@ -233,6 +238,23 @@
                 ]
             }
         },
+        "SharedScratch": {
+            "Type": "AWS::EC2::Volume",
+            "Properties": {
+                    "VolumeType": "io1",
+                    "Size": { "Ref": "StorageSize" },
+                    "Iops": "200",
+                    "AvailabilityZone": { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "AvailabilityZone" ] }
+            }
+        },
+        "AttachScratch": {
+            "Type": "AWS::EC2::VolumeAttachment",
+                "Properties": { 
+                     "Device": "xvdb",
+                     "InstanceId": { "Ref": "AlcesClusterwareMasterNode" },
+                     "VolumeId": { "Ref": "SharedScratch" }
+                }
+        },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
             "DependsOn": "ClusterwareAttachGW",
@@ -287,6 +309,31 @@
                                 "hostname: login1",
                                 "\n",
                                 "write_files:",
+                                "\n",
+                                "- content: |",
+                                "    #!/bin/bash",
+                                "\n",
+                                "    mkfs.ext4 /dev/xvdb",
+                                "\n",
+                                "    mkdir /sharedscratch",
+                                "\n",
+                                "    chmod -R 777 /sharedscratch",
+                                "\n",
+                                "    echo \"/dev/xvdb /sharedscratch ext4 defaults 0 0\" >> etc/fstab ",
+                                "\n",
+                                "    mount -a",
+                                "\n",
+                                "    echo \"/sharedscratch 10.75.0.0/255.255.0.0(rw,no_root_squash,no_subtree_check,async)\" >> /etc/exports",
+                                "\n",
+                                "    systemctl enable nfs-server && systemctl start nfs-server",
+                                "\n",
+                                "  path: /tmp/disk-format",
+                                "\n",
+                                "  permissions: '0700'",
+                                "\n",
+                                "runcmd:",
+                                "\n",
+                                "  - /tmp/disk-format",
                                 "\n",
                                 "- content: |",
                                 "\n",
@@ -371,7 +418,28 @@
                             [
                               "#cloud-config",
                               "\n",
-                              "write_files:","\n",
+                              "write_files:",
+                              "\n",
+                              "- content: |",
+                              "\n",
+                              "    #!/bin/bash",
+                              "\n",
+                              "    mkdir /sharedscratch",
+                              "\n",
+                              "    echo '",  
+                              { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "PrivateIp" ] },
+                              ":/sharedscratch /sharedscratch ext4 defaults 0 0' >> etc/fstab ",
+                              "\n",
+                              "    mount -a",
+                              "\n",
+                              "  path: /tmp/disk-format",
+                              "\n",
+                              "  permissions: '0700'",
+                              "\n",
+                              "runcmd:",
+                              "\n",
+                              "  - /tmp/disk-format",
+                              "\n",
                               "- content: |",
                               "\n",
                               "    cluster:",
