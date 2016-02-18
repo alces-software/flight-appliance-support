@@ -170,10 +170,31 @@ resources:
       - config: { get_resource: master_config1 }
       - config: { get_resource: master_config2 }
 
-  node_config:
+  node_config1:
     type: OS::Heat::CloudConfig
     properties:
       cloud_config:
+          write_files:
+          - path: /tmp/disk-format
+            permissions: '0700'
+            owner: root:root
+            content:
+              str_replace:
+                template: |
+                  #!bin/bash
+                  mkdir /sharedscratch
+                  echo "%MASTERIP%:/sharedscratch /sharedscratch nfs defaults 0 0" >> /etc/fstab
+                  mount -a
+                params:
+                  "%MASTERIP%": { get_attr: [login1_port, fixed_ips, 0, ip_address] }
+
+  node_config2:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+            merge_how: 'dict(recurse_array,no_replace)+list(append)'
+            runcmd:
+              - /tmp/disk-format
             write_files:
             - path: /opt/clusterware/etc/config.yml
               permissions: '0640'
@@ -192,6 +213,13 @@ resources:
                     "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
                     "%UUID%": { get_resource: cluster_uuid }
                     "%TOKEN%": { get_resource: cluster_token }
+
+  node_config:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+      - config: { get_resource: node_config1 }
+      - config: { get_resource: node_config2 }
            
   login1:
     type: OS::Nova::Server
