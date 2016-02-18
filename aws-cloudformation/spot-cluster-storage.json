@@ -1,12 +1,6 @@
 {
     "Description": "Launch an Alces ClusterWare environment with a single SGE master node together with compute nodes using EC2 spot pricing. Cluster includes user-defined shared storage area using Provisioned IOPs EBS volume",
     "Parameters": {
-        "ClusterName": {
-            "Description": "Choose a cluster name",
-            "Type": "String",
-            "AllowedPattern": "[a-z0-9]*",
-            "Default": "awscluster"
-        },
         "KeyPair": {
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
@@ -76,7 +70,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "ClusterName" } 
+                        "Value": { "Ref": "AWS::StackName" } 
                     }
                 ],
                 "CidrBlock": "10.75.0.0/16",
@@ -203,7 +197,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "ClusterName" } 
+                        "Value": { "Ref": "AWS::StackName" } 
                     }
                 ],
                 "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
@@ -243,7 +237,7 @@
             "Properties": {
                     "VolumeType": "io1",
                     "Size": { "Ref": "StorageSize" },
-                    "Iops": "200",
+                    "Iops": "2000",
                     "AvailabilityZone": { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "AvailabilityZone" ] }
             }
         },
@@ -314,13 +308,13 @@
                                 "\n",
                                 "    #!/bin/bash",
                                 "\n",
-                                "    mkfs.ext4 /dev/xvdb",
+                                "    mkfs -t xfs /dev/xvdb",
                                 "\n",
                                 "    mkdir /sharedscratch",
                                 "\n",
-                                "    chmod -R 777 /sharedscratch",
+                                "    chmod 777 /sharedscratch",
                                 "\n",
-                                "    echo 'dev/xvdb /sharedscratch ext4 defaults 0 0' >> etc/fstab",
+                                "    echo 'dev/xvdb /sharedscratch xfs defaults 0 0' >> etc/fstab",
                                 "\n",
                                 "    mount -a",
                                 "\n",
@@ -332,10 +326,6 @@
                                 "\n",
                                 "  permissions: '0700'",
                                 "\n",
-                                "runcmd:",
-                                "\n",
-                                "  - /tmp/disk-format",
-                                "\n",
                                 "- content: |",
                                 "\n",
                                 "    cluster:",
@@ -346,7 +336,7 @@
                                 "\n",
                                 "      name: ",
                                 {
-                                    "Ref": "ClusterName"
+                                    "Ref": "AWS::StackName"
                                 },
                                 "\n",
                                 "      role: 'master'",
@@ -376,7 +366,10 @@
                                 "  path: /opt/clusterware/etc/config.yml",
                                 "\n",
                                 "  permissions: '0640'",
-                                "\n"
+                                "\n",
+                                "runcmd:",
+                                "\n",
+                                "  - /tmp/disk-format"
                             ]
                         ]
                     }
@@ -450,7 +443,7 @@
                               "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
                               "\n",
                               "      name: ",
-                              { "Ref": "ClusterName" },
+                              { "Ref": "AWS::StackName" },
                               "\n",
                               "      role: 'slave'",
                               "\n",
