@@ -127,10 +127,10 @@ resources:
               #!bin/bash
               mkfs.xfs /dev/vdb
               mkdir /sharedscratch
-              chmod 777 /sharedscratch
               echo "/dev/vdb /sharedscratch xfs defaults 0 0" >> /etc/fstab
               mount -a
               echo "/sharedscratch 10.75.0.0/255.255.0.0(rw,no_root_squash,no_subtree_check,async)" >> /etc/exports
+              chmod 0777 /sharedscratch
           runcmd:
             - /tmp/disk-format
 
