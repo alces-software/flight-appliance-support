@@ -112,7 +112,7 @@ resources:
                     "%UUID%": { get_resource: cluster_uuid }
                     "%TOKEN%": { get_resource: cluster_token }
 
-  node_config:
+  pulsar_config:
     type: OS::Heat::CloudConfig
     properties:
       cloud_config:
