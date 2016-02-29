@@ -1,0 +1,15 @@
+#Copyright (c) 2016 Alces Software Ltd
+#Override AWS configs
+AWS_ACCESS_KEY_ID=""
+AWS_SECRET_ACCESS_KEY=""
+AWS_DEFAULT_REGION="eu-west-1"
+
+#Alces Flight/AWS - compute settings
+CLUSTER_NAME="alces-cluster"
+AWS_KEYPAIR=""
+VPCID="vpc-aba7a1ce"
+GATEWAYID="igw-1b11637e"
+ROUTETABLEID="rtb-b6cd27d2"
+SUBNETID="subnet-ccfbebbb"
+NETWORKACL="acl-879c7fe3"
+SECURITYGROUP="sg-baba88de"
