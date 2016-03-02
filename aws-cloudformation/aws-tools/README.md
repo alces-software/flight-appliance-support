@@ -11,7 +11,7 @@ To deploy cluster components, such as scheduler master nodes, scheduler compute 
 The `settings` file is used to add important environment information for later use. Before deploying - add the name of your AWS keypair as listed in your AWS account to the `settings` file, for example: 
 
 ```bash
-AWS_KEYPAIR="mykeypair"
+KEYPAIR="mykeypair"
 ``` 
 
 Each component is deployed using AWS CloudFormation - this ensures simple deletion of all resources when you are finished.
@@ -37,7 +37,7 @@ aws cloudformation describe-stack \
 Once the network stack has successfully created - add the network resource IDs to the `settings` file: 
 ```bash
 for resource in VPCID GATEWAYID ROUTETABLEID SUBNETID NETWORKACL SECURITYGROUP; do
-  id=$(aws cloudformation describe-stacks --stack-name ${CLUSTER_NAME}-network | grep $resource | awk '{print $4}');
+  id=$(aws cloudformation describe-stacks --stack-name ${CLUSTERNAME}-network | grep $resource | awk '{print $4}');
   echo "${resource}=\"${id}\"" >> settings;
 done
 ```
@@ -53,7 +53,6 @@ Source the cluster settings file - this will load all of the required network ID
 Create the login node stack. First set the instance type you wish to deploy, e.g. `c4.large` provides 2 cores/4GB memory. Also include the name of your AWS keypair - this is used to access the cluster login node:
 ```bash
 LOGINTYPE="c4.large"
-KEYPAIR="aws_ireland"
 aws cloudformation create-stack \
 	--stack-name ${CLUSTERNAME}-login \
 	--template-body file://templates/login.json \
@@ -83,8 +82,8 @@ The login nodes internal IP address also needs to be gathered in order to correc
 
 ```bash
 LOGINIP=$(aws cloudformation describe-stacks \
-	--stack-name {$CLUSTERNAME}-login | \
-	grep -E 'OutputValue.*10.75' | \
+	--stack-name ${CLUSTERNAME}-login | \
+	grep InternalIP | \
         awk '{print $4}')
 echo "LOGINIP=\"${LOGINIP}\"" >> settings
 ```
@@ -99,11 +98,10 @@ To launch a single compute node, run the following commands. Make sure you have 
 . settings
 ```
 
-Create a single compute node, naming the node with your preference e.g. `node01`. A compute node instance type should also be chosen, such as `c4.large`.
+Create a single compute node using the following command - a compute node instance type should also be chosen, such as `c4.large`.
 
 ```bash
 COMPUTETYPE="c4.large"
-NODENAME="node01"
 aws cloudformation create-stack \
 	--stack-name ${CLUSTERNAME}-${NODENAME} \
 	--template-body file://templates/1-node.json \
@@ -116,7 +114,6 @@ aws cloudformation create-stack \
                      ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
-                     ParameterKey=NODENAME,ParameterValue="$NODENAME" \
                      ParameterKey=LOGINIP,ParameterValue="$LOGINIP" 
 ```
 
@@ -133,7 +130,7 @@ Create multiple compute nodes, up to the limit of your AWS account (typically 10
 
 ```bash
 COMPUTETYPE="c4.large"
-NODENUMER="5"
+NODENUMBER="5"
 aws cloudformation create-stack \
         --stack-name ${CLUSTERNAME}-compute-$$ \
         --template-body file://templates/multiple-nodes.json \

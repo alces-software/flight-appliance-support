@@ -55,7 +55,7 @@
 					"Key": "Name",
 					"Value": { "Ref": "AWS::StackName" } 
 				}],
-				"ImageId": "ami-f6b61e85",
+				"ImageId": "ami-556cd226",
 				"NetworkInterfaces": [{
 					"AssociatePublicIpAddress": "True",
 					"DeviceIndex": "0",
@@ -77,10 +77,6 @@
 						"Fn::Join": [
 							"", [
 								"#cloud-config",
-								"\n",
-								"hostname: ", {
-                                                                    "Ref": "NODENAME"
-                                                                },
 								"\n",
 								"write_files:",
 								"\n",

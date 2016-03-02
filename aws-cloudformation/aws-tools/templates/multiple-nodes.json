@@ -53,7 +53,7 @@
             "Properties": {
                 "AssociatePublicIpAddress": "True",
                 "KeyName": { "Ref": "KEYPAIR" },
-                "ImageId": "ami-f6b61e85",
+                "ImageId": "ami-556cd226",
                 "InstanceType": {
                     "Ref": "COMPUTETYPE"
                 },
