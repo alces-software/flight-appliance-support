@@ -1,0 +1,123 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Launch an Alces network for use with Alces compute environments",
+	"Parameters": {
+		"VPCID": {
+			"Description": "VPC ID",
+			"Type": "String"
+		},
+		"GATEWAYID": {
+			"Description": "Gateway ID",
+			"Type": "String"
+		},
+		"ROUTETABLEID": {
+			"Description": "Route Table ID",
+			"Type": "String"
+		},
+		"SUBNETID": {
+			"Description": "Subnet ID",
+			"Type": "String"
+		},
+		"NETWORKACL": {
+			"Description": "Network ACL",
+			"Type": "String"
+		},
+		"SECURITYGROUP": {
+			"Description": "Security Group ID",
+			"Type": "String"
+		},
+		"CLUSTERNAME": {
+			"Description": "Cluster name",
+			"Type": "String"
+		},
+		"KEYPAIR": {
+			"Description": "Cluster name",
+			"Type": "String"
+		},
+		"LOGINIP": {
+			"Description": "Login node internal IP",
+			"Type": "String"
+		},
+		"NODENUMBER": {
+			"Description": "Number of nodes to deploy",
+			"Type": "String"
+		},
+		"COMPUTETYPE": {
+			"Description": "Compute node instance type",
+			"Type": "String"
+		}
+	},
+	"Resources": {
+        "ComputeConfig": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Properties": {
+                "AssociatePublicIpAddress": "True",
+                "KeyName": { "Ref": "KEYPAIR" },
+                "ImageId": "ami-f6b61e85",
+                "InstanceType": {
+                    "Ref": "COMPUTETYPE"
+                },
+		"SpotPrice": "0.50",
+                "SecurityGroups": [ { "Ref": "SECURITYGROUP" } ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                              "#cloud-config",
+                              "\n",
+                              "write_files:","\n",
+                              "- content: |",
+                              "\n",
+                              "    cluster:",
+                              "\n",
+                              "      uuid: '11111111-2222-3333-444444444444'",
+                              "\n",
+                              "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
+                              "\n",
+                              "      name: ",
+                              { "Ref": "AWS::StackName" },
+                              "\n",
+                              "      role: 'slave'",
+                              "\n",
+                              "      master: ",
+                              { "Ref": "LOGINIP" },
+                              "\n",
+                              "      tags:",
+                              "\n",
+                              "        scheduler_roles: ':compute:'",
+                              "\n",
+                              "      quorum: 3",
+                              "\n",
+                              "  owner: root:root",
+                              "\n",
+                              "  path: /opt/clusterware/etc/config.yml",
+                              "\n",
+                              "  permissions: '0640'",
+                              "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "ComputeGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "DesiredCapacity": {
+                    "Ref": "NODENUMBER"
+                },
+                "LaunchConfigurationName": {
+                    "Ref": "ComputeConfig"
+                },
+                "MinSize": "1",
+                "MaxSize": "100",
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "SUBNETID"
+                    }
+                ]
+            }
+        }
+	}
+}

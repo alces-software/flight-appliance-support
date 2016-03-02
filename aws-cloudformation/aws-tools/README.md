@@ -72,7 +72,7 @@ LOGINPUBIP=$(aws cloudformation describe-stacks \
 	grep OutputValue | \
 	awk '{print $4}')
 echo "LOGINPUBIP=\"${LOGINPUBIP}\"" >> settings
-ssh -i ~/.ssh/aws_ireland.pem alces@52.49.50.51
+ssh -i ~/.ssh/aws_ireland.pem alces@$LOGINPUBIP
 ```
 
 The login nodes internal IP address also needs to be gathered in order to correctly create and configure cluster compute nodes - gather the internal IP and add it to the `settings` file: 
@@ -84,3 +84,68 @@ LOGINIP=$(aws cloudformation describe-stacks \
         awk '{print $4}')
 echo "LOGINIP=\"${LOGINIP}\"" >> settings
 ```
+
+##Launching compute nodes
+To deploy cluster compute nodes, used for scheduling your jobs and running applications on - the following commands should be used.
+
+###Single compute node
+To launch a single compute node, run the following commands. Make sure you have sourced your `settings` file before running the following commands.
+
+```bash
+. settings
+```
+
+Create a single compute node, naming the node with your preference e.g. `node01`. A compute node instance type should also be chosen, such as `c4.large`.
+
+```bash
+COMPUTETYPE="c4.large"
+NODENAME="node01"
+aws cloudformation create-stack \
+	--stack-name ${CLUSTERNAME}-${NODENAME} \
+	--template-body file://templates/1-node.json \
+	--parameters ParameterKey=COMPUTETYPE,ParameterValue="$COMPUTETYPE" \
+                     ParameterKey=VPCID,ParameterValue="$VPCID" \
+                     ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
+                     ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
+                     ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
+                     ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
+                     ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
+                     ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
+                     ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
+                     ParameterKey=NODENAME,ParameterValue="$NODENAME" \
+                     ParameterKey=LOGINIP,ParameterValue="$LOGINIP" 
+```
+
+Once stack creation is successful - your new node `node01` will join the environment, registering itself as ready for compute jobs. 
+
+##Multiple compute nodes
+To deploy multiple compute nodes to your environment, run the following commands. Make sure you source your `settings` file before running the following commands. 
+
+```bash
+. settings
+```
+
+Create multiple compute nodes, up to the limit of your AWS account (typically 10). A compute node instance type should also be chosen, such as `c4.large`. 
+
+```bash
+COMPUTETYPE="c4.large"
+NODENUMER="5"
+aws cloudformation create-stack \
+        --stack-name ${CLUSTERNAME}-compute-$$ \
+        --template-body file://templates/multiple-nodes.json \
+        --parameters ParameterKey=COMPUTETYPE,ParameterValue="$COMPUTETYPE" \
+                     ParameterKey=VPCID,ParameterValue="$VPCID" \
+                     ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
+                     ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
+                     ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
+                     ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
+                     ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
+                     ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
+                     ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
+                     ParameterKey=NODENUMBER,ParameterValue="$NODENUMBER" \
+                     ParameterKey=LOGINIP,ParameterValue="$LOGINIP"
+```
+
+#Environment deletion
+Once you have finished with your environment - the components can easily be deleted. Either from AWS EC2 console or using CLI tools, first delete each of the login node and compute node CloudFormation stacks, then the network stack last. All resources will be deleted leaving your AWS account in the state it was, with no hidden resources. 
+

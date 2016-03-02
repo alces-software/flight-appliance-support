@@ -45,7 +45,7 @@
 			"Properties": {
 				"Tags": [{
 					"Key": "Name",
-					"Value": "Cluster login node"
+					"Value": { "Ref": "AWS::StackName" }
 				}],
 				"ImageId": "ami-f6b61e85",
 				"NetworkInterfaces": [{
