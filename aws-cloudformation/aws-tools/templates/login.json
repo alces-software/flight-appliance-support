@@ -113,6 +113,14 @@
 					"PublicIp"
 				]
 			}
+		},
+		"InternalIP": {
+			"Value": {
+				"Fn::GetAtt": [
+					"Login",
+					"PrivateIp"
+				]
+			}
 		}
 	}
 }
