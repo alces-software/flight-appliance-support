@@ -8,7 +8,11 @@ Once the AWS CLI tools have been installed - clone the `flight-appliance-support
 #Environment deployment
 To deploy cluster components, such as scheduler master nodes, scheduler compute hosts and more - a private cluster network must be deployed. The included template creates a complete private network to host your compute environment(s) in. 
 
-The `settings` file is used to add important environment information for later use.  
+The `settings` file is used to add important environment information for later use. Before deploying - add the name of your AWS keypair as listed in your AWS account to the `settings` file, for example: 
+
+```bash
+AWS_KEYPAIR="mykeypair"
+``` 
 
 Each component is deployed using AWS CloudFormation - this ensures simple deletion of all resources when you are finished.
 
