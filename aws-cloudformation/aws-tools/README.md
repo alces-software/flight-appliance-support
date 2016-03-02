@@ -67,10 +67,20 @@ aws cloudformation create-stack \
 Once the login node stack has successfully created - you can obtain its public IP address - you can log in to the cluster login node using the previously provided AWS keypair together with the public IP as the `alces` user: 
 
 ```bash
-LOGINIP=$(aws cloudformation describe-stacks \
+LOGINPUBIP=$(aws cloudformation describe-stacks \
 	--stack-name ${CLUSTERNAME}-login | \
-	grep AccessIP | \
+	grep OutputValue | \
 	awk '{print $4}')
-echo "LOGINIP=\"${LOGINIP}\"" >> settings
+echo "LOGINPUBIP=\"${LOGINPUBIP}\"" >> settings
 ssh -i ~/.ssh/aws_ireland.pem alces@52.49.50.51
+```
+
+The login nodes internal IP address also needs to be gathered in order to correctly create and configure cluster compute nodes - gather the internal IP and add it to the `settings` file: 
+
+```bash
+LOGINIP=$(aws cloudformation describe-stacks \
+	--stack-name {$CLUSTERNAME}-login | \
+	grep -E 'OutputValue.*10.75' | \
+        awk '{print $4}')
+echo "LOGINIP=\"${LOGINIP}\"" >> settings
 ```
