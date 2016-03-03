@@ -34,6 +34,10 @@
 			"Description": "Cluster name",
 			"Type": "String"
 		},
+		"NODENAME": {
+			"Description": "Login node hostname",
+			"Type": "String"
+		},
 		"LOGINTYPE": {
 			"Description": "Login node instance type",
 			"Type": "String"
