@@ -34,10 +34,6 @@
 			"Description": "Cluster name",
 			"Type": "String"
 		},
-		"GALAXYNAME": {
-			"Description": "Galaxy node hostname",
-			"Type": "String"
-		},
 		"GALAXYAMI": {
 			"Description": "Galaxy node AMI ID",
 			"Type": "String"
