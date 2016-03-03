@@ -10,6 +10,12 @@ To deploy cluster components, such as scheduler master nodes, scheduler compute 
 
 The `settings` file is used to add important environment information for later use. Before deploying - add the name of your AWS keypair as listed in your AWS account to the `settings` file, for example: 
 
+To begin - copy the `settings.example` file to `settings` to work with the remainder of the walkthrough: 
+
+```bash
+cp settings.example settings
+```
+
 ```bash
 KEYPAIR="mykeypair"
 ``` 
