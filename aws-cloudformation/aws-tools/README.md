@@ -329,3 +329,26 @@ aws cloudformation create-stack \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
                      ParameterKey=GALAXYAMI,ParameterValue="$GALAXYAMI" 
 ```
+
+###Adding additional nodes
+For when a single node is not enough - additional compute nodes can be dynamically added to your Galaxy compute environment
+
+####Adding single nodes
+To add a single node at a time, follow the below steps: 
+
+```bash
+COMPUTETYPE="c4.large"
+aws cloudformation create-stack \
+	--stack-name ${CLUSTERNAME}-galaxy-node \
+	--template-body file://templates/galaxy-node.json \
+	--parameters ParameterKey=COMPUTETYPE,ParameterValue="$COMPUTETYPE" \
+                     ParameterKey=VPCID,ParameterValue="$VPCID" \
+                     ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
+                     ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
+                     ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
+                     ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
+                     ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
+                     ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
+                     ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
+                     ParameterKey=GALAXYAMI,ParameterValue="$GALAXYAMI" 
+```
