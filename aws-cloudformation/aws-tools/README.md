@@ -88,7 +88,6 @@ aws cloudformation create-stack \
                      ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
                      ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
-                     ParameterKey=NODENAME,ParameterValue="login1" \
                      ParameterKey=LOGINAMI,ParameterValue="$LOGINAMI" \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR"
 ```
