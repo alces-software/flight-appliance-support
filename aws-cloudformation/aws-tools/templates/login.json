@@ -72,6 +72,14 @@
 								"\n",
 								"hostname: login1",
                                                                 "\n",
+                                                                "fqdn: ", {
+                                                                "Ref": "NODENAME"
+                                                                },
+                                                                ".", {
+                                                                "Ref": "CLUSTERNAME"
+                                                                },
+                                                                ".alces.network",
+                                                                "\n",
 								"write_files:",
 								"\n",
 								"- content: |",
