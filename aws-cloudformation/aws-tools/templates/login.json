@@ -80,10 +80,8 @@
 								"\n",
 								"hostname: login1",
                                                                 "\n",
-                                                                "fqdn: ", {
-                                                                "Ref": "NODENAME"
-                                                                },
-                                                                ".", {
+                                                                "fqdn: login1.",
+                                                                {
                                                                 "Ref": "CLUSTERNAME"
                                                                 },
                                                                 ".alces.network",
