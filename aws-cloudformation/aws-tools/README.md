@@ -178,3 +178,26 @@ aws cloudformation create-stack \
 #Environment deletion
 Once you have finished with your environment - the components can easily be deleted. Either from AWS EC2 console or using CLI tools, first delete each of the login node and compute node CloudFormation stacks, then the network stack last. All resources will be deleted leaving your AWS account in the state it was, with no hidden resources. 
 
+###Automatically scaling compute nodes
+You can easily add automatic scaling functionality to your autoscaling compute group. The CloudWatch alarms will monitor each deployed autoscaling group you choose - increasing and decreasing the number of nodes available as your workload increases and decreases. 
+
+For this example - assume that our autoscaling group stack we previously created is named `alces-cluster-compute-2287`. 
+
+First - get the ID of the autoscaling group, this can be done with the following command: 
+
+```bash
+ASGID=(aws cloudformation describe-stacks \
+	--stack-name alces-cluster-compute-2287 | \
+	grep OutputValue | \
+        awk '{print $4}')
+```
+
+Use the obtained autoscaling group ID to attach the CloudWatch monitoring alarms and policies to: 
+
+```bash
+ASG=MyASGID
+aws cloudformation create-stack \
+	--stack-name ${ASG}-monitor \
+        --template-body file://templates/monitor.json \
+	--parameters ParameterKey=ASG,ParameterValue="$ASG"
+```
