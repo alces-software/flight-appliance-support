@@ -288,7 +288,7 @@ aws cloudformation create-stack \
                      ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
-                     ParameterKey=APPMGRAMI,ParameterValue="$APPMGRAMI" \
+                     ParameterKey=APPMGRAMI,ParameterValue="$APPMGRAMI" 
 ```
 
 Once the Application Manager stack has successfully deployed - obtain both its internal IP (for future use) and external IP for access and customisation: 
@@ -308,4 +308,24 @@ aws cloudformation describe-stacks \
 	--stack-name ${CLUSTERNAME}-app-manager | \
         grep AccessIP | \
         awk '{print $4}'
+```
+
+##Galaxy environment deployment
+To deploy a single-node Galaxy compute environment - hosted on a single instance, use the following commands: 
+
+```bash
+GALAXYTYPE="c4.large"
+aws cloudformation create-stack \
+	--stack-name ${CLUSTERNAME}-galaxy \
+	--template-body file://templates/galaxy.json \
+	--parameters ParameterKey=GALAXYTYPE,ParameterValue="$GALAXYTYPE" \
+                     ParameterKey=VPCID,ParameterValue="$VPCID" \
+                     ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
+                     ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
+                     ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
+                     ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
+                     ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
+                     ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
+                     ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
+                     ParameterKey=GALAXYAMI,ParameterValue="$GALAXYAMI" 
 ```
