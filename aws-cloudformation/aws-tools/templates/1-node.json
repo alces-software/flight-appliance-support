@@ -42,6 +42,10 @@
 			"Description": "Login node internal IP",
 			"Type": "String"
 		},
+		"COMPUTEAMI": {
+			"Description": "Compute node AMI ID",
+			"Type": "String"
+		},
 		"COMPUTETYPE": {
 			"Description": "Compute node instance type",
 			"Type": "String"
@@ -55,7 +59,7 @@
 					"Key": "Name",
 					"Value": { "Ref": "AWS::StackName" } 
 				}],
-				"ImageId": "ami-556cd226",
+				"ImageId": { "Ref": "COMPUTEAMI" },
 				"NetworkInterfaces": [{
 					"AssociatePublicIpAddress": "True",
 					"DeviceIndex": "0",

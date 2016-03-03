@@ -38,6 +38,10 @@
 			"Description": "Login node hostname",
 			"Type": "String"
 		},
+		"LOGINAMI": {
+			"Description": "Login node AMI ID",
+			"Type": "String"
+		},
 		"LOGINTYPE": {
 			"Description": "Login node instance type",
 			"Type": "String"
@@ -51,7 +55,7 @@
 					"Key": "Name",
 					"Value": { "Ref": "AWS::StackName" }
 				}],
-				"ImageId": "ami-556cd226",
+				"ImageId": { "Ref": "LOGINAMI" },
 				"NetworkInterfaces": [{
 					"AssociatePublicIpAddress": "True",
 					"DeviceIndex": "0",

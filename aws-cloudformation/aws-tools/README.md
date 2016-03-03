@@ -89,6 +89,7 @@ aws cloudformation create-stack \
                      ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=NODENAME,ParameterValue="login1" \
+                     ParameterKey=LOGINAMI,ParameterValue="$LOGINAMI" \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR"
 ```
 
@@ -142,6 +143,7 @@ aws cloudformation create-stack \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
                      ParameterKey=NODENAME,ParameterValue="$NODENAME" \
+                     ParameterKey=COMPUTEAMI,ParameterValue="$COMPUTEAMI" \
                      ParameterKey=LOGINIP,ParameterValue="$LOGINIP" 
 ```
 
@@ -172,6 +174,7 @@ aws cloudformation create-stack \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
                      ParameterKey=NODENUMBER,ParameterValue="$NODENUMBER" \
+                     ParameterKey=COMPUTEAMI,ParameterValue="$COMPUTEAMI" \
                      ParameterKey=LOGINIP,ParameterValue="$LOGINIP"
 ```
 

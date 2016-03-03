@@ -42,6 +42,10 @@
 			"Description": "Number of nodes to deploy",
 			"Type": "String"
 		},
+		"COMPUTEAMI": {
+			"Description": "Compute node AMI ID",
+			"Type": "String"
+		},
 		"COMPUTETYPE": {
 			"Description": "Compute node instance type",
 			"Type": "String"
@@ -53,7 +57,7 @@
             "Properties": {
                 "AssociatePublicIpAddress": "True",
                 "KeyName": { "Ref": "KEYPAIR" },
-                "ImageId": "ami-556cd226",
+                "ImageId": { "Ref": "COMPUTEAMI" },
                 "InstanceType": {
                     "Ref": "COMPUTETYPE"
                 },
