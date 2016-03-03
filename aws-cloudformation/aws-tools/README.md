@@ -77,6 +77,7 @@ Source the cluster settings file - this will load all of the required network ID
 Create the login node stack. First set the instance type you wish to deploy, e.g. `c4.large` provides 2 cores/4GB memory. Also include the name of your AWS keypair - this is used to access the cluster login node:
 ```bash
 LOGINTYPE="c4.large"
+NODENAME="login1"
 aws cloudformation create-stack \
 	--stack-name ${CLUSTERNAME}-login \
 	--template-body file://templates/login.json \
@@ -89,7 +90,8 @@ aws cloudformation create-stack \
                      ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=LOGINAMI,ParameterValue="$LOGINAMI" \
-                     ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR"
+                     ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
+                     ParameterKey=NODENAME,ParameterValue="$NODENAME" 
 ```
 
 Once the login node stack has successfully created - you can obtain its public IP address - you can log in to the cluster login node using the previously provided AWS keypair together with the public IP as the `alces` user: 
