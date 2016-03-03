@@ -5,6 +5,14 @@ For information on installation of the AWS CLI tools, [visit the AWS howto](http
 
 Once the AWS CLI tools have been installed - clone the `flight-appliance-support` repo to your workstation. *Note*: when configuring the AWS CLI tool, set the `output` method to `table`. This can be done in the `$HOME/.aws/config` file.  
 
+Your AWS configuration file must contain the two following settings to correctly follow the following steps - make sure you add the following values to the configuration file. This is usually located on UNIX machines at `$HOME/.aws/config`: 
+
+```
+[default]
+output = table
+region = eu-west-1
+```
+
 #Environment deployment
 To deploy cluster components, such as scheduler master nodes, scheduler compute hosts and more - a private cluster network must be deployed. The included template creates a complete private network to host your compute environment(s) in. 
 
