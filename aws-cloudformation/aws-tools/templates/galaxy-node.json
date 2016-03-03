@@ -30,6 +30,10 @@
 			"Description": "Cluster name",
 			"Type": "String"
 		},
+		"GALAXYIP": {
+			"Description": "Galaxy master IP",
+			"Type": "String"
+		},
 		"KEYPAIR": {
 			"Description": "Cluster name",
 			"Type": "String"
@@ -90,6 +94,10 @@
 								"\n",
 								"      role: 'slave'",
 								"\n",
+                                                                "      master: ", {
+                                                                    "Ref": "GALAXYIP"
+                                                                },
+                                                                "\n",
 								"      tags:",
 								"\n",
 								"        galaxy_roles: ':compute:'",
