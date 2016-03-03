@@ -313,6 +313,12 @@ aws cloudformation describe-stacks \
 ##Galaxy environment deployment
 To deploy a single-node Galaxy compute environment - hosted on a single instance, use the following commands: 
 
+Source the `settings` file: 
+
+```bash
+. settings
+```
+
 ```bash
 GALAXYTYPE="c4.large"
 aws cloudformation create-stack \
@@ -330,11 +336,27 @@ aws cloudformation create-stack \
                      ParameterKey=GALAXYAMI,ParameterValue="$GALAXYAMI" 
 ```
 
+Add the Galaxy master nodes internal IP to the `settings` file for later use: 
+
+```bash
+GALAXYIP=$(aws cloudformation describe-stacks \
+	--stack-name ${CLUSTERNAME}-galaxy | \
+	grep InternalIP | \
+        awk '{print $4}')
+echo "GALAXYIP=\"${GALAXYIP}\"" >> settings
+```
+
 ###Adding additional nodes
 For when a single node is not enough - additional compute nodes can be dynamically added to your Galaxy compute environment
 
 ####Adding single nodes
 To add a single node at a time, follow the below steps: 
+
+Source the `settings` file: 
+
+```bash
+. settings
+```
 
 ```bash
 COMPUTETYPE="c4.large"
@@ -346,9 +368,35 @@ aws cloudformation create-stack \
                      ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
                      ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
                      ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
+                     ParameterKey=GALAXYIP,ParameterValue="$GALAXYIP" \
                      ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
                      ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
                      ParameterKey=GALAXYAMI,ParameterValue="$GALAXYAMI" 
+```
+
+####Adding multiple nodes
+To add multiple compute nodes using Amazon AutoScaling Groups - follow the below steps: 
+
+Source the `settings` file: 
+
+```bash
+COMPUTETYPE="c4.large"
+NODENUMBER="5"
+aws cloudformation create-stack \
+        --stack-name ${CLUSTERNAME}-galaxy-compute-$$ \
+        --template-body file://templates/multiple-nodes.json \
+        --parameters ParameterKey=COMPUTETYPE,ParameterValue="$COMPUTETYPE" \
+                     ParameterKey=VPCID,ParameterValue="$VPCID" \
+                     ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
+                     ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
+                     ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
+                     ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
+                     ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
+                     ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
+                     ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
+                     ParameterKey=NODENUMBER,ParameterValue="$NODENUMBER" \
+                     ParameterKey=GALAXYAMI,ParameterValue="$GALAXYAMI" \
+                     ParameterKey=GALAXYIP,ParameterValue="$GALAXYIP"
 ```
