@@ -1,0 +1,100 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Launch an Alces Application Manager appliance into your network",
+	"Parameters": {
+		"VPCID": {
+			"Description": "VPC ID",
+			"Type": "String"
+		},
+		"GATEWAYID": {
+			"Description": "Gateway ID",
+			"Type": "String"
+		},
+		"ROUTETABLEID": {
+			"Description": "Route Table ID",
+			"Type": "String"
+		},
+		"SUBNETID": {
+			"Description": "Subnet ID",
+			"Type": "String"
+		},
+		"NETWORKACL": {
+			"Description": "Network ACL",
+			"Type": "String"
+		},
+		"SECURITYGROUP": {
+			"Description": "Security Group ID",
+			"Type": "String"
+		},
+		"CLUSTERNAME": {
+			"Description": "Cluster name",
+			"Type": "String"
+		},
+		"KEYPAIR": {
+			"Description": "Cluster name",
+			"Type": "String"
+		},
+		"APPMGRAMI": {
+			"Description": "Application Manager AMI ID",
+			"Type": "String"
+		},
+		"APPTYPE": {
+			"Description": "Application Manager instance type",
+			"Type": "String"
+		}
+	},
+	"Resources": {
+		"AppManager": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+				"Tags": [{
+					"Key": "Name",
+					"Value": { "Ref": "AWS::StackName" }
+				}],
+				"ImageId": { "Ref": "APPMGRAMI" },
+				"NetworkInterfaces": [{
+					"AssociatePublicIpAddress": "True",
+					"DeviceIndex": "0",
+					"GroupSet": [{
+						"Ref": "SECURITYGROUP"
+					}],
+					"SubnetId": {
+						"Ref": "SUBNETID"
+					}
+				}],
+				"InstanceType": {
+					"Ref": "APPTYPE"
+				},
+				"KeyName": {
+					"Ref": "KEYPAIR"
+				},
+				"UserData": {
+					"Fn::Base64": {
+						"Fn::Join": [
+							"", [
+								"#cloud-config",
+								"\n",
+								"hostname: app-manager1",
+                                                                "\n",
+                                                                "fqdn: app-manager1.", {
+                                                                "Ref": "CLUSTERNAME"
+                                                                },
+                                                                ".alces.network"
+							]
+						]
+					}
+				}
+			}
+		}
+	},
+	"Outputs": {
+		"InternalIP": {
+			"Value": {
+				"Fn::GetAtt": [
+					"AppManager",
+					"PrivateIp"
+				]
+			}
+		}
+	}
+}

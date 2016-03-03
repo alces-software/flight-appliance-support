@@ -265,3 +265,48 @@ Changing password for alces.
 ```
 
 The storage from your cluster is automatically added to the Storage Manager with no configuration necessary. See more on [using Alces Storage Manager](http://alces-flight-appliance-docs.readthedocs.org/en/aws-v1.2.1/clusterware-storage/alces-storage-overview.html) 
+
+##Application Manager deployment
+To deploy an Alces Application Manager appliance to your environment, use the following commands: 
+
+Source the `settings` file: 
+
+```bash
+. settings
+```
+
+```bash
+APPTYPE="c4.large"
+aws cloudformation create-stack \
+	--stack-name ${CLUSTERNAME}-app-manager \
+	--template-body file://templates/app-manager.json \
+	--parameters ParameterKey=APPTYPE,ParameterValue="$APPTYPE" \
+                     ParameterKey=VPCID,ParameterValue="$VPCID" \
+                     ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
+                     ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
+                     ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
+                     ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
+                     ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
+                     ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
+                     ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
+                     ParameterKey=APPMGRAMI,ParameterValue="$APPMGRAMI" \
+```
+
+Once the Application Manager stack has successfully deployed - obtain both its internal IP (for future use) and external IP for access and customisation: 
+
+```bash
+APPMGRIP=$(aws cloudformation describe-stacks \
+	--stack-name ${CLUSTERNAME}-app-manager | \
+	grep InternalIP | \
+        awk '{print $4}')
+echo "APPMGRIP=\"${APPMGRIP}\"" >> settings
+```
+
+Get the public access IP: 
+
+```bash
+aws cloudformation describe-stacks \
+	--stack-name ${CLUSTERNAME}-app-manager | \
+        grep AccessIP | \
+        awk '{print $4}'
+```
