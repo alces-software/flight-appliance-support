@@ -14,23 +14,33 @@ The `settings` file is used to add important environment information for later u
 KEYPAIR="mykeypair"
 ``` 
 
+Next - include your desired cluster name in the `settings` file, for example: 
+
+```bash
+CLUSTERNAME="alces-cluster"
+```
+
 Each component is deployed using AWS CloudFormation - this ensures simple deletion of all resources when you are finished.
 
 ##Network deployment
 To deploy a cluster network, the following commands should be used in conjunction with the templates provided in the `flight-appliance-support/aws-cloudformation/aws-tools/templates` directory. The `$CLUSTERNAME` variable should be exported and added to the `settings` file for later use.  
 
+Before running the following commands - source the `settings` file: 
+
+```bash
+. settings
+```
+
 Network creation:
 ```bash
-CLUSTERNAME="alces-cluster"
 aws cloudformation create-stack \
 	--stack-name ${CLUSTERNAME}-network \
 	--template-body file://templates/network.json
-echo "CLUSTERNAME=\"${CLUSTERNAME}\"" >> settings
 ```
 
 Check the status of the network creation using: 
 ```bash
-aws cloudformation describe-stack \
+aws cloudformation describe-stacks \
 	--stack-name ${CLUSTERNAME}-network
 ```
 
@@ -72,11 +82,12 @@ Once the login node stack has successfully created - you can obtain its public I
 ```bash
 LOGINPUBIP=$(aws cloudformation describe-stacks \
 	--stack-name ${CLUSTERNAME}-login | \
-	grep OutputValue | \
+	grep AccessIP | \
 	awk '{print $4}')
 echo "LOGINPUBIP=\"${LOGINPUBIP}\"" >> settings
-ssh -i ~/.ssh/aws_ireland.pem alces@$LOGINPUBIP
 ```
+
+Now - SSH to the login node public IP as the `alces` user, together with the previously provided AWS key.
 
 The login nodes internal IP address also needs to be gathered in order to correctly create and configure cluster compute nodes - gather the internal IP and add it to the `settings` file: 
 
@@ -102,6 +113,7 @@ Create a single compute node using the following command - a compute node instan
 
 ```bash
 COMPUTETYPE="c4.large"
+NODENAME="node01"
 aws cloudformation create-stack \
 	--stack-name ${CLUSTERNAME}-${NODENAME} \
 	--template-body file://templates/1-node.json \
@@ -114,6 +126,7 @@ aws cloudformation create-stack \
                      ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
+                     ParameterKey=NODENAME,ParameterValue="$NODENAME" \
                      ParameterKey=LOGINIP,ParameterValue="$LOGINIP" 
 ```
 

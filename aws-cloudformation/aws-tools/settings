@@ -1,7 +1,7 @@
 #Copyright (c) 2016 Alces Software Ltd
 #Override AWS configs
-AWS_ACCESS_KEY_ID=""
-AWS_SECRET_ACCESS_KEY=""
+#AWS_ACCESS_KEY_ID=""
+#AWS_SECRET_ACCESS_KEY=""
 AWS_DEFAULT_REGION="eu-west-1"
 
 #Alces Flight/AWS - compute settings

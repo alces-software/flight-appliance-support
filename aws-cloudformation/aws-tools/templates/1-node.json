@@ -78,6 +78,10 @@
 							"", [
 								"#cloud-config",
 								"\n",
+                                                                "hostname: ", {
+                                                                "Ref": "NODENAME"
+                                                                },
+                                                                "\n",
 								"write_files:",
 								"\n",
 								"- content: |",
