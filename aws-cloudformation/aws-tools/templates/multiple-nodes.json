@@ -119,5 +119,13 @@
                 ]
             }
         }
-	}
+	},
+        "Outputs": {
+            "ASGID": {
+                "Value": {
+                    "Ref": "ComputeGroup"
+                },
+                "Description": "AutoScaling Group ID"
+                }
+        }  
 }
