@@ -204,3 +204,64 @@ aws cloudformation create-stack \
         --template-body file://templates/monitor.json \
 	--parameters ParameterKey=ASG,ParameterValue="$ASG"
 ```
+
+##Alces Storage Manager
+To deploy an Alces Storage Manager appliance to manage your storage including file and object storage - complete the following steps. A default Alces Storage Manager appliance AMI ID is included in the `settings.example` file. 
+
+Source the `settings` file: 
+
+```bash
+. settings
+```
+
+Launch the Alces Storage Manager appliance - choosing an instance type to launch with, this sets the number of cores and memory available to the instance. 
+
+```bash
+STORAGETYPE="c4.large"
+aws cloudformation create-stack \
+	--stack-name ${CLUSTERNAME}-storage-manager \
+	--template-body file://templates/storage-manager.json \
+	--parameters ParameterKey=STORAGETYPE,ParameterValue="$STORAGETYPE" \
+                     ParameterKey=VPCID,ParameterValue="$VPCID" \
+                     ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
+                     ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
+                     ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
+                     ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
+                     ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
+                     ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
+                     ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
+                     ParameterKey=NODENAME,ParameterValue="$NODENAME" \
+                     ParameterKey=STORAGEMGRAMI,ParameterValue="$STORAGEMGRAMI" \
+                     ParameterKey=LOGINIP,ParameterValue="$LOGINIP" 
+```
+
+Once the Storage Manager stack has successfully creatd - you can get its access IP through the `describe-stacks` feature: 
+
+```bash
+aws cloudformation describe-stacks \
+	--stack-name ${CLUSTERNAME}-storage-manager | \
+	grep OutputValue | \
+        awk '{print $4}'
+```
+
+Once you have gained the IP - log in to the instance using SSH. Once you are on the Storage Manager appliance - you can gain its automatically generated public host name, for example: 
+
+```bash
+[alces@storage-manager(alces-cluster) ~]$ alces about environment
+      Clusterware release: 2016.03
+         Public host name: storage.alces-cluster.cloud.compute.estate
+         Clusterware name: storage.alces-cluster
+       Platform host name: ec2-52-50-113-44.eu-west-1.compute.amazonaws.com
+        Public IP address: 52.50.113.44
+```
+
+You will also need to set a password on your cluster login node of the user account you would like to log in to the Storage Manager interface with, for example: 
+
+```bash
+[alces@login1(alces-cluster) ~]$ passwd
+Changing password for user alces.
+Changing password for alces.
+(current) UNIX password:
+```
+
+The storage from your cluster is automatically added to the Storage Manager with no configuration necessary. See more on [using Alces Storage Manager](http://alces-flight-appliance-docs.readthedocs.org/en/aws-v1.2.1/clusterware-storage/alces-storage-overview.html) 

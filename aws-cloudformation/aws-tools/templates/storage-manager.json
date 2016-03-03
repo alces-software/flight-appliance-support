@@ -1,6 +1,6 @@
 {
 	"AWSTemplateFormatVersion": "2010-09-09",
-	"Description": "Launch an Alces network for use with Alces compute environments",
+	"Description": "Launch an Alces Storage Manager into your existing Alces network",
 	"Parameters": {
 		"VPCID": {
 			"Description": "VPC ID",
@@ -34,28 +34,32 @@
 			"Description": "Cluster name",
 			"Type": "String"
 		},
+		"LOGINIP": {
+			"Description": "Login node access IP",
+			"Type": "String"
+		},
 		"NODENAME": {
 			"Description": "Login node hostname",
 			"Type": "String"
 		},
-		"LOGINAMI": {
-			"Description": "Login node AMI ID",
+		"STORAGEMGRAMI": {
+			"Description": "Storage Manager AMI ID",
 			"Type": "String"
 		},
-		"LOGINTYPE": {
-			"Description": "Login node instance type",
+		"STORAGETYPE": {
+			"Description": "Storage manager instance type",
 			"Type": "String"
 		}
 	},
 	"Resources": {
-		"Login": {
+		"StorageManager": {
 			"Type": "AWS::EC2::Instance",
 			"Properties": {
 				"Tags": [{
 					"Key": "Name",
 					"Value": { "Ref": "AWS::StackName" }
 				}],
-				"ImageId": { "Ref": "LOGINAMI" },
+				"ImageId": { "Ref": "STORAGEMGRAMI" },
 				"NetworkInterfaces": [{
 					"AssociatePublicIpAddress": "True",
 					"DeviceIndex": "0",
@@ -67,7 +71,7 @@
 					}
 				}],
 				"InstanceType": {
-					"Ref": "LOGINTYPE"
+					"Ref": "STORAGETYPE"
 				},
 				"KeyName": {
 					"Ref": "KEYPAIR"
@@ -78,11 +82,9 @@
 							"", [
 								"#cloud-config",
 								"\n",
-								"hostname: login1",
+								"hostname: storage-manager",
                                                                 "\n",
-                                                                "fqdn: ", {
-                                                                "Ref": "NODENAME"
-                                                                },
+                                                                "fqdn: storage-manager.", 
                                                                 ".", {
                                                                 "Ref": "CLUSTERNAME"
                                                                 },
@@ -102,13 +104,15 @@
 									"Ref": "CLUSTERNAME"
 								},
 								"\n",
-								"      role: 'master'",
+								"      role: 'appliance'",
+                                                                "\n",
+                                                                "      master: ", {
+                                                                    "Ref": "LOGINIP"
+                                                                },
 								"\n",
 								"      tags:",
 								"\n",
-								"        scheduler_roles: ':master:'",
-								"\n",
-                                                                "        storage_roles: ':master:'",
+								"        appliance_roles: ':storage:'",
                                                                 "\n",
 								"  owner: root:root",
 								"\n",
@@ -120,24 +124,6 @@
 						]
 					}
 				}
-			}
-		}
-	},
-	"Outputs": {
-		"AccessIP": {
-			"Value": {
-				"Fn::GetAtt": [
-					"Login",
-					"PublicIp"
-				]
-			}
-		},
-		"InternalIP": {
-			"Value": {
-				"Fn::GetAtt": [
-					"Login",
-					"PrivateIp"
-				]
 			}
 		}
 	}
