@@ -1,0 +1,262 @@
+{
+    "Description": "Launch Alces compute nodes into your existing environment.",
+    "Parameters": {
+        "InfrastructureStack": {
+            "Description": "Name of infrastructure CloudFormation stack",
+            "Type": "String"
+        },
+        "ComputeNumber": {
+            "Description": "Enter the number of compute nodes you wish to deploy",
+            "Type": "String",
+            "AllowedPattern": "[0-9]",
+            "Default": "3"
+        },
+        "InstanceFlavour": {
+            "Description": "Select the compute node instance flavour",
+            "Type": "String",
+            "Default": "small",
+            "AllowedValues": [
+                "small",
+                "large"
+            ]
+        },
+	"SpotPrice": {
+	    "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing.",
+	    "Type": "String",
+	    "Default": "0.50"
+	}
+    },
+    "Mappings": {
+        "InstanceType2Flavour": {
+            "small": {
+                "instanceflavour": "c4.large"
+            },
+            "large": {
+                "instanceflavour": "c4.8xlarge"
+           }
+        },
+        "AWSRegionArch2AMI": {
+            "eu-west-1": {
+                "centos7": "ami-556cd226"
+            }
+        }
+    },
+    "Resources": {
+        "BaseInfo": {
+          "Type": "Custom::BaseInfo",
+          "Properties": {
+            "ServiceToken": { "Fn::GetAtt" : ["LookupStackOutputs", "Arn"] },
+            "StackName": {
+              "Ref": "InfrastructureStack"
+            }
+          }
+        },
+        "LookupStackOutputs": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "ZipFile":  { "Fn::Join": ["\n", [
+                "var response = require('cfn-response');",
+                "exports.handler = function(event, context) {",
+                "    console.log('REQUEST RECEIVED:\\n', JSON.stringify(event));",
+                "    if (event.RequestType == 'Delete') {",
+                "        response.send(event, context, response.SUCCESS);",
+                "        return;",
+                "    }",
+                "    var stackName = event.ResourceProperties.StackName;",
+                "    var responseData = {};",
+                "    if (stackName) {",
+                "        var aws = require('aws-sdk');",
+                "        var cfn = new aws.CloudFormation();",
+                "        cfn.describeStacks({StackName: stackName}, function(err, data) {",
+                "            if (err) {",
+                "                responseData = {Error: 'DescribeStacks call failed'};",
+                "                console.log(responseData.Error + ':\\n', err);",
+                "                response.send(event, context, response.FAILED, responseData);",
+                "            }",
+                "            else {",
+                "                data.Stacks[0].Outputs.forEach(function(output) {",
+                "                    responseData[output.OutputKey] = output.OutputValue;",
+                "                });",
+                "                response.send(event, context, response.SUCCESS, responseData);",
+                "            }",
+                "        });",
+                "    } else {",
+                "        responseData = {Error: 'Stack name not specified'};",
+                "        console.log(responseData.Error);",
+                "        response.send(event, context, response.FAILED, responseData);",
+                "    }",
+                "};"
+            ]]}
+          },
+          "Handler": "index.handler",
+          "Runtime": "nodejs",
+          "Timeout": "30",
+          "Role": { "Fn::GetAtt" : ["LambdaExecutionRole", "Arn"] }
+          }
+        },
+        "LambdaExecutionRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [{
+                "Effect": "Allow",
+                "Principal": {"Service": ["lambda.amazonaws.com"]},
+                "Action": ["sts:AssumeRole"]
+              }]
+            },
+            "Path": "/",
+            "Policies": [{
+              "PolicyName": "root",
+              "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [{
+                  "Effect": "Allow",
+                  "Action": ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
+                  "Resource": "arn:aws:logs:*:*:*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": ["cloudformation:DescribeStacks"],
+                  "Resource": "*"
+                }]
+              }
+            }]
+          }
+        },
+        "ComputeConfig": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Properties": {
+                "AssociatePublicIpAddress": "True",
+                "KeyName": { "Fn::GetAtt": [ "BaseInfo", "KEYNAME" ]},
+                "ImageId": "ami-556cd226",
+                "InstanceType": {
+                    "Fn::FindInMap": [
+                        "InstanceType2Flavour",
+                        { "Ref": "InstanceFlavour" },
+                        "instanceflavour"
+                    ]
+                },
+		"SpotPrice": {
+			"Ref": "SpotPrice"
+		},
+                "SecurityGroups": [ { "Fn::GetAtt": [ "BaseInfo", "SECURITYGROUP" ] } ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                              "#cloud-config",
+                              "\n",
+                              "write_files:","\n",
+                              "- content: |",
+                              "\n",
+                              "    cluster:",
+                              "\n",
+                              "      uuid: '11111111-2222-3333-444444444444'",
+                              "\n",
+                              "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
+                              "\n",
+                              "      name: ",
+                              { "Fn::GetAtt": [ "BaseInfo", "CLUSTERNAME" ] },
+                              "\n",
+                              "      role: 'slave'",
+                              "\n",
+                              "      master: ",
+                              { "Fn::GetAtt": [ "BaseInfo", "LOGINIP" ] },
+                              "\n",
+                              "      tags:",
+                              "\n",
+                              "        scheduler_roles: ':compute:'",
+                              "\n",
+                              "  owner: root:root",
+                              "\n",
+                              "  path: /opt/clusterware/etc/config.yml",
+                              "\n",
+                              "  permissions: '0640'",
+                              "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "ComputeGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "DesiredCapacity": {
+                    "Ref": "ComputeNumber"
+                },
+                "LaunchConfigurationName": {
+                    "Ref": "ComputeConfig"
+                },
+                "MinSize": "1",
+                "MaxSize": "100",
+                "VPCZoneIdentifier": [
+                    {
+                        "Fn::GetAtt": [ "BaseInfo", "SUBNETID" ]
+                    }
+                ]
+            }
+        },
+        "ScaleUp": {
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+	    "Properties": {
+                "AdjustmentType": "ChangeInCapacity",
+                "AutoScalingGroupName": { "Ref": "ComputeGroup" },
+                "Cooldown": "3300",
+                "ScalingAdjustment": "1"
+             }
+        },
+        "ScaleDown": {
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+	    "Properties": {
+                "AdjustmentType": "ChangeInCapacity",
+                "AutoScalingGroupName": { "Ref": "ComputeGroup" },
+                "Cooldown": "3300",
+                "ScalingAdjustment": "-1"
+             }
+        },
+        "CPUAlarmHigh": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "Scale-up if CPU > 90% for 20 minutes",
+                "MetricName": "CPUUtilization",
+                "Namespace": "AWS/EC2",
+                "Statistic": "Average",
+                "Period": "60",
+                "EvaluationPeriods": "20",
+                "Threshold": "90",
+                "AlarmActions": [ { "Ref": "ScaleUp" } ],
+                "Dimensions": [
+                  {
+                    "Name": "AutoScalingGroupName",
+                    "Value": { "Ref": "ComputeGroup" }
+                  }
+                ],
+                "ComparisonOperator": "GreaterThanThreshold"
+              }
+            },
+        "CPUAlarmLow": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "Scale-down if CPU < 10% for 55 minutes",
+                "MetricName": "CPUUtilization",
+                "Namespace": "AWS/EC2",
+                "Statistic": "Average",
+                "Period": "60",
+                "EvaluationPeriods": "55",
+                "Threshold": "10",
+                "AlarmActions": [ { "Ref": "ScaleDown" } ],
+                "Dimensions": [
+                  {
+                    "Name": "AutoScalingGroupName",
+                    "Value": { "Ref": "ComputeGroup" }
+                  }
+                ],
+                "ComparisonOperator": "LessThanThreshold"
+              }
+            }
+        }
+}
