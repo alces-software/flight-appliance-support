@@ -1,6 +1,6 @@
 {
 	"AWSTemplateFormatVersion": "2010-09-09",
-	"Description": "Launch an Alces network for use with Alces compute environments",
+	"Description": "Launch an Alces HPC scheduler master node to your network stack",
 	"Parameters": {
 		"VPCID": {
 			"Description": "VPC ID",

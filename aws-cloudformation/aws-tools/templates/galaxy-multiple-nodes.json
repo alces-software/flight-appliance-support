@@ -1,6 +1,6 @@
 {
 	"AWSTemplateFormatVersion": "2010-09-09",
-	"Description": "Launch an Alces network for use with Alces compute environments",
+	"Description": "Launch multiple Galaxy compute nodes to your existing environment",
 	"Parameters": {
 		"VPCID": {
 			"Description": "VPC ID",
