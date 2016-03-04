@@ -205,8 +205,8 @@
 	    "Properties": {
                 "AdjustmentType": "ChangeInCapacity",
                 "AutoScalingGroupName": { "Ref": "ComputeGroup" },
-                "Cooldown": "3300",
-                "ScalingAdjustment": "1"
+                "Cooldown": "60",
+                "ScalingAdjustment": "10"
              }
         },
         "ScaleDown": {
@@ -214,20 +214,20 @@
 	    "Properties": {
                 "AdjustmentType": "ChangeInCapacity",
                 "AutoScalingGroupName": { "Ref": "ComputeGroup" },
-                "Cooldown": "3300",
+                "Cooldown": "600",
                 "ScalingAdjustment": "-1"
              }
         },
         "CPUAlarmHigh": {
             "Type": "AWS::CloudWatch::Alarm",
             "Properties": {
-                "AlarmDescription": "Scale-up if CPU > 90% for 20 minutes",
+                "AlarmDescription": "Scale-up if CPU > 25% for 1 minutes",
                 "MetricName": "CPUUtilization",
                 "Namespace": "AWS/EC2",
                 "Statistic": "Average",
                 "Period": "60",
-                "EvaluationPeriods": "20",
-                "Threshold": "90",
+                "EvaluationPeriods": "1",
+                "Threshold": "25",
                 "AlarmActions": [ { "Ref": "ScaleUp" } ],
                 "Dimensions": [
                   {
