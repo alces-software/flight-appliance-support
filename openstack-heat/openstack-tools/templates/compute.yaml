@@ -1,0 +1,22 @@
+parameters:
+  # Select an instance flavour to use. This defines
+  # the number of CPU cores and memory available
+  compute_flavour: m1.medium
+
+  # Enter the `cluster_uuid` value obtained from
+  # your infrastructure stack output
+  cluster_uuid: '701986198346777918678467'
+
+  # Enter the `cluster_token` value obtained from
+  # your infrastructure stack output
+  cluster_token: 'ri8oYpt70INvLxtXFoWe'
+
+  # Enter the `cluster_name` value obtained from
+  # your infrastructure stack output
+  cluster_name: research1
+
+  # Enter the Alces Flight Compute appliance
+  # image to deploy. Check the image exists in
+  # your environment using:
+  # `openstack image list`
+  image: centos7-compute-2.1.1

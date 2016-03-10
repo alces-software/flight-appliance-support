@@ -1,0 +1,77 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Add multiple compute nodes to your existing infrastructure stack
+
+parameters:
+  cluster_uuid:
+    type: string
+    label: Cluster unique ID
+    description: Enter the cluster unique ID
+
+  cluster_token:
+    type: string
+    label: Cluster unique token
+    description: Enter the cluster unique token
+
+  cluster_name:
+    type: string
+    label: Cluster name
+    description: Enter the cluster name
+
+  compute_flavour:
+    type: string
+    label: Compute node flavour
+    description: Enter the compute node flavour to use
+    constraints:
+    - custom_constraint: nova.flavor
+
+  image:
+    type: string
+    label: Compute image
+    description: Select the Alces Compute image to use
+    constraints:
+    - custom_constraint: glance.image
+
+  compute_number:
+    type: string
+    label: Compute number
+    description: Enter the number of compute hosts to deploy
+
+resources:
+  node_config:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+            write_files:
+            - path: /opt/clusterware/etc/config.yml
+              permissions: '0640'
+              owner: root:root
+              content:
+                str_replace:
+                  template: |
+                    cluster:
+                      uuid: '%UUID%'
+                      token: '%TOKEN%'
+                      name: '%CLUSTER_NAME%'
+                      role: 'slave'
+                      tags:
+                        scheduler_roles: ':compute:'
+                  params:
+                    "%CLUSTER_NAME%": { get_param: cluster_name }
+                    "%UUID%": { get_param: cluster_uuid }
+                    "%TOKEN%": { get_param: cluster_token }
+
+  compute_group:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: compute_number }
+      resource_def:
+        type: OS::Nova::Server
+        properties:
+          name: node%index%
+          flavor: { get_param: compute_flavour }
+          image: { get_param: image }
+          user_data_format: RAW
+          user_data: { get_resource: node_config }
+          networks: [{ network: { get_param: cluster_name } }]

@@ -1,0 +1,148 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Create an isolated network for use with an
+  Alces compute environment.
+
+parameters:
+  cluster_name:
+    type: string
+    label: Cluster name
+    description: Enter the cluster name you wish to use
+
+  admin_key:
+    type: string
+    label: Cluster admin key
+    description: Enter the name of an OpenStack nova keypair for administrator access
+    constraints:
+    - custom_constraint: nova.keypair
+
+  image:
+    type: string
+    label: Cluster type
+    description: Choose an Alces ClusterWare image to use
+    constraints:
+    - custom_constraint: glance.image
+
+  compute_flavour:
+    type: string
+    label: >
+      Compute node instance type
+    description: Compute node type
+    constraints:
+    - custom_constraint: nova.flavor
+
+resources:
+  cluster_uuid:
+    type: OS::Heat::RandomString
+    properties:
+      length: 24
+      sequence: digits
+
+  cluster_token:
+    type: OS::Heat::RandomString
+    properties:
+      length: 20
+      sequence: lettersdigits
+
+  cluster_network:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: cluster_name }
+
+  cluster_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: cluster_network }
+      cidr: 10.75.0.0/16
+      gateway_ip: 10.75.0.254
+      dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
+      allocation_pools:
+        - start: 10.75.0.2
+          end: 10.75.0.253
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: public
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: cluster_subnet }
+
+  cluster_sg:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: { get_param: cluster_name }
+      description: Enable ping/SSH
+      rules:
+      - protocol: icmp
+      - protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+
+  master_config:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+            write_files:
+            - path: /opt/clusterware/etc/config.yml
+              permissions: '0640'
+              owner: root:root
+              content:
+                str_replace:
+                  template: |
+                    cluster:
+                      uuid: '%UUID%'
+                      token: '%TOKEN%'
+                      name: '%CLUSTER_NAME%'
+                      role: 'master'
+                      tags:
+                        scheduler_roles: ':master:'
+                  params:
+                    "%CLUSTER_NAME%": { get_param: cluster_name }
+                    "%UUID%": { get_resource: cluster_uuid }
+                    "%TOKEN%": { get_resource: cluster_token }
+
+  login1:
+    type: OS::Nova::Server
+    properties:
+      name: login1
+      image: { get_param: image }
+      flavor: { get_param: compute_flavour }
+      key_name: { get_param: admin_key }
+      networks:
+        - port: { get_resource: login1_port }
+      user_data_format: RAW
+      user_data: { get_resource: master_config }
+
+  login1_port:
+    type: OS::Neutron::Port
+    depends_on: cluster_subnet
+    properties:
+      network_id: { get_resource: cluster_network }
+      fixed_ips:
+        - subnet_id: { get_resource: cluster_subnet }
+
+  login1_access:
+    type: OS::Neutron::FloatingIP
+    depends_on: router
+    properties:
+      floating_network: public
+      port_id: { get_resource: login1_port }
+
+outputs:
+  login1_public_ip:
+    description: Access IP of cluster login node
+    value: { get_attr: [ login1_access, floating_ip_address ] }
+
+  cluster_uuid:
+    description: Cluster unique ID
+    value: { get_resource: cluster_uuid }
+
+  cluster_token:
+    description: Cluster unique token
+    value: { get_resource: cluster_token }
