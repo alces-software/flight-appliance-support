@@ -102,6 +102,7 @@ resources:
                       role: 'master'
                       tags:
                         scheduler_roles: ':master:'
+                        storage_roles: ':master:'
                   params:
                     "%CLUSTER_NAME%": { get_param: cluster_name }
                     "%UUID%": { get_resource: cluster_uuid }

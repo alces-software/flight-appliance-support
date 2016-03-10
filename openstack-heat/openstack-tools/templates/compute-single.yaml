@@ -1,0 +1,73 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Add multiple compute nodes to your existing infrastructure stack
+
+parameters:
+  cluster_uuid:
+    type: string
+    label: Cluster unique ID
+    description: Enter the cluster unique ID
+
+  cluster_token:
+    type: string
+    label: Cluster unique token
+    description: Enter the cluster unique token
+
+  cluster_name:
+    type: string
+    label: Cluster name
+    description: Enter the cluster name
+
+  compute_flavour:
+    type: string
+    label: Compute node flavour
+    description: Enter the compute node flavour to use
+    constraints:
+    - custom_constraint: nova.flavor
+
+  image:
+    type: string
+    label: Compute image
+    description: Select the Alces Compute image to use
+    constraints:
+    - custom_constraint: glance.image
+
+  node_name:
+    type: string
+    label: Node name
+    description: Enter the hostname of the node to deploy
+
+resources:
+  node_config:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+            write_files:
+            - path: /opt/clusterware/etc/config.yml
+              permissions: '0640'
+              owner: root:root
+              content:
+                str_replace:
+                  template: |
+                    cluster:
+                      uuid: '%UUID%'
+                      token: '%TOKEN%'
+                      name: '%CLUSTER_NAME%'
+                      role: 'slave'
+                      tags:
+                        scheduler_roles: ':compute:'
+                  params:
+                    "%CLUSTER_NAME%": { get_param: cluster_name }
+                    "%UUID%": { get_param: cluster_uuid }
+                    "%TOKEN%": { get_param: cluster_token }
+
+  node:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: node_name }
+      image: { get_param: image }
+      flavor: { get_param: compute_flavour }
+      networks: [{ network: { get_param: cluster_name } }]
+      user_data_format: RAW
+      user_data: { get_resource: node_config }
