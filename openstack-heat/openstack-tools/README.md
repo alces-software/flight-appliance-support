@@ -129,6 +129,8 @@ parameters:
 ##Deploying compute nodes
 The following section will detail how to deploy both single compute nodes and groups of compute nodes to your environment, using the previously configured `compute.yaml` file together with your existing infrastructure stack. 
 
+After deploying compute nodes - they will automatically join the cluster login node, self-configuring and registering as ready for work through the cluster scheduler. 
+
 ###Deploying multiple compute nodes
 Using the AutoScaling Groups feature - it is trivial to deploy multiple compute nodes in a group to your existing network. Whilst correctly authenticated to your OpenStack project using the OpenStack RC file - run the following commands to add multiple compute nodes to your environment:
 
@@ -144,4 +146,24 @@ heat stack-create research1-computegroup \
 | 166e5743-6f60-46c4-a718-64368a2c53b4 | research1              | CREATE_COMPLETE    | 2016-03-10T15:52:59Z |
 | 800f9986-916f-44c3-a5fc-99e785707712 | research1-computegroup | CREATE_IN_PROGRESS | 2016-03-10T16:55:22Z |
 +--------------------------------------+------------------------+--------------------+----------------------+
+```
+
+###Deploying a single node
+Whilst correctly authenticated to your OpenStack project using the OpenStack RC file - run the following commands to add a single compute node to your environment. 
+
+First - verify the settings in the `compute.yaml` settings file - once you have confirmed the settings, launch a single node into the environment using the following command - the `node_name` value should be unique, check which nodes exist in your environment first. 
+
+```bash
+heat stack-create research1-compute-node10 \
+	-e compute.yaml \
+	-t 60 -r \
+	-f templates/compute-single.yaml \
+	-P node_name=node10
++--------------------------------------+--------------------------+--------------------+----------------------+
+| id                                   | stack_name               | stack_status       | creation_time        |
++--------------------------------------+--------------------------+--------------------+----------------------+
+| 166e5743-6f60-46c4-a718-64368a2c53b4 | research1                | CREATE_COMPLETE    | 2016-03-10T15:52:59Z |
+| 442a9775-3626-4f34-b285-6e1868d9190a | research1-computegroup   | CREATE_COMPLETE    | 2016-03-10T17:10:02Z |
+| 04cbdb3a-6ee9-41f8-8ddd-0bf89865b706 | research1-compute-node10 | CREATE_IN_PROGRESS | 2016-03-10T17:29:58Z |
++--------------------------------------+--------------------------+--------------------+----------------------+
 ```
