@@ -82,7 +82,7 @@ Once the stack has finished creating - gather information to be used later on wh
 +-----------------------+---------------------------------------------------------------------------------------------------------------------------+
 ```
 
-Select the `network_id` and `subnet_id` output values - then enter them into the appropriate fields in the `login.yaml` file. For example, a populated `login.yaml` file would look like the following:
+Select the `network_id` and `subnet_id` output values - then enter them into the appropriate fields in the `login.yaml` file. For example, a populated `login.yaml` file would look like the following. You should also complete the other options, such as `environment_type` and `admin_key`. 
 
 ```yaml
 parameters:
@@ -112,6 +112,11 @@ parameters:
   # choose `galaxy`. The type must
   # match the chosen `image` setting
   environment_type: scheduler
+
+  # Enter the name of your OpenStack
+  # key pair you wish to use. This
+  # provides cluster access
+  admin_key: mykeyname
 ```
 
 ##Deploying a cluster login/master node
