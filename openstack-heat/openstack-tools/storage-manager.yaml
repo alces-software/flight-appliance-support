@@ -7,7 +7,7 @@ parameters:
   # image to deploy. Check the image exists in
   # your environment using:
   # `openstack image list`
-  image: centos7-storage-manager-2.0.0
+  image: centos7-storage-manager-1.0.0
 
   # Enter the `cluster_network` unique ID
   # from the output of your network stack
@@ -20,7 +20,7 @@ parameters:
   # Enter the name of your OpenStack
   # key pair you wish to use. This
   # provides cluster access
-  admin_key: mykeyname
+  admin_key: keyname
 
   # Enter the `cluster_uuid` value obtained from
   # your infrastructure stack output

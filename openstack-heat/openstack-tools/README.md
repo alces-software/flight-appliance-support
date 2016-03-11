@@ -119,7 +119,7 @@ parameters:
   admin_key: mykeyname
 ```
 
-##Deploying a cluster login/master node
+##Deploying a cluster login node
 Once the network stack has been deployed, and your `login.yaml` environment file has been populated, you can deploy a cluster login node - used to host cluster services. In a `scheduler` environment - the login node runs the scheduler master services, as well as providing node configuration and hosting applications. 
 
 To deploy a cluster login node using your populated `login.yaml` environment file - run the following commands:
@@ -208,3 +208,27 @@ heat stack-create research1-compute-node10 \
 | 04cbdb3a-6ee9-41f8-8ddd-0bf89865b706 | research1-compute-node10 | CREATE_IN_PROGRESS | 2016-03-10T17:29:58Z |
 +--------------------------------------+--------------------------+--------------------+----------------------+
 ```
+
+#Deploying a Galaxy environment
+Once you have completed the *network deployment* stage, a Galaxy environment can easily be deployed into your network. 
+
+* Repeat the [login node deployment](#deploy-a-cluster-login-node) steps, with the following modifications: 
+  * Select an available Alces Flight Galaxy appliance image
+  * Change the `environment_type` to `galaxy`
+* Repeat the compute node deployment steps, either [single](#deploying-a-single-node) or [multiple](#deploying-multiple-compute-nodes)
+  * Select an available Alces Flight Galaxy appliance image
+  * Change the `environment_type` to `galaxy`
+
+#Deploying a Storage Manager
+To deploy an Alces Storage Manager to your environment - perform the following steps: 
+
+```bash
+heat stack-create research1-storage-manager \
+	-e storage-manager.yaml \
+	-t 60 -r \
+	-f templates/storage-manager.yaml 
+```
+
+The stack outputs will display the access IP for the Storage Manager appliance - gather this using `heat stack-show <stackname>`. 
+
+To access the Storage Manager - you must first log on to your cluster login node, and set a password for each of the users you wish to log into Storage Manager as, using the `passwd` command. Once a password has been set - you can gain access to the Storage Manager. 
