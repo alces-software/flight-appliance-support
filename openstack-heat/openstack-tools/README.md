@@ -41,10 +41,92 @@ Once the stack has finished creating - gather information to be used later on wh
 
 ```bash
 [alces-cluster@login1(demo) ~]$ heat stack-show research1
-insert placeholder here 
++-----------------------+---------------------------------------------------------------------------------------------------------------------------+
+| Property              | Value                                                                                                                     |
++-----------------------+---------------------------------------------------------------------------------------------------------------------------+
+| capabilities          | []                                                                                                                        |
+| creation_time         | 2016-03-11T09:36:23Z                                                                                                      |
+| description           | Create an isolated network for use with an Alces                                                                          |
+|                       | compute environment.                                                                                                      |
+| disable_rollback      | False                                                                                                                     |
+| id                    | 558bfe1e-61a8-405d-9e5b-8c765ebc5500                                                                                      |
+| links                 | http://10.78.254.10:8004/v1/06c2c75c14514ca0880e987398ec4a76/stacks/research1/558bfe1e-61a8-405d-9e5b-8c765ebc5500 (self) |
+| notification_topics   | []                                                                                                                        |
+| outputs               | [                                                                                                                         |
+|                       |   {                                                                                                                       |
+|                       |     "output_value": "fdc8fb16-b699-4b63-9084-f5aaaf81fc3c",                                                               |
+|                       |     "description": "Cluster network ID",                                                                                  |
+|                       |     "output_key": "network_id"                                                                                            |
+|                       |   },                                                                                                                      |
+|                       |   {                                                                                                                       |
+|                       |     "output_value": "999184fb-cd54-4254-9345-20a16b686c6b",                                                               |
+|                       |     "description": "Cluster subnet ID",                                                                                   |
+|                       |     "output_key": "subnet_id"                                                                                             |
+|                       |   }                                                                                                                       |
+|                       | ]                                                                                                                         |
+| parameters            | {                                                                                                                         |
+|                       |   "OS::project_id": "06c2c75c14514ca0880e987398ec4a76",                                                                   |
+|                       |   "OS::stack_id": "558bfe1e-61a8-405d-9e5b-8c765ebc5500",                                                                 |
+|                       |   "OS::stack_name": "research1"                                                                                           |
+|                       | }                                                                                                                         |
+| parent                | None                                                                                                                      |
+| stack_name            | research1                                                                                                                 |
+| stack_owner           | stackadmin                                                                                                                |
+| stack_status          | CREATE_COMPLETE                                                                                                           |
+| stack_status_reason   | Stack CREATE completed successfully                                                                                       |
+| stack_user_project_id | 5557741a336c4226925a4cc03370bcbb                                                                                          |
+| template_description  | Create an isolated network for use with an Alces                                                                          |
+|                       | compute environment.                                                                                                      |
+| timeout_mins          | 60                                                                                                                        |
+| updated_time          | None                                                                                                                      |
++-----------------------+---------------------------------------------------------------------------------------------------------------------------+
 ```
 
-Select the `cluster_uuid`, `cluster_token`, `image` and `cluster_name` output values - and enter them into the appropriate fields in the `compute.yaml` file. For example, a populated `compute.yaml` file would look like: 
+Select the `network_id` and `subnet_id` output values - then enter them into the appropriate fields in the `login.yaml` file. For example, a populated `login.yaml` file would look like the following:
+
+```yaml
+parameters:
+  # Enter the  unique ID
+  # from the output of your network stack
+  cluster_network_id: 'fdc8fb16-b699-4b63-9084-f5aaaf81fc3c'
+
+  # Enter the  unique ID
+  # from the output of your network stack
+  cluster_subnet_id: '999184fb-cd54-4254-9345-20a16b686c6b'
+
+  # Enter the name of your cluster. This
+  # should be the name of your network
+  # stack, e.g.
+  cluster_name: research1
+
+  # Enter the Alces Flight Compute appliance
+  # image to deploy. Check the image exists in
+  # your environment using:
+  # `openstack image list`
+  image: centos7-compute-2.1.1
+
+  # Enter the proposed deployment, for
+  # example if deploying a HPC compute
+  # environment - enter `scheduler`,
+  # or if creating a Galaxy environment
+  # choose `galaxy`. The type must
+  # match the chosen `image` setting
+  environment_type: scheduler
+```
+
+##Deploying a cluster login/master node
+Once the network stack has been deployed, and your `login.yaml` environment file has been populated, you can deploy a cluster login node - used to host cluster services. In a `scheduler` environment - the login node runs the scheduler master services, as well as providing node configuration and hosting applications. 
+
+To deploy a cluster login node using your populated `login.yaml` environment file - run the following commands:
+
+```bash
+heat stack-create research1-login \
+	-e login.yaml \
+	-t 60 -r \
+	-f templates/login.yaml
+```
+
+Once the login node stack has deployed - use the `heat stack-show` command to obtain the output values of the login node stack - add the `cluster_uuid` and `cluster_token` to the `compute.yaml` environment file. The settings should also be configured in the `compute.yaml` file for the deployment of your choice, i.e `scheduler` or `galaxy` - with the appropriate image. 
 
 ```yaml
 parameters:
@@ -54,11 +136,11 @@ parameters:
 
   # Enter the `cluster_uuid` value obtained from
   # your infrastructure stack output
-  cluster_uuid: 701986198346777918678467
+  cluster_uuid: '701986198346777918678467'
 
   # Enter the `cluster_token` value obtained from
   # your infrastructure stack output
-  cluster_token: ri8oYpt70INvLxtXFoWe
+  cluster_token: 'ri8oYpt70INvLxtXFoWe'
 
   # Enter the `cluster_name` value obtained from
   # your infrastructure stack output
@@ -69,7 +151,15 @@ parameters:
   # your environment using:
   # `openstack image list`
   image: centos7-compute-2.1.1
+
+  # Enter the proposed deployment, for
+  # example if deploying a HPC compute
+  # environment - enter `scheduler`,
+  # or if creating a Galaxy environment
+  # choose `galaxy`
+  environment_type: scheduler
 ```
+	
 
 ##Deploying compute nodes
 The following section will detail how to deploy both single compute nodes and groups of compute nodes to your environment, using the previously configured `compute.yaml` file together with your existing infrastructure stack. 
@@ -89,6 +179,7 @@ heat stack-create research1-computegroup \
 | id                                   | stack_name             | stack_status       | creation_time        |
 +--------------------------------------+------------------------+--------------------+----------------------+
 | 166e5743-6f60-46c4-a718-64368a2c53b4 | research1              | CREATE_COMPLETE    | 2016-03-10T15:52:59Z |
+| 558bfe1e-61a8-405d-9e5b-8c765ebc5500 | research1-login        | CREATE_COMPLETE    | 2016-03-10T15:59:29Z |
 | 800f9986-916f-44c3-a5fc-99e785707712 | research1-computegroup | CREATE_IN_PROGRESS | 2016-03-10T16:55:22Z |
 +--------------------------------------+------------------------+--------------------+----------------------+
 ```
