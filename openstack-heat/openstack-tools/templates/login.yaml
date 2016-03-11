@@ -103,7 +103,6 @@ resources:
 
   login1_port:
     type: OS::Neutron::Port
-    depends_on: cluster_subnet
     properties:
       network_id: { get_param: cluster_network_id }
       fixed_ips:
@@ -111,7 +110,6 @@ resources:
 
   login1_access:
     type: OS::Neutron::FloatingIP
-    depends_on: router
     properties:
       floating_network: public
       port_id: { get_resource: login1_port }
