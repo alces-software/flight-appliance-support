@@ -1,0 +1,67 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Add an Alces Storage Manager appliance to your existing environment
+
+parameters:
+  image:
+    type: string
+    label: Compute image
+    description: Select the Alces Compute image to use
+    constraints:
+    - custom_constraint: glance.image
+
+  cluster_network_id:
+    type: string
+    label: Cluster network ID
+    description: Enter the unique cluster network ID
+    constraints:
+      - custom_constraint: neutron.network
+
+  cluster_subnet_id:
+    type: string
+    label: Cluster subnet ID
+    description: Enter the unique cluster subnet ID
+    constraints:
+      - custom_constraint: neutron.subnet
+
+  admin_key:
+    type: string
+    label: Admin keypair
+    description: Select your keypair to use
+    constraints:
+      - custom_constraint: nova.keypair
+
+  cluster_name:
+    type: string
+    label: Cluster name
+    description: Enter the cluster/environment name
+
+resources:
+  app_manager:
+    type: OS::Nova::Server
+    properties:
+      name: app-manager
+      image: { get_param: image }
+      flavor: m1.medium 
+      key_name: { get_param: admin_key }
+      networks:
+        - port: { get_resource: app_manager_port }
+
+  app_manager_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: cluster_network_id }
+      fixed_ips:
+        - subnet_id: { get_param: cluster_subnet_id }
+
+  app_manager_access:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: public
+      port_id: { get_resource: app_manager_port }
+
+outputs:
+  app_manager_public_ip:
+    description: Access IP of Alces Application Manager
+    value: { get_attr: [ app_manager_access, floating_ip_address ] }

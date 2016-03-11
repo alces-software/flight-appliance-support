@@ -272,3 +272,49 @@ heat stack-create research1-storage-manager \
 The stack outputs will display the access IP for the Storage Manager appliance - gather this using `heat stack-show <stackname>`. 
 
 To access the Storage Manager - you must first log on to your cluster login node, and set a password for each of the users you wish to log into Storage Manager as, using the `passwd` command. Once a password has been set - you can gain access to the Storage Manager. 
+
+#Deploying an Application Manager
+To deploy an Alces Application Manager to your environment - perform the following steps: 
+
+Open the `app-manager.yaml` environment file, verify the settings - gathering any required information including `network_id` and `subnet_id` from the previously created network stack.
+
+A fully populated `app-manager.yaml` environment file should look like the following: 
+
+```yaml
+parameters:
+  # Enter the `cluster_name` value obtained from
+  # your infrastructure stack output
+  cluster_name: research1
+
+  # Enter the Alces Flight Application Manager
+  # image to deploy. Check the image exists in
+  # your environment using:
+  # `openstack image list`
+  image: centos7-app-manager-1.1.0
+
+  # Enter the `cluster_network` unique ID
+  # from the output of your network stack
+  cluster_network_id: '18e59ca4-7baf-4623-850e-a29cc013ade0'
+
+  # Enter the `cluster subnet` unique ID
+  # from the output of your network stack
+  cluster_subnet_id: '8cd55bda-349b-44bb-811e-d7ed86581ef0'
+
+  # Enter the name of your OpenStack
+  # key pair you wish to use. This
+  # provides cluster access
+  admin_key: keyname
+```
+
+Once you have confirmed your settings, perform the following command: 
+
+```bash
+heat stack-create research1-app-manager \
+	-e app-manager.yaml \
+	-t 60 -r \
+	-f templates/app-manager.yaml 
+```
+
+The stack outputs will display the access IP for the Application Manager appliance - gather this using `heat stack-show <stackname>`. 
+
+For information on the deployment of compute environments using the Application Manager appliance - please [see the following guide](https://github.com/alces-software/flight-appliance-support/blob/c8aa9cc788adf2d42718fddd154c65847b170e90/how-to/appliance/application-manager/deployment-openstack.rst)

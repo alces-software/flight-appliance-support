@@ -1,0 +1,23 @@
+parameters:
+  # Enter the `cluster_name` value obtained from
+  # your infrastructure stack output
+  cluster_name: research1
+
+  # Enter the Alces Flight Application Manager
+  # image to deploy. Check the image exists in
+  # your environment using:
+  # `openstack image list`
+  image: centos7-app-manager-1.1.0
+
+  # Enter the `cluster_network` unique ID
+  # from the output of your network stack
+  cluster_network_id: '18e59ca4-7baf-4623-850e-a29cc013ade0'
+
+  # Enter the `cluster subnet` unique ID
+  # from the output of your network stack
+  cluster_subnet_id: '8cd55bda-349b-44bb-811e-d7ed86581ef0'
+
+  # Enter the name of your OpenStack
+  # key pair you wish to use. This
+  # provides cluster access
+  admin_key: mykeyname
