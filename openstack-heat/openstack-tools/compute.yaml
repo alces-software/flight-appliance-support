@@ -20,3 +20,10 @@ parameters:
   # your environment using:
   # `openstack image list`
   image: centos7-compute-2.1.1
+
+  # Enter the proposed deployment, for
+  # example if deploying a HPC compute
+  # environment - enter `scheduler`,
+  # or if creating a Galaxy environment
+  # choose `galaxy`
+  environment_type: scheduler

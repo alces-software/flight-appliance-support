@@ -1,0 +1,27 @@
+parameters:
+  # Enter the `cluster_network` unique ID
+  # from the output of your network stack
+  cluster_network_id: 
+
+  # Enter the `cluster subnet` unique ID
+  # from the output of your network stack
+  cluster_subnet_id: 
+
+  # Enter the name of your cluster. This
+  # should be the name of your network
+  # stack, e.g. `research1`
+  cluster_name: research1
+
+  # Enter the Alces Flight Compute appliance
+  # image to deploy. Check the image exists in
+  # your environment using:
+  # `openstack image list`
+  image: centos7-compute-2.1.1
+
+  # Enter the proposed deployment, for
+  # example if deploying a HPC compute
+  # environment - enter `scheduler`,
+  # or if creating a Galaxy environment
+  # choose `galaxy`. The type must
+  # match the chosen `image` setting
+  environment_type: scheduler
