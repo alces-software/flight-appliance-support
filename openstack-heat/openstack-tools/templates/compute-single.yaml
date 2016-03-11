@@ -38,6 +38,13 @@ parameters:
     label: Node name
     description: Enter the hostname of the node to deploy
 
+  environment_type:
+    type: string
+    label: Environment type
+    description: Select the environment type to deploy
+    constraints:
+    - allowed_values: [ "galaxy", "scheduler" ]
+
 resources:
   node_config:
     type: OS::Heat::CloudConfig

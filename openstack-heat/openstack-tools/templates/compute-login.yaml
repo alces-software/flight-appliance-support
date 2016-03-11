@@ -37,6 +37,13 @@ parameters:
     constraints:
       - custom_constraint: neutron.subnet
 
+  environment_type:
+    type: string
+    label: Environment type
+    description: Select the environment type to deploy
+    constraints:
+    - allowed_values: [ "galaxy", "scheduler" ]
+
 resources:
   cluster_uuid:
     type: OS::Heat::RandomString
@@ -67,12 +74,13 @@ resources:
                       name: '%CLUSTER_NAME%'
                       role: 'master'
                       tags:
-                        scheduler_roles: ':master:'
+                        %ENVIRONMENT%_roles: ':master:'
                         storage_roles: ':master:'
                   params:
                     "%CLUSTER_NAME%": { get_param: cluster_name }
                     "%UUID%": { get_resource: cluster_uuid }
                     "%TOKEN%": { get_resource: cluster_token }
+                    "%ENVIRONMENT%": { get_param: environment_type }
 
   login1:
     type: OS::Nova::Server
