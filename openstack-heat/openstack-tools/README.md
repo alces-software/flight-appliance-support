@@ -222,6 +222,46 @@ Once you have completed the *network deployment* stage, a Galaxy environment can
 #Deploying a Storage Manager
 To deploy an Alces Storage Manager to your environment - perform the following steps: 
 
+Open and edit the `storage-manager.yaml` environment file, verify the settings - gathering any required information including `cluster_token`, `cluster_uuid`, `network_id` and `subnet_id` from previously created stacks. 
+
+A fully populated `storage-manager.yaml` environment file should look like the following: 
+
+```yaml
+parameters:
+  # Enter the `cluster_name` value obtained from
+  # your infrastructure stack output
+  cluster_name: research1
+
+  # Enter the Alces Flight Storage Manager
+  # image to deploy. Check the image exists in
+  # your environment using:
+  # `openstack image list`
+  image: centos7-storage-manager-1.0.0
+
+  # Enter the `cluster_network` unique ID
+  # from the output of your network stack
+  cluster_network_id: '18e59ca4-7baf-4623-850e-a29cc013ade0'
+
+  # Enter the `cluster subnet` unique ID
+  # from the output of your network stack
+  cluster_subnet_id: '8cd55bda-349b-44bb-811e-d7ed86581ef0'
+
+  # Enter the name of your OpenStack
+  # key pair you wish to use. This
+  # provides cluster access
+  admin_key: keyname
+
+  # Enter the `cluster_uuid` value obtained from
+  # your infrastructure stack output
+  cluster_uuid: '082293614169887316299151'
+
+  # Enter the `cluster_token` value obtained from
+  # your infrastructure stack output
+  cluster_token: 'QRikZj8l0SsuCuIV4jQb'
+```
+
+Once you have confirmed your settings, perform the following command:
+
 ```bash
 heat stack-create research1-storage-manager \
 	-e storage-manager.yaml \
