@@ -8,7 +8,7 @@ resources:
   cluster_network:
     type: OS::Neutron::Net
     properties:
-      name: { get_param: cluster_name }
+      name: { get_param: 'OS::stack_name' }
 
   cluster_subnet:
     type: OS::Neutron::Subnet
@@ -36,7 +36,7 @@ resources:
   cluster_sg:
     type: OS::Neutron::SecurityGroup
     properties:
-      name: { get_param: cluster_name }
+      name: { get_param: 'OS::stack_name' }
       description: Enable ping/SSH
       rules:
       - protocol: icmp
