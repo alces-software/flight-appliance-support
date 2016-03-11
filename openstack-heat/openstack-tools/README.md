@@ -13,8 +13,8 @@ The environment deployment guide includes end-to-end deployment of a complete re
 
 Navigate to the `openstack-heat/openstack-tools` directory within the previously cloned out Git repository, then continue with the below steps to start launching your environment. 
 
-##Network and infrastructure node deployment
-The following steps will automatically create a segregated cluster network for your compute hosts to live in, creating a completely isolated environment from other instances in your current project. The steps will also create a cluster master node, used to host scheduler services and run your environment. 
+##Network deployment
+The following steps will automatically create a segregated cluster network for your compute hosts to live in, creating a completely isolated environment from other instances in your current project. 
 
 Note - the values used in the Heat templates assume an Alces OpenStack installation. 
 
@@ -24,20 +24,12 @@ To begin, source the OpenStack RC file to authenticate to your project - this is
 source project-openrc.sh
 ```
 
-Open the ``infrastructure.yaml`` file for editing - this will configure your environment with the values included. 
-
-For each of the parameters in the file, edit them with your preferred choice - most importantly: 
-
-* `admin_key`
-* `cluster_name`
-
-Once you have finished editing the ``infrastructure.yaml`` file, save and exit - you can now deploy your network and login node using the following command: 
+Run the following command to create your network. Note, the `research1` stack name should be replaced with the exact value of the cluster name you wish to deploy, it is important this is the same throughout to ensure correct configuration.
 
 ```bash
 heat stack-create research1 \
-	-e infrastructure.yaml \
 	-t 60 -r \
-	-f templates/network-login.yaml
+	-f templates/network.yaml
 +--------------------------------------+------------+--------------------+----------------------+
 | id                                   | stack_name | stack_status       | creation_time        |
 +--------------------------------------+------------+--------------------+----------------------+
@@ -49,54 +41,7 @@ Once the stack has finished creating - gather information to be used later on wh
 
 ```bash
 [alces-cluster@login1(demo) ~]$ heat stack-show research1
-+-----------------------+---------------------------------------------------------------------------------------------------------------------------+
-| Property              | Value                                                                                                                     |
-+-----------------------+---------------------------------------------------------------------------------------------------------------------------+
-| capabilities          | []                                                                                                                        |
-| creation_time         | 2016-03-10T15:52:59Z                                                                                                      |
-| description           | Create an isolated network for use with an Alces                                                                          |
-|                       | compute environment.                                                                                                      |
-| disable_rollback      | False                                                                                                                     |
-| id                    | 166e5743-6f60-46c4-a718-64368a2c53b4                                                                                      |
-| links                 | http://10.78.254.10:8004/v1/06c2c75c14514ca0880e987398ec4a76/stacks/research1/166e5743-6f60-46c4-a718-64368a2c53b4 (self) |
-| notification_topics   | []                                                                                                                        |
-| outputs               | [                                                                                                                         |
-|                       |   {                                                                                                                       |
-|                       |     "output_value": "10.77.2.179",                                                                                        |
-|                       |     "description": "Access IP of cluster login node",                                                                     |
-|                       |     "output_key": "login1_public_ip"                                                                                      |
-|                       |   },                                                                                                                      |
-|                       |   {                                                                                                                       |
-|                       |     "output_value": "701986198346777918678467",                                                                           |
-|                       |     "description": "Cluster unique ID",                                                                                   |
-|                       |     "output_key": "cluster_uuid"                                                                                          |
-|                       |   },                                                                                                                      |
-|                       |   {                                                                                                                       |
-|                       |     "output_value": "ri8oYpt70INvLxtXFoWe",                                                                               |
-|                       |     "description": "Cluster unique token",                                                                                |
-|                       |     "output_key": "cluster_token"                                                                                         |
-|                       |   }                                                                                                                       |
-|                       | ]                                                                                                                         |
-| parameters            | {                                                                                                                         |
-|                       |   "OS::project_id": "06c2c75c14514ca0880e987398ec4a76",                                                                   |
-|                       |   "OS::stack_id": "166e5743-6f60-46c4-a718-64368a2c53b4",                                                                 |
-|                       |   "OS::stack_name": "research1",                                                                                          |
-|                       |   "image": "centos7-compute-2.1.1",                                                                                       |
-|                       |   "cluster_name": "research1",                                                                                            |
-|                       |   "compute_flavour": "m1.medium",                                                                                         |
-|                       |   "admin_key": "aws_ireland"                                                                                              |
-|                       | }                                                                                                                         |
-| parent                | None                                                                                                                      |
-| stack_name            | research1                                                                                                                 |
-| stack_owner           | stackadmin                                                                                                                |
-| stack_status          | CREATE_COMPLETE                                                                                                           |
-| stack_status_reason   | Stack CREATE completed successfully                                                                                       |
-| stack_user_project_id | ece4cdbf4b5a4ec59cce5b0d40acc710                                                                                          |
-| template_description  | Create an isolated network for use with an Alces                                                                          |
-|                       | compute environment.                                                                                                      |
-| timeout_mins          | 60                                                                                                                        |
-| updated_time          | None                                                                                                                      |
-+-----------------------+---------------------------------------------------------------------------------------------------------------------------+
+insert placeholder here 
 ```
 
 Select the `cluster_uuid`, `cluster_token`, `image` and `cluster_name` output values - and enter them into the appropriate fields in the `compute.yaml` file. For example, a populated `compute.yaml` file would look like: 

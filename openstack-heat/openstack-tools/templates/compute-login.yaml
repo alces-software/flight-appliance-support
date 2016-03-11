@@ -1,36 +1,41 @@
 heat_template_version: 2013-05-23
 
 description: >
-  Create an isolated network for use with an
-  Alces compute environment.
+  Add multiple compute nodes to your existing infrastructure stack
 
 parameters:
   cluster_name:
     type: string
     label: Cluster name
-    description: Enter the cluster name you wish to use
-
-  admin_key:
-    type: string
-    label: Cluster admin key
-    description: Enter the name of an OpenStack nova keypair for administrator access
-    constraints:
-    - custom_constraint: nova.keypair
-
-  image:
-    type: string
-    label: Cluster type
-    description: Choose an Alces ClusterWare image to use
-    constraints:
-    - custom_constraint: glance.image
+    description: Enter the cluster name
 
   compute_flavour:
     type: string
-    label: >
-      Compute node instance type
-    description: Compute node type
+    label: Compute node flavour
+    description: Enter the compute node flavour to use
     constraints:
     - custom_constraint: nova.flavor
+
+  image:
+    type: string
+    label: Compute image
+    description: Select the Alces Compute image to use
+    constraints:
+    - custom_constraint: glance.image
+
+  cluster_network_id:
+    type: string
+    label: Cluster network ID
+    description: Enter the unique cluster network ID
+    constraints:
+      - custom_constraint: neutron.network
+
+  cluster_subnet_id:
+    type: string
+    label: Cluster subnet ID
+    description: Enter the unique cluster subnet ID
+    constraints:
+      - custom_constraint: neutron.subnet
 
 resources:
   cluster_uuid:
@@ -44,45 +49,6 @@ resources:
     properties:
       length: 20
       sequence: lettersdigits
-
-  cluster_network:
-    type: OS::Neutron::Net
-    properties:
-      name: { get_param: cluster_name }
-
-  cluster_subnet:
-    type: OS::Neutron::Subnet
-    properties:
-      network_id: { get_resource: cluster_network }
-      cidr: 10.75.0.0/16
-      gateway_ip: 10.75.0.254
-      dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
-      allocation_pools:
-        - start: 10.75.0.2
-          end: 10.75.0.253
-
-  router:
-    type: OS::Neutron::Router
-    properties:
-      external_gateway_info:
-        network: public
-
-  router_interface:
-    type: OS::Neutron::RouterInterface
-    properties:
-      router_id: { get_resource: router }
-      subnet_id: { get_resource: cluster_subnet }
-
-  cluster_sg:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      name: { get_param: cluster_name }
-      description: Enable ping/SSH
-      rules:
-      - protocol: icmp
-      - protocol: tcp
-        port_range_min: 22
-        port_range_max: 22
 
   master_config:
     type: OS::Heat::CloudConfig
@@ -124,9 +90,9 @@ resources:
     type: OS::Neutron::Port
     depends_on: cluster_subnet
     properties:
-      network_id: { get_resource: cluster_network }
+      network_id: { get_param: cluster_network_id }
       fixed_ips:
-        - subnet_id: { get_resource: cluster_subnet }
+        - subnet_id: { get_param: cluster_subnet_id }
 
   login1_access:
     type: OS::Neutron::FloatingIP
