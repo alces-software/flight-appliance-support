@@ -1,11 +1,11 @@
 parameters:
   # Enter the `cluster_network` unique ID
   # from the output of your network stack
-  cluster_network_id: 
+  cluster_network_id: '18e59ca4-7baf-4623-850e-a29cc013ade0'
 
   # Enter the `cluster subnet` unique ID
   # from the output of your network stack
-  cluster_subnet_id: 
+  cluster_subnet_id: '8cd55bda-349b-44bb-811e-d7ed86581ef0'
 
   # Enter the name of your cluster. This
   # should be the name of your network
@@ -18,6 +18,11 @@ parameters:
   # `openstack image list`
   image: centos7-compute-2.1.1
 
+  # Select the flavor to deploy - this sets
+  # the number of CPU cores and memory
+  # available to the login node
+  compute_flavour: m1.medium
+
   # Enter the proposed deployment, for
   # example if deploying a HPC compute
   # environment - enter `scheduler`,
@@ -29,4 +34,4 @@ parameters:
   # Enter the name of your OpenStack
   # key pair you wish to use. This
   # provides cluster access
-  admin_key: mykeyname
+  admin_key: mykeyname 
