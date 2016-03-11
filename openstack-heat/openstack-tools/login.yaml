@@ -25,3 +25,8 @@ parameters:
   # choose `galaxy`. The type must
   # match the chosen `image` setting
   environment_type: scheduler
+
+  # Enter the name of your OpenStack
+  # key pair you wish to use. This
+  # provides cluster access
+  admin_key: mykeyname
