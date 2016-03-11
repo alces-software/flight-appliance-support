@@ -63,11 +63,12 @@ resources:
                       name: '%CLUSTER_NAME%'
                       role: 'slave'
                       tags:
-                        scheduler_roles: ':compute:'
+                        %ENVIRONMENT%_roles: ':compute:'
                   params:
                     "%CLUSTER_NAME%": { get_param: cluster_name }
                     "%UUID%": { get_param: cluster_uuid }
                     "%TOKEN%": { get_param: cluster_token }
+                    "%ENVIRONMENT%": { get_param: environment_type }
 
   node:
     type: OS::Nova::Server
