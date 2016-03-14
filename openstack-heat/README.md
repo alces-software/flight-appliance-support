@@ -13,6 +13,5 @@ The latest Alces images can be downloaded from:
 * [CentOS 7.1 Clusterware](#)
 
 ##Current deployment types
-The following deployment types are currently available: 
+[See the deployment methods](http://alces-flight-appliance-docs.readthedocs.org/en/latest/getting-started/deployment/deployment.html)
 
-* [Gridscheduler compute environment](#)

@@ -265,7 +265,7 @@ Changing password for alces.
 (current) UNIX password:
 ```
 
-The storage from your cluster is automatically added to the Storage Manager with no configuration necessary. See more on [using Alces Storage Manager](http://alces-flight-appliance-docs.readthedocs.org/en/aws-v1.2.1/clusterware-storage/alces-storage-overview.html) 
+The storage from your cluster is automatically added to the Storage Manager with no configuration necessary. See more on [using Alces Storage Manager](http://alces-flight-appliance-docs.readthedocs.org/en/latest/about/overview.html#alces-flight-storage-access-appliance) 
 
 ##Application Manager deployment
 To deploy an Alces Application Manager appliance to your environment, use the following commands: 

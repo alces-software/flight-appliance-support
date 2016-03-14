@@ -38,7 +38,7 @@ Access your environment
 Using your environment
 ----------------------
 
--  Read the `environment usage guides <http://alces-flight-appliance-docs.readthedocs.org/en/aws/getting-started/environment-usage/environment_usage.html>`_
+-  Read the `environment usage guides <http://alces-flight-appliance-docs.readthedocs.org/en/latest/getting-started/environment-usage/environment_usage.html>`_
 
 Destroying your environment
 ---------------------------
