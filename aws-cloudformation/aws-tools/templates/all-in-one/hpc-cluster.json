@@ -44,7 +44,7 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-556cd226"
+                "centos7": "ami-3758e244"
             }
         }
     },
@@ -268,11 +268,6 @@
                                 "#cloud-config",
                                 "\n",
                                 "hostname: login1",
-                                "\n",
-                                "fqdn: login1.", {
-                                    "Ref": "AWS::StackName"
-                                },
-                                ".alces.network",
                                 "\n",
                                 "write_files:",
                                 "\n",
