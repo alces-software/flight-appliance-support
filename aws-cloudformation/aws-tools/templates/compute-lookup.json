@@ -34,11 +34,6 @@
             "large": {
                 "instanceflavour": "c4.8xlarge"
            }
-        },
-        "AWSRegionArch2AMI": {
-            "eu-west-1": {
-                "centos7": "ami-556cd226"
-            }
         }
     },
     "Resources": {
@@ -130,7 +125,7 @@
             "Properties": {
                 "AssociatePublicIpAddress": "True",
                 "KeyName": { "Fn::GetAtt": [ "BaseInfo", "KEYNAME" ]},
-                "ImageId": "ami-556cd226",
+                "ImageId": "ami-3758e244",
                 "InstanceType": {
                     "Fn::FindInMap": [
                         "InstanceType2Flavour",

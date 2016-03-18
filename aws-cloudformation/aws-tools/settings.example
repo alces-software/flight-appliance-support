@@ -2,8 +2,8 @@
 #Alces Flight/AWS - compute settings
 CLUSTERNAME="alces-cluster"
 KEYPAIR=""
-LOGINAMI="ami-556cd226"
-COMPUTEAMI="ami-556cd226"
+LOGINAMI="ami-3758e244"
+COMPUTEAMI="ami-3758e244"
 STORAGEMGRAMI="ami-1710af64"
 APPMGRAMI="ami-ef68d49c"
 GALAXYAMI="ami-dd0eb0ae"
