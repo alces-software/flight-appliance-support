@@ -258,11 +258,6 @@
                                 "\n",
                                 "hostname: login1",
                                 "\n",
-                                "fqdn: login1.", {
-                                    "Ref": "AWS::StackName"
-                                },
-                                ".alces.network",
-                                "\n",
                                 "write_files:",
                                 "\n",
                                 "- content: |",
