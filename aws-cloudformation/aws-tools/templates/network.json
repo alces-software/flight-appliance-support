@@ -163,23 +163,6 @@
                 }
             }
         },
-        "InboundICMPACLEntry": {
-            "Type": "AWS::EC2::NetworkAclEntry",
-            "Properties": {
-                "NetworkAclId": {
-                    "Ref": "ClusterwareNetACL"
-                },
-                "RuleNumber": "210",
-                "Protocol": "1",
-                "RuleAction": "allow",
-                "Egress": "false",
-                "CidrBlock": "0.0.0.0/0",
-                "PortRange": {
-                    "From": "1",
-                    "To": "65535"
-                }
-            }
-        },
         "InboundFTPTCPACLEntry": {
             "Type": "AWS::EC2::NetworkAclEntry",
             "Properties": {
