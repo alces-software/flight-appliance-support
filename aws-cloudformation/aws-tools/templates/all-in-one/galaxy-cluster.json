@@ -55,7 +55,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "AWS::StackName" } 
+                        "Value": { "Ref": "AWS::StackName" }
                     }
                 ],
                 "CidrBlock": "10.75.0.0/16",
@@ -137,13 +137,81 @@
                 "NetworkAclId": {
                     "Ref": "ClusterwareNetACL"
                 },
-                "RuleNumber": "100",
-                "Protocol": "-1",
+                "RuleNumber": "120",
+                "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
                 "CidrBlock": {
                     "Ref": "NetworkCIDR"
                 },
+                "PortRange": {
+                    "From": "22",
+                    "To": "22"
+                }
+            }
+        },
+        "InboundHTTPACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "ClusterwareNetACL"
+                },
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {
+                    "From": "80",
+                    "To": "80"
+                }
+            }
+        },
+        "InboundHTTPSACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "ClusterwareNetACL"
+                },
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {
+                    "From": "443",
+                    "To": "443"
+                }
+            }
+        },
+        "InboundTCPACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "ClusterwareNetACL"
+                },
+                "RuleNumber": "200",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {
+                    "From": "1",
+                    "To": "65535"
+                }
+            }
+        },
+        "InboundICMPACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "ClusterwareNetACL"
+                },
+                "RuleNumber": "210",
+                "Protocol": "1",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
                 "PortRange": {
                     "From": "1",
                     "To": "65535"
@@ -184,30 +252,26 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "AWS::StackName" } 
+                        "Value": { "Ref": "AWS::StackName" }
                     }
                 ],
-                "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
+                "GroupDescription": "Open communication between cluster hosts",
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
                 },
                 "SecurityGroupIngress": [
                     {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "NetworkCIDR"
-                        }
-                    },
-                    {
                         "IpProtocol": "-1",
                         "FromPort": "0",
                         "ToPort": "65535",
-                        "CidrIp": {
-                            "Ref": "NetworkCIDR"
-                        }
-                    }
+                        "CidrIp": "10.75.0.0/24"
+                      },
+                      {
+                          "IpProtocol": "6",
+                          "FromPort": "22",
+                          "ToPort": "22",
+                          "CidrIp": { "Ref": "NetworkCIDR" }
+                      }
                 ],
                 "SecurityGroupEgress": [
                     {
