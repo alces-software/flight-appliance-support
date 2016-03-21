@@ -20,11 +20,11 @@
                 "large"
             ]
         },
-	"SpotPrice": {
-	    "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing.",
-	    "Type": "String",
-	    "Default": "0.50"
-	},
+        "SpotPrice": {
+            "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing.",
+            "Type": "String",
+            "Default": "0.50"
+        },
         "NetworkCIDR": {
             "Description": "Enter an address range that is permitted to access the Clusterware master node. Leave blank if unknown",
             "Type": "String",
@@ -40,7 +40,7 @@
             },
             "large": {
                 "instanceflavour": "c4.4xlarge"
-           }
+            }
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
@@ -55,7 +55,9 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "AWS::StackName" }
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
                     }
                 ],
                 "CidrBlock": "10.75.0.0/16",
@@ -70,7 +72,14 @@
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
                 },
-                "Tags": [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
+                "Tags": [
+                    {
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
+                        }
+                    }
+                ]
             }
         },
         "ClusterwarePublicNet": {
@@ -252,7 +261,9 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "AWS::StackName" }
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
                     }
                 ],
                 "GroupDescription": "Open communication between cluster hosts",
@@ -265,13 +276,15 @@
                         "FromPort": "0",
                         "ToPort": "65535",
                         "CidrIp": "10.75.0.0/24"
-                      },
-                      {
-                          "IpProtocol": "6",
-                          "FromPort": "22",
-                          "ToPort": "22",
-                          "CidrIp": { "Ref": "NetworkCIDR" }
-                      }
+                    },
+                    {
+                        "IpProtocol": "6",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "NetworkCIDR"
+                        }
+                    }
                 ],
                 "SecurityGroupEgress": [
                     {
@@ -296,7 +309,9 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        { "Ref": "AWS::Region" },
+                        {
+                            "Ref": "AWS::Region"
+                        },
                         "centos7"
                     ]
                 },
@@ -317,7 +332,9 @@
                 "InstanceType": {
                     "Fn::FindInMap": [
                         "InstanceType2Flavour",
-                        { "Ref": "InstanceFlavour" },
+                        {
+                            "Ref": "InstanceFlavour"
+                        },
                         "instanceflavour"
                     ]
                 },
@@ -333,7 +350,8 @@
                                 "\n",
                                 "hostname: master1",
                                 "\n",
-                                "fqdn: master1.", {
+                                "fqdn: master1.",
+                                {
                                     "Ref": "AWS::StackName"
                                 },
                                 ".alces.network",
@@ -375,59 +393,77 @@
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
                 "AssociatePublicIpAddress": "True",
-                "KeyName": { "Ref": "KeyPair" },
+                "KeyName": {
+                    "Ref": "KeyPair"
+                },
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        { "Ref": "AWS::Region" },
+                        {
+                            "Ref": "AWS::Region"
+                        },
                         "centos7"
                     ]
                 },
                 "InstanceType": {
                     "Fn::FindInMap": [
                         "InstanceType2Flavour",
-                        { "Ref": "InstanceFlavour" },
+                        {
+                            "Ref": "InstanceFlavour"
+                        },
                         "instanceflavour"
                     ]
                 },
-		"SpotPrice": {
-			"Ref": "SpotPrice"
-		},
-                "SecurityGroups": [ { "Ref": "AlcesClusterwareSecurityGroup" } ],
+                "SpotPrice": {
+                    "Ref": "SpotPrice"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "AlcesClusterwareSecurityGroup"
+                    }
+                ],
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
                             "",
                             [
-                              "#cloud-config",
-                              "\n",
-                              "write_files:","\n",
-                              "- content: |",
-                              "\n",
-                              "    cluster:",
-                              "\n",
-                              "      uuid: '11111111-2222-3333-444444444444'",
-                              "\n",
-                              "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
-                              "\n",
-                              "      name: ",
-                              { "Ref": "AWS::StackName" },
-                              "\n",
-                              "      role: 'slave'",
-                              "\n",
-                              "      master: ",
-                              { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "PrivateIp" ] },
-                              "\n",
-                              "      tags:",
-                              "\n",
-                              "        galaxy_roles: ':compute:'",
-                              "\n",
-                              "  owner: root:root",
-                              "\n",
-                              "  path: /opt/clusterware/etc/config.yml",
-                              "\n",
-                              "  permissions: '0640'",
-                              "\n"
+                                "#cloud-config",
+                                "\n",
+                                "write_files:",
+                                "\n",
+                                "- content: |",
+                                "\n",
+                                "    cluster:",
+                                "\n",
+                                "      uuid: '11111111-2222-3333-444444444444'",
+                                "\n",
+                                "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
+                                "\n",
+                                "      name: ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                "\n",
+                                "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                {
+                                    "Fn::GetAtt": [
+                                        "AlcesClusterwareMasterNode",
+                                        "PrivateIp"
+                                    ]
+                                },
+                                "\n",
+                                "      tags:",
+                                "\n",
+                                "        galaxy_roles: ':compute:'",
+                                "\n",
+                                "  owner: root:root",
+                                "\n",
+                                "  path: /opt/clusterware/etc/config.yml",
+                                "\n",
+                                "  permissions: '0640'",
+                                "\n"
                             ]
                         ]
                     }
@@ -453,15 +489,15 @@
                 ]
             }
         }
-        },
-        "Outputs": {
-                "AccessIP": {
-                        "Value": {
-                                "Fn::GetAtt": [
-                                        "AlcesClusterwareMasterNode",
-                                        "PublicIp"
-                                ]
-                        }
-                }
+    },
+    "Outputs": {
+        "AccessIP": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "AlcesClusterwareMasterNode",
+                    "PublicIp"
+                ]
+            }
         }
+    }
 }
