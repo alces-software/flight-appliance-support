@@ -233,6 +233,40 @@
                 }
             }
         },
+        "InboundVNCACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "ClusterwareNetACL"
+                },
+                "RuleNumber": "300",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": { "Ref": "NetworkCIDR" },
+                "PortRange": {
+                    "From": "5900",
+                    "To": "5920"
+                }
+            }
+        },
+        "InboundVNCWSACLEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "ClusterwareNetACL"
+                },
+                "RuleNumber": "301",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": { "Ref": "NetworkCIDR" },
+                "PortRange": {
+                    "From": "41360",
+                    "To": "41380"
+                }
+            }
+        },
         "OutboundACLEntry": {
             "Type": "AWS::EC2::NetworkAclEntry",
             "Properties": {
@@ -282,6 +316,38 @@
                         "FromPort": "0",
                         "ToPort": "65535",
                         "CidrIp": "10.75.0.0/24"
+                    },
+                    {
+                        "IpProtocol": "6",
+                        "FromPort": "5900",
+                        "ToPort": "5920",
+                        "CidrIp": {
+                           "Ref": "NetworkCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "6",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "CidrIp": {
+                            "Ref": "NetworkCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "6",
+                        "FromPort": "443",
+                        "ToPort": "443",
+                        "CidrIp": {
+                            "Ref": "NetworkCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "6",
+                        "FromPort": "64443",
+                        "ToPort": "64443",
+                        "CidrIp": {
+                            "Ref": "NetworkCIDR"
+                        }
                     },
                     {
                         "IpProtocol": "6",

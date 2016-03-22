@@ -44,7 +44,7 @@
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-556cd226"
+                "centos7": "ami-640ab317"
             }
         }
     },
@@ -216,7 +216,7 @@
                 "NetworkAclId": {
                     "Ref": "ClusterwareNetACL"
                 },
-                "RuleNumber": "120",
+                "RuleNumber": "140",
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
@@ -293,6 +293,30 @@
                         "FromPort": "0",
                         "ToPort": "65535",
                         "CidrIp": "10.75.0.0/24"
+                    },
+                    {
+                        "IpProtocol": "6",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "CidrIp": {
+                            "Ref": "NetworkCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "6",
+                        "FromPort": "443",
+                        "ToPort": "443",
+                        "CidrIp": {
+                            "Ref": "NetworkCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "6",
+                        "FromPort": "64443",
+                        "ToPort": "64443",
+                        "CidrIp": {
+                            "Ref": "NetworkCIDR"
+                        }
                     },
                     {
                         "IpProtocol": "6",
