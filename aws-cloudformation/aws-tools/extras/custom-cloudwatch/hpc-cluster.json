@@ -231,7 +231,32 @@
             }
         },
         "MasterIAM": {
-          "Type": "AWS::IAM::Group"
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Statement": [ {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ec2.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ]
+                }]
+            }
+          }
+        },
+        "MasterIAMProfile": {
+          "Type": "AWS::IAM::InstanceProfile",
+          "Properties": {
+            "Path": "/",
+            "Roles": [
+              { "Ref": "MasterIAM"
+              }
+            ]
+          }
         },
         "MetricData": {
           "Type": "AWS::IAM::Policy",
@@ -249,7 +274,7 @@
                 ]
                 }]
             },
-            "Groups": [ { "Ref": "MasterIAM" } ]
+            "Roles": [ { "Ref": "MasterIAM" } ]
           }
         },
         "AlcesClusterwareMasterNode": {
@@ -270,6 +295,9 @@
                         },
                         "centos7"
                     ]
+                },
+                "IamInstanceProfile": {
+                  "Ref": "MasterIAMProfile"
                 },
                 "NetworkInterfaces": [
                     {
