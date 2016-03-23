@@ -29,7 +29,7 @@
             },
             "large": {
                 "instanceflavour": "c4.8xlarge"
-           }
+            }
         },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
@@ -44,7 +44,9 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "AWS::StackName" }
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
                     }
                 ],
                 "CidrBlock": "10.75.0.0/16",
@@ -59,7 +61,14 @@
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
                 },
-                "Tags": [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
+                "Tags": [
+                    {
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
+                        }
+                    }
+                ]
             }
         },
         "ClusterwarePublicNet": {
@@ -173,7 +182,9 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": { "Ref": "AWS::StackName" }
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
                     }
                 ],
                 "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
@@ -221,7 +232,9 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
-                        { "Ref": "AWS::Region" },
+                        {
+                            "Ref": "AWS::Region"
+                        },
                         "centos7"
                     ]
                 },
@@ -239,10 +252,20 @@
                         }
                     }
                 ],
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": "500"
+                        }
+                    }
+                ],
                 "InstanceType": {
                     "Fn::FindInMap": [
                         "InstanceType2Flavour",
-                        { "Ref": "InstanceFlavour" },
+                        {
+                            "Ref": "InstanceFlavour"
+                        },
                         "instanceflavour"
                     ]
                 },
@@ -291,64 +314,63 @@
                 }
             }
         }
-   },
-        "Outputs": {
-                "VPCID": {
-                        "Value": {
-                                "Ref": "ClusterwareVPC"
-                        }
-                },
-                "GATEWAYID": {
-                        "Value": {
-                                "Ref": "ClusterwareGateway"
-                        }
-                },
-                "ROUTETABLEID": {
-                        "Value": {
-                                "Ref": "ClusterwareRouteTable"
-                        }
-                },
-                "SUBNETID": {
-                        "Value": {
-                                "Ref": "ClusterwarePublicNet"
-                        }
-                },
-                "NETWORKACL": {
-                        "Value": {
-                                "Ref": "ClusterwareNetACL"
-                        }
-                },
-                "SECURITYGROUP": {
-                        "Value": {
-                                "Ref": "AlcesClusterwareSecurityGroup"
-                        }
-                },
-                "KEYNAME": {
-                        "Value": {
-                                "Ref": "KeyPair"
-                        }
-                },
-                "LOGINIP": {
-                       "Value": {
-                               "Fn::GetAtt": [
-                               "AlcesClusterwareMasterNode",
-                               "PrivateIp"
-                       ]
-                    }
-                },
-                "ACCESSIP": {
-                       "Value": {
-                               "Fn::GetAtt": [
-                               "AlcesClusterwareMasterNode",
-                               "PublicIp"
-                       ]
-                    }
-                },
-                "CLUSTERNAME": {
-                        "Value": {
-                                "Ref": "AWS::StackName"
-                        }
-                }
-
+    },
+    "Outputs": {
+        "VPCID": {
+            "Value": {
+                "Ref": "ClusterwareVPC"
+            }
+        },
+        "GATEWAYID": {
+            "Value": {
+                "Ref": "ClusterwareGateway"
+            }
+        },
+        "ROUTETABLEID": {
+            "Value": {
+                "Ref": "ClusterwareRouteTable"
+            }
+        },
+        "SUBNETID": {
+            "Value": {
+                "Ref": "ClusterwarePublicNet"
+            }
+        },
+        "NETWORKACL": {
+            "Value": {
+                "Ref": "ClusterwareNetACL"
+            }
+        },
+        "SECURITYGROUP": {
+            "Value": {
+                "Ref": "AlcesClusterwareSecurityGroup"
+            }
+        },
+        "KEYNAME": {
+            "Value": {
+                "Ref": "KeyPair"
+            }
+        },
+        "LOGINIP": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "AlcesClusterwareMasterNode",
+                    "PrivateIp"
+                ]
+            }
+        },
+        "ACCESSIP": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "AlcesClusterwareMasterNode",
+                    "PublicIp"
+                ]
+            }
+        },
+        "CLUSTERNAME": {
+            "Value": {
+                "Ref": "AWS::StackName"
+            }
         }
+    }
 }

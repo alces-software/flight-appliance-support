@@ -66,6 +66,14 @@
 						"Ref": "SUBNETID"
 					}
 				}],
+				"BlockDeviceMappings": [
+						{
+								"DeviceName": "/dev/sda1",
+								"Ebs": {
+										"VolumeSize": "500"
+								}
+						}
+				],
 				"InstanceType": {
 					"Ref": "LOGINTYPE"
 				},
@@ -79,13 +87,13 @@
 								"#cloud-config",
 								"\n",
 								"hostname: login1",
-                                                                "\n",
-                                                                "fqdn: login1.",
-                                                                {
-                                                                "Ref": "CLUSTERNAME"
-                                                                },
-                                                                ".alces.network",
-                                                                "\n",
+                "\n",
+                "fqdn: login1.",
+                {
+                "Ref": "CLUSTERNAME"
+                },
+                ".alces.network",
+                "\n",
 								"write_files:",
 								"\n",
 								"- content: |",
@@ -106,8 +114,8 @@
 								"\n",
 								"        scheduler_roles: ':master:'",
 								"\n",
-                                                                "        storage_roles: ':master:'",
-                                                                "\n",
+                "        storage_roles: ':master:'",
+                "\n",
 								"  owner: root:root",
 								"\n",
 								"  path: /opt/clusterware/etc/config.yml",
