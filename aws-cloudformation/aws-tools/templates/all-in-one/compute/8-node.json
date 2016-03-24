@@ -418,8 +418,6 @@
                                 "\n",
                                 "        scheduler_roles: ':compute:'",
                                 "\n",
-                                "      quorum: 3",
-                                "\n",
                                 "  owner: root:root",
                                 "\n",
                                 "  path: /opt/clusterware/etc/config.yml",
