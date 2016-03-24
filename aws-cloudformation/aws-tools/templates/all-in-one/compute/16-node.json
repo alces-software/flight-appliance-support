@@ -433,6 +433,12 @@
                 }
             }
         },
+        "PlacementGroup": {
+            "Type": "AWS::EC2::PlacementGroup",
+            "Properties": {
+                "Strategy": "cluster"
+            }
+        },
         "ComputeGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "DependsOn": "AlcesClusterwareMasterNode",
@@ -440,6 +446,9 @@
                 "DesiredCapacity": "16",
                 "LaunchConfigurationName": {
                     "Ref": "ComputeConfig"
+                },
+                "PlacementGroup": {
+                    "Ref": "PlacementGroup"
                 },
                 "Tags": [
                     {
