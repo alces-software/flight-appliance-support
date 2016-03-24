@@ -11,6 +11,16 @@
             "AllowedPattern": "[0-9]",
             "Default": "3"
         },
+        "SubnetId": {
+	    "Description": "Enter the ID of your existing subnet. If you wish to have one created for you, select None. The SecurityGroup field must also be set to None.",
+            "Type": "String",
+            "Default": "None"
+        },
+	"SecurityGroup": {
+	    "Description": "Enter the ID of your existing security group. If you wish to have one created for you, select None. The Subnet ID field must also be set to None.",
+            "Type": "String",
+            "Default": "None"
+        },
         "InstanceFlavour": {
             "Description": "Select the compute node instance flavour",
             "Type": "String",
@@ -48,6 +58,16 @@
             }
         }
     },
+    "Conditions": {
+        "CreateNetwork": {
+          "Fn::Equals" : [
+            {
+              "Ref" : "SubnetId"
+            },
+            "None"
+          ]
+    }
+    },
     "Resources": {
         "ClusterwareVPC": {
             "Type": "AWS::EC2::VPC",
@@ -63,7 +83,8 @@
                 "CidrBlock": "10.75.0.0/16",
                 "EnableDnsSupport": "true",
                 "EnableDnsHostnames": "true"
-            }
+            },
+            "Condition": "CreateNetwork"
         },
         "ClusterwareRouteTable": {
             "Type": "AWS::EC2::RouteTable",
@@ -80,7 +101,8 @@
                         }
                     }
                 ]
-            }
+            },
+	    "Condition": "CreateNetwork"
         },
         "ClusterwarePublicNet": {
             "Type": "AWS::EC2::Subnet",
@@ -89,11 +111,13 @@
                     "Ref": "ClusterwareVPC"
                 },
                 "CidrBlock": "10.75.0.0/24"
-            }
+            },
+	    "Condition": "CreateNetwork"
         },
         "ClusterwareGateway": {
             "Type": "AWS::EC2::InternetGateway",
-            "DependsOn": "ClusterwareVPC"
+            "DependsOn": "ClusterwareVPC",
+	    "Condition": "CreateNetwork"
         },
         "ClusterwareAttachGW": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
@@ -105,7 +129,8 @@
                 "InternetGatewayId": {
                     "Ref": "ClusterwareGateway"
                 }
-            }
+            },
+	    "Condition": "CreateNetwork"
         },
         "ClusterwareRoute": {
             "Type": "AWS::EC2::Route",
@@ -118,7 +143,8 @@
                 "GatewayId": {
                     "Ref": "ClusterwareGateway"
                 }
-            }
+            },
+	    "Condition": "CreateNetwork"
         },
         "SubnetToRouteTable": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
@@ -130,7 +156,8 @@
                 "RouteTableId": {
                     "Ref": "ClusterwareRouteTable"
                 }
-            }
+            },
+	    "Condition": "CreateNetwork"
         },
         "ClusterwareNetACL": {
             "Type": "AWS::EC2::NetworkAcl",
@@ -138,7 +165,8 @@
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
                 }
-            }
+            },
+	    "Condition": "CreateNetwork"
         },
         "InboundSSHACLEntry": {
             "Type": "AWS::EC2::NetworkAclEntry",
@@ -157,7 +185,8 @@
                     "From": "1",
                     "To": "65535"
                 }
-            }
+            },
+	    "Condition": "CreateNetwork"
         },
         "OutboundACLEntry": {
             "Type": "AWS::EC2::NetworkAclEntry",
@@ -174,7 +203,8 @@
                     "From": "1",
                     "To": "65535"
                 }
-            }
+            },
+	    "Condition": "CreateNetwork"
         },
         "ClusterwareSubnetLink": {
             "Type": "AWS::EC2::SubnetNetworkAclAssociation",
@@ -185,7 +215,8 @@
                 "NetworkAclId": {
                     "Ref": "ClusterwareNetACL"
                 }
-            }
+            },
+	    "Condition": "CreateNetwork"
         },
         "AlcesClusterwareSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
@@ -228,11 +259,11 @@
                         "CidrIp": "0.0.0.0/0"
                     }
                 ]
-            }
+            },
+	    "Condition": "CreateNetwork"
         },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": "ClusterwareAttachGW",
             "Properties": {
                 "Tags": [
                     {
@@ -254,14 +285,31 @@
                         "AssociatePublicIpAddress": "True",
                         "DeviceIndex": "0",
                         "GroupSet": [
-                            {
+                          {
+                            "Fn::If": [
+                              "CreateNetwork",
+                              {
                                 "Ref": "AlcesClusterwareSecurityGroup"
-                            }
+                              },
+                              {
+                                "Ref": "SecurityGroup"
+                              }
+                            ]
+                          }
                         ],
-                        "SubnetId": {
-                            "Ref": "ClusterwarePublicNet"
+                        "SubnetId":
+                          {
+                            "Fn::If": [
+                              "CreateNetwork",
+                              {
+                                "Ref": "ClusterwarePublicNet"
+                              },
+                              {
+                                "Ref": "SubnetId"
+                              }
+                            ]
+                          }
                         }
-                    }
                 ],
                 "BlockDeviceMappings": [
                     {
@@ -362,9 +410,17 @@
                     "Ref": "SpotPrice"
                 },
                 "SecurityGroups": [
-                    {
+                  {
+                    "Fn::If": [
+                      "CreateNetwork",
+                      {
                         "Ref": "AlcesClusterwareSecurityGroup"
-                    }
+                      },
+                      {
+                        "Ref": "SecurityGroup"
+                      }
+                    ]
+                  }
                 ],
                 "UserData": {
                     "Fn::Base64": {
@@ -429,9 +485,17 @@
                 "MinSize": "1",
                 "MaxSize": "100",
                 "VPCZoneIdentifier": [
-                    {
+                  {
+                    "Fn::If": [
+                      "CreateNetwork",
+                      {
                         "Ref": "ClusterwarePublicNet"
-                    }
+                      },
+                      {
+                        "Ref": "SubnetId"
+                      }
+                    ]
+                  }
                 ]
             }
         },
