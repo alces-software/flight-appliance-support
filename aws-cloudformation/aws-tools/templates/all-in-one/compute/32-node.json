@@ -20,6 +20,21 @@
             "Type": "String",
             "Default": "0.50"
         },
+        "SystemDiskSize": {
+            "Description": "Select the size in GB of root system disk to use for all deployed nodes in the environment",
+            "Type": "String",
+            "Default": "500"
+        },
+        "LoginType": {
+            "Description": "Select the login node instance type to deploy - this defines the number of cores and memory available",
+            "Type": "String",
+            "Default": "t2.large",
+            "AllowedValues": [
+                "t2.large",
+                "c3.large",
+                "c4.large"
+            ]
+        },
         "NetworkCIDR": {
             "Description": "Enter an address range that is permitted to access the Clusterware master node. Leave blank if unknown",
             "Type": "String",
@@ -341,11 +356,11 @@
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
-                            "VolumeSize": "1000"
+                            "VolumeSize": { "Ref": "SystemDiskSize" }
                         }
                     }
                 ],
-                "InstanceType": "c4.large",
+                "InstanceType": { "Ref": "LoginType" },
                 "KeyName": {
                     "Ref": "KeyPair"
                 },
