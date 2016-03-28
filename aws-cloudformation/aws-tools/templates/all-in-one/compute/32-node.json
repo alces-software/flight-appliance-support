@@ -541,7 +541,7 @@
                                 "\n",
                                 "      echo '",
                                 { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "PrivateIp" ] },
-                                ":/sharedscratch /sharedscratch ext4 defaults 0 0' >> etc/fstab ",
+                                ":/sharedscratch /sharedscratch xfs defaults 0 0' >> etc/fstab ",
                                 "\n",
                                 "      mount -a",
                                 "\n",
