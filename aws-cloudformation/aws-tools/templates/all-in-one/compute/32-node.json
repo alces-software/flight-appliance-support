@@ -35,6 +35,10 @@
                 "c4.large"
             ]
         },
+        "SharedDataSize": {
+            "Description": "Enter the size in GB of the shared NFS area to deploy. If no shared area is required, enter None",
+            "Type": "String",
+        },
         "NetworkCIDR": {
             "Description": "Enter an address range that is permitted to access the Clusterware master node. Leave blank if unknown",
             "Type": "String",
@@ -55,6 +59,14 @@
             "Fn::Equals": [
                 {
                     "Ref": "SubnetId"
+                },
+                "None"
+            ]
+        },
+        "CreateSharedData": {
+            "Fn::Not": [
+                {
+                    "Ref": "SharedDataSize"
                 },
                 "None"
             ]
@@ -300,6 +312,25 @@
             },
             "Roles": [ { "Ref": "MasterIAM" } ]
           }
+        },
+        "SharedData": {
+            "Type": "AWS::EC2::Volume",
+            "Properties": {
+                "VolumeType": "io1",
+                "Size": { "Ref": "SharedDataSize" },
+                "Iops": "1000",
+                "AvailabilityZone": { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "AvailabilityZone" ] }
+            },
+            "Conditions": "CreateSharedData"
+        },
+        "AttachSharedData" {
+            "Type": "AWS::EC2::VolumeAttachment",
+            "Properties": {
+                "Device": "xvdb",
+                "InstanceId": { "Ref": "AlcesClusterwareMasterNode" },
+                "VolumeId": { "Ref": "SharedData" }
+            },
+            "Conditions": "CreateSharedData"
         },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
