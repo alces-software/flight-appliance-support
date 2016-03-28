@@ -527,41 +527,63 @@
                 ]
             }
         },
-        "ScaleUp": {
+        "ScaleUp10": {
             "Type": "AWS::AutoScaling::ScalingPolicy",
             "Properties": {
-                "AdjustmentType": "ChangeInCapacity",
+                "AdjustmentType": "PercentChangeInCapacity",
                 "AutoScalingGroupName": {
                     "Ref": "ComputeGroup"
                 },
                 "Cooldown": "3300",
-                "ScalingAdjustment": "1"
+                "ScalingAdjustment": "10"
             }
         },
-        "ScaleDown": {
+        "ScaleDown10": {
             "Type": "AWS::AutoScaling::ScalingPolicy",
             "Properties": {
-                "AdjustmentType": "ChangeInCapacity",
+                "AdjustmentType": "PercentChangeInCapacity",
                 "AutoScalingGroupName": {
                     "Ref": "ComputeGroup"
                 },
                 "Cooldown": "3300",
-                "ScalingAdjustment": "-1"
+                "ScalingAdjustment": "-10"
             }
         },
-        "CPUAlarmHigh": {
+        "ScaleUp25": {
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+            "Properties": {
+                "AdjustmentType": "PercentChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "ComputeGroup"
+                },
+                "Cooldown": "3300",
+                "ScalingAdjustment": "25"
+            }
+        },
+        "ScaleDown25": {
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+            "Properties": {
+                "AdjustmentType": "PercentChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "ComputeGroup"
+                },
+                "Cooldown": "3300",
+                "ScalingAdjustment": "-25"
+            }
+        },
+        "CPUAlarmHigh10": {
             "Type": "AWS::CloudWatch::Alarm",
             "Properties": {
-                "AlarmDescription": "Scale-up if CPU > 90% for 20 minutes",
-                "MetricName": "CPUUtilization",
-                "Namespace": "AWS/EC2",
+                "AlarmDescription": "Scale-up by 10% if currently queued jobs > 50 for 20 minutes",
+                "MetricName": "Queued",
+                "Namespace": "ALCES/SGE",
                 "Statistic": "Average",
                 "Period": "60",
                 "EvaluationPeriods": "20",
                 "Threshold": "90",
                 "AlarmActions": [
                     {
-                        "Ref": "ScaleUp"
+                        "Ref": "ScaleUp10"
                     }
                 ],
                 "Dimensions": [
@@ -575,19 +597,19 @@
                 "ComparisonOperator": "GreaterThanThreshold"
             }
         },
-        "CPUAlarmLow": {
+        "CPUAlarmLow10": {
             "Type": "AWS::CloudWatch::Alarm",
             "Properties": {
                 "AlarmDescription": "Scale-down if CPU < 10% for 55 minutes",
-                "MetricName": "CPUUtilization",
-                "Namespace": "AWS/EC2",
+                "MetricName": "Queued",
+                "Namespace": "ALCES/SGE",
                 "Statistic": "Average",
                 "Period": "60",
                 "EvaluationPeriods": "55",
                 "Threshold": "10",
                 "AlarmActions": [
                     {
-                        "Ref": "ScaleDown"
+                        "Ref": "ScaleDown10"
                     }
                 ],
                 "Dimensions": [
@@ -599,6 +621,32 @@
                     }
                 ],
                 "ComparisonOperator": "LessThanThreshold"
+            }
+        },
+        "CPUAlarmHigh25": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "Scale-up by 25% if currently queued jobs > 100 for 20 minutes",
+                "MetricName": "Queued",
+                "Namespace": "ALCES/SGE",
+                "Statistic": "Average",
+                "Period": "60",
+                "EvaluationPeriods": "20",
+                "Threshold": "100",
+                "AlarmActions": [
+                    {
+                        "Ref": "ScaleUp25"
+                    }
+                ],
+                "Dimensions": [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": {
+                            "Ref": "ComputeGroup"
+                        }
+                    }
+                ],
+                "ComparisonOperator": "GreaterThanThreshold"
             }
         }
     },
