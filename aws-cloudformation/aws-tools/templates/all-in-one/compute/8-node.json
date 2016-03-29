@@ -302,7 +302,8 @@
               "Statement": [ {
                 "Effect": "Allow",
                 "Action": [
-                  "cloudwatch:PutMetricData"
+                  "cloudwatch:PutMetricData",
+                  "autoscaling:DescribeAutoScalingGroups"
                 ],
                 "Resource": [
                   "*"
@@ -314,6 +315,7 @@
         },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
+            "DependsOn": "ClusterwarePublicNet",
             "Properties": {
                 "Tags": [
                     {
@@ -367,7 +369,7 @@
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
-                            "VolumeSize": { "Fn::FindInMap": [ "LoginType2SystemDisk", { "Ref": "LoginType" }, "rootdisk" ] }
+                            "VolumeSize": { "Fn::FindInMap": [ "LoginType2SystemDisk", { "Ref": "LoginType" }, "rootdisk"] }
                         }
                     }
                 ],
@@ -385,6 +387,22 @@
                                 "hostname: login1",
                                 "\n",
                                 "write_files:",
+                                "\n",
+                                "- content: |",
+                                "\n",
+                                "    #!/bin/bash -l",
+                                "\n",
+                                "    computegroup=\"INSERTGROUP\"",
+                                "\n",
+                                "    timestamp=$(date + '%Y-%m-%d'T'%T'.000Z)",
+                                "\n",
+                                "    queued=$(qstat -u \\* | awk 'NR > 2{print $5}' | wc -l)",
+                                "\n",
+                                "    /opt/clusterware/opt/aws/bin/aws --region \"eu-west-1\" cloudwatch put-metric-data --metric-name Queued --namespace \"ALCES/SGE\" --dimensions \"AutoScalingGroupName=${computegroup}\" --value $queued --timestamp $timestamp",
+                                "\n",
+                                "  path: /opt/alces-sge-cloudwatch.sh",
+                                "\n",
+                                "  permissions: '0700'",
                                 "\n",
                                 "- content: |",
                                 "\n",
@@ -410,7 +428,10 @@
                                 "  path: /opt/clusterware/etc/config.yml",
                                 "\n",
                                 "  permissions: '0640'",
-                                "\n"
+                                "\n",
+                                "runcmd:",
+                                "\n",
+                                "  - echo \"5 * * * * alces /opt/alces-sge-cloudwatch.sh\" >> /etc/crontab"
                             ]
                         ]
                     }
@@ -508,8 +529,7 @@
         },
         "ComputeGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
-            "DependsOn": "AlcesClusterwareMasterNode",
-            "Properties": {
+                "Properties": {
                 "DesiredCapacity": "8",
                 "LaunchConfigurationName": {
                     "Ref": "ComputeConfig"

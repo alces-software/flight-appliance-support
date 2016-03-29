@@ -38,6 +38,7 @@
         "SharedDataSize": {
             "Description": "Enter the size in GB of the shared NFS area to deploy. If no shared area is required, enter None",
             "Type": "String",
+            "Default": "5000"
         },
         "NetworkCIDR": {
             "Description": "Enter an address range that is permitted to access the Clusterware master node. Leave blank if unknown",
@@ -45,13 +46,6 @@
             "Default": "0.0.0.0/0",
             "AllowedPattern": "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/[0-9]{1,2}",
             "ConstraintDescription": "Please specify a valid IP range, e.g. 101.21.2.0/16"
-        }
-    },
-    "Mappings": {
-        "AWSRegionArch2AMI": {
-            "eu-west-1": {
-                "centos7": "ami-3758e244"
-            }
         }
     },
     "Conditions": {
@@ -64,12 +58,23 @@
             ]
         },
         "CreateSharedData": {
-            "Fn::Not": [
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
                 {
-                    "Ref": "SharedDataSize"
+                  "Ref": "SharedDataSize"
                 },
                 "None"
-            ]
+              ]
+            }
+          ]
+        }
+    },
+    "Mappings": {
+        "AWSRegionArch2AMI": {
+            "eu-west-1": {
+                "centos7": "ami-3758e244"
+            }
         }
     },
     "Resources": {
@@ -321,19 +326,20 @@
                 "Iops": "1000",
                 "AvailabilityZone": { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "AvailabilityZone" ] }
             },
-            "Conditions": "CreateSharedData"
+            "Condition": "CreateSharedData"
         },
-        "AttachSharedData" {
+        "AttachSharedData": {
             "Type": "AWS::EC2::VolumeAttachment",
             "Properties": {
                 "Device": "xvdb",
                 "InstanceId": { "Ref": "AlcesClusterwareMasterNode" },
                 "VolumeId": { "Ref": "SharedData" }
             },
-            "Conditions": "CreateSharedData"
+            "Condition": "CreateSharedData"
         },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
+            "DependsOn": "ClusterwarePublicNet",
             "Properties": {
                 "Tags": [
                     {
@@ -408,6 +414,22 @@
                                 "\n",
                                 "- content: |",
                                 "\n",
+                                "    #!/bin/bash -l",
+                                "\n",
+                                "    computegroup=\"INSERTGROUP\"",
+                                "\n",
+                                "    timestamp=$(date + '%Y-%m-%d'T'%T'.000Z)",
+                                "\n",
+                                "    queued=$(qstat -u \\* | awk 'NR > 2{print $5}' | wc -l)",
+                                "\n",
+                                "    /opt/clusterware/opt/aws/bin/aws --region \"eu-west-1\" cloudwatch put-metric-data --metric-name Queued --namespace \"ALCES/SGE\" --dimensions \"AutoScalingGroupName=${computegroup}\" --value $queued --timestamp $timestamp",
+                                "\n",
+                                "  path: /opt/alces-sge-cloudwatch.sh",
+                                "\n",
+                                "  permissions: '0700'",
+                                "\n",
+                                "- content: |",
+                                "\n",
                                 "    #!/bin/bash",
                                 "\n",
                                 "    checkdisk=$(fdisk -l | grep xvdb)",
@@ -434,7 +456,7 @@
                                 "\n",
                                 "      echo \"No disk detected\"",
                                 "\n",
-                                "  fi"
+                                "  fi",
                                 "\n",
                                 "  path: /tmp/disk-format",
                                 "\n",
@@ -464,10 +486,12 @@
                                 "  path: /opt/clusterware/etc/config.yml",
                                 "\n",
                                 "  permissions: '0640'",
-                                "\n"
+                                "\n",
                                 "runcmd:",
                                 "\n",
-                                "  - /tmp/disk-format"
+                                "  - /tmp/disk-format",
+                                "\n",
+                                "  - echo \"5 * * * * /opt/alces-sge-cloudwatch.sh\" >> /etc/crontab"
                             ]
                         ]
                     }
@@ -527,8 +551,6 @@
                                 "\n",
                                 "write_files:",
                                 "\n",
-                                "- content: |",
-                                "\n",
                                 "    #!/bin/bash",
                                 "\n",
                                 "    diskcheck=$(showmount -e ",
@@ -587,10 +609,10 @@
                                 "  path: /opt/clusterware/etc/config.yml",
                                 "\n",
                                 "  permissions: '0640'",
-                                "\n"
+                                "\n",
                                 "runcmd:",
                                 "\n",
-                                "  - /tmp/disk-format",
+                                "  - /tmp/disk-format"
                             ]
                         ]
                     }
