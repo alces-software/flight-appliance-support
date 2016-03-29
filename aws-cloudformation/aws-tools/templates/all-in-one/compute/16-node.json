@@ -358,6 +358,14 @@
                         "Ebs": {
                             "VolumeSize": { "Ref": "SystemDiskSize" }
                         }
+                    },
+                    {
+                        "DeviceName": "/dev/sdb",
+                        "VirtualName": "ephemeral0"
+                    },
+                    {
+                        "DeviceName": "/dev/sdc",
+                        "VirtualName": "ephemeral1"
                     }
                 ],
                 "InstanceType": { "Ref": "LoginType" },
