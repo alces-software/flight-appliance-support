@@ -453,6 +453,9 @@
                         "centos7"
                     ]
                 },
+                "IamInstanceProfile": {
+                  "Ref": "MasterIAMProfile"
+                },
                 "InstanceType": "c4.large",
                 "BlockDeviceMappings": [
                     {

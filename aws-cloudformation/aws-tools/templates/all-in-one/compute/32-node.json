@@ -35,11 +35,6 @@
                 "c4.large"
             ]
         },
-        "SharedDataSize": {
-            "Description": "Enter the size in GB of the shared NFS area to deploy. If no shared area is required, enter None",
-            "Type": "String",
-            "Default": "5000"
-        },
         "NetworkCIDR": {
             "Description": "Enter an address range that is permitted to access the Clusterware master node. Leave blank if unknown",
             "Type": "String",
@@ -56,18 +51,6 @@
                 },
                 "None"
             ]
-        },
-        "CreateSharedData": {
-          "Fn::Not": [
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "SharedDataSize"
-                },
-                "None"
-              ]
-            }
-          ]
         }
     },
     "Mappings": {
@@ -318,25 +301,6 @@
             "Roles": [ { "Ref": "MasterIAM" } ]
           }
         },
-        "SharedData": {
-            "Type": "AWS::EC2::Volume",
-            "Properties": {
-                "VolumeType": "io1",
-                "Size": { "Ref": "SharedDataSize" },
-                "Iops": "1000",
-                "AvailabilityZone": { "Fn::GetAtt": [ "AlcesClusterwareMasterNode", "AvailabilityZone" ] }
-            },
-            "Condition": "CreateSharedData"
-        },
-        "AttachSharedData": {
-            "Type": "AWS::EC2::VolumeAttachment",
-            "Properties": {
-                "Device": "xvdb",
-                "InstanceId": { "Ref": "AlcesClusterwareMasterNode" },
-                "VolumeId": { "Ref": "SharedData" }
-            },
-            "Condition": "CreateSharedData"
-        },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
@@ -456,6 +420,9 @@
                         },
                         "centos7"
                     ]
+                },
+                "IamInstanceProfile": {
+                  "Ref": "MasterIAMProfile"
                 },
                 "InstanceType": "c4.8xlarge",
                 "BlockDeviceMappings": [
@@ -601,17 +568,6 @@
                 },
                 "Cooldown": "3300",
                 "ScalingAdjustment": "25"
-            }
-        },
-        "ScaleDown25": {
-            "Type": "AWS::AutoScaling::ScalingPolicy",
-            "Properties": {
-                "AdjustmentType": "PercentChangeInCapacity",
-                "AutoScalingGroupName": {
-                    "Ref": "ComputeGroup"
-                },
-                "Cooldown": "3300",
-                "ScalingAdjustment": "-25"
             }
         },
         "CPUAlarmHigh10": {

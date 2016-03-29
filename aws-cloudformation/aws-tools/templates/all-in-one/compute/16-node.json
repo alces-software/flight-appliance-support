@@ -358,6 +358,14 @@
                         "Ebs": {
                             "VolumeSize": { "Ref": "SystemDiskSize" }
                         }
+                    },
+                    {
+                        "DeviceName": "/dev/sdb",
+                        "VirtualName": "ephemeral0"
+                    },
+                    {
+                        "DeviceName": "/dev/sdc",
+                        "VirtualName": "ephemeral1"
                     }
                 ],
                 "InstanceType": { "Ref": "LoginType" },
@@ -421,13 +429,24 @@
                         "centos7"
                     ]
                 },
-                "InstanceType": "c4.8xlarge",
+                "IamInstanceProfile": {
+                  "Ref": "MasterIAMProfile"
+                },
+                "InstanceType": "c3.2xlarge",
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
                             "VolumeSize": { "Ref": "SystemDiskSize" }
                         }
+                    },
+                    {
+                        "DeviceName": "/dev/sdb",
+                        "VirtualName": "ephemeral0"
+                    },
+                    {
+                        "DeviceName": "/dev/sdc",
+                        "VirtualName": "ephemeral1"
                     }
                 ],
                 "SpotPrice": {
