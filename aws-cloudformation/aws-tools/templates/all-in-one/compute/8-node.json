@@ -48,6 +48,17 @@
             "eu-west-1": {
                 "centos7": "ami-3758e244"
             }
+        },
+        "LoginType2SystemDisk": {
+            "t2.large": {
+                "rootdisk": "8"
+              },
+              "c3.large": {
+                "rootdisk": "100"
+              },
+              "c4.large": {
+                "rootdisk": "100"
+              }
         }
     },
     "Conditions": {
@@ -356,7 +367,7 @@
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
-                            "VolumeSize": { "Ref": "SystemDiskSize" }
+                            "VolumeSize": { "Fn::FindInMap": [ "LoginType2SystemDisk", { "Ref": "LoginType" }, "rootdisk" ] }
                         }
                     }
                 ],
