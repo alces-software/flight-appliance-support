@@ -339,7 +339,6 @@
         },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": "ClusterwarePublicNet",
             "Properties": {
                 "Tags": [
                     {

@@ -303,7 +303,6 @@
         },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": "ClusterwarePublicNet",
             "Properties": {
                 "Tags": [
                     {
@@ -359,14 +358,6 @@
                         "Ebs": {
                             "VolumeSize": { "Ref": "SystemDiskSize" }
                         }
-                    },
-                    {
-                        "DeviceName": "/dev/sdb",
-                        "VirtualName": "ephemeral0"
-                    },
-                    {
-                        "DeviceName": "/dev/sdc",
-                        "VirtualName": "ephemeral1"
                     }
                 ],
                 "InstanceType": { "Ref": "LoginType" },
@@ -457,9 +448,6 @@
                         "Ebs": {
                             "VolumeSize": { "Ref": "SystemDiskSize" }
                         }
-                    },
-                    {
-                      "DeviceName": "ephemeral0"
                     }
                 ],
                 "SpotPrice": {
