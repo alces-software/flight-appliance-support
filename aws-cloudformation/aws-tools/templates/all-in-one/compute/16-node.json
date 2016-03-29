@@ -1,15 +1,9 @@
 {
-    "Description": "Launch an Alces HPC environment with a single SGE master node together with compute nodes using EC2 spot.",
+    "Description": "Launch an Alces HPC environment with a single SGE master node together with 16 initial compute nodes using EC2 spot.",
     "Parameters": {
         "KeyPair": {
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
-        },
-        "ComputeNumber": {
-            "Description": "Enter the number of compute nodes you wish to deploy",
-            "Type": "String",
-            "AllowedPattern": "[0-9]",
-            "Default": "3"
         },
         "SubnetId": {
             "Description": "Enter the ID of your existing subnet. If you wish to have one created for you, select None. The SecurityGroup field must also be set to None.",
@@ -21,19 +15,25 @@
             "Type": "String",
             "Default": "None"
         },
-        "InstanceFlavour": {
-            "Description": "Select the compute node instance flavour",
-            "Type": "String",
-            "Default": "small",
-            "AllowedValues": [
-                "small",
-                "large"
-            ]
-        },
         "SpotPrice": {
             "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing.",
             "Type": "String",
             "Default": "0.50"
+        },
+        "SystemDiskSize": {
+            "Description": "Select the size in GB of root system disk to use for all deployed nodes in the environment",
+            "Type": "String",
+            "Default": "500"
+        },
+        "LoginType": {
+            "Description": "Select the login node instance type to deploy - this defines the number of cores and memory available",
+            "Type": "String",
+            "Default": "t2.large",
+            "AllowedValues": [
+                "t2.large",
+                "c3.large",
+                "c4.large"
+            ]
         },
         "NetworkCIDR": {
             "Description": "Enter an address range that is permitted to access the Clusterware master node. Leave blank if unknown",
@@ -44,14 +44,6 @@
         }
     },
     "Mappings": {
-        "InstanceType2Flavour": {
-            "small": {
-                "instanceflavour": "c4.large"
-            },
-            "large": {
-                "instanceflavour": "c4.4xlarge"
-            }
-        },
         "AWSRegionArch2AMI": {
             "eu-west-1": {
                 "centos7": "ami-3758e244"
@@ -262,13 +254,61 @@
             },
             "Condition": "CreateNetwork"
         },
+        "MasterIAM": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Statement": [ {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ec2.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ]
+                }]
+            }
+          }
+        },
+        "MasterIAMProfile": {
+          "Type": "AWS::IAM::InstanceProfile",
+          "Properties": {
+            "Path": "/",
+            "Roles": [
+              { "Ref": "MasterIAM"
+              }
+            ]
+          }
+        },
+        "MetricData": {
+          "Type": "AWS::IAM::Policy",
+          "Properties": {
+            "PolicyName": "MetricData",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [ {
+                "Effect": "Allow",
+                "Action": [
+                  "cloudwatch:PutMetricData"
+                ],
+                "Resource": [
+                  "*"
+                ]
+                }]
+            },
+            "Roles": [ { "Ref": "MasterIAM" } ]
+          }
+        },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
+            "DependsOn": "ClusterwarePublicNet",
             "Properties": {
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "Alces Clusterware Master"
+                        "Value": { "Fn::Join": [ "", [ {"Ref": "AWS::StackName"}, "-login1" ] ]}
                     }
                 ],
                 "ImageId": {
@@ -279,6 +319,9 @@
                         },
                         "centos7"
                     ]
+                },
+                "IamInstanceProfile": {
+                  "Ref": "MasterIAMProfile"
                 },
                 "NetworkInterfaces": [
                     {
@@ -314,19 +357,19 @@
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
-                            "VolumeSize": "500"
+                            "VolumeSize": { "Ref": "SystemDiskSize" }
                         }
+                    },
+                    {
+                        "DeviceName": "/dev/sdb",
+                        "VirtualName": "ephemeral0"
+                    },
+                    {
+                        "DeviceName": "/dev/sdc",
+                        "VirtualName": "ephemeral1"
                     }
                 ],
-                "InstanceType": {
-                    "Fn::FindInMap": [
-                        "InstanceType2Flavour",
-                        {
-                            "Ref": "InstanceFlavour"
-                        },
-                        "instanceflavour"
-                    ]
-                },
+                "InstanceType": { "Ref": "LoginType" },
                 "KeyName": {
                     "Ref": "KeyPair"
                 },
@@ -340,6 +383,22 @@
                                 "hostname: login1",
                                 "\n",
                                 "write_files:",
+                                "\n",
+                                "- content: |",
+                                "\n",
+                                "    #!/bin/bash -l",
+                                "\n",
+                                "    computegroup=\"INSERTGROUP\"",
+                                "\n",
+                                "    timestamp=$(date + '%Y-%m-%d'T'%T'.000Z)",
+                                "\n",
+                                "    queued=$(qstat -u \\* | awk 'NR > 2{print $5}' | wc -l)",
+                                "\n",
+                                "    /opt/clusterware/opt/aws/bin/aws --region \"eu-west-1\" cloudwatch put-metric-data --metric-name Queued --namespace \"ALCES/SGE\" --dimensions \"AutoScalingGroupName=${computegroup}\" --value $queued --timestamp $timestamp",
+                                "\n",
+                                "  path: /opt/alces-sge-cloudwatch.sh",
+                                "\n",
+                                "  permissions: '0700'",
                                 "\n",
                                 "- content: |",
                                 "\n",
@@ -365,7 +424,10 @@
                                 "  path: /opt/clusterware/etc/config.yml",
                                 "\n",
                                 "  permissions: '0640'",
-                                "\n"
+                                "\n",
+                                "runcmd:",
+                                "\n",
+                                "  - echo \"5 * * * * alces /opt/alces-sge-cloudwatch.sh\" >> /etc/crontab"
                             ]
                         ]
                     }
@@ -388,21 +450,16 @@
                         "centos7"
                     ]
                 },
-                "InstanceType": {
-                    "Fn::FindInMap": [
-                        "InstanceType2Flavour",
-                        {
-                            "Ref": "InstanceFlavour"
-                        },
-                        "instanceflavour"
-                    ]
-                },
+                "InstanceType": "c4.8xlarge",
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
-                            "VolumeSize": "500"
+                            "VolumeSize": { "Ref": "SystemDiskSize" }
                         }
+                    },
+                    {
+                      "DeviceName": "ephemeral0"
                     }
                 ],
                 "SpotPrice": {
@@ -457,8 +514,6 @@
                                 "\n",
                                 "        scheduler_roles: ':compute:'",
                                 "\n",
-                                "      quorum: 3",
-                                "\n",
                                 "  owner: root:root",
                                 "\n",
                                 "  path: /opt/clusterware/etc/config.yml",
@@ -471,16 +526,30 @@
                 }
             }
         },
+        "PlacementGroup": {
+            "Type": "AWS::EC2::PlacementGroup",
+            "Properties": {
+                "Strategy": "cluster"
+            }
+        },
         "ComputeGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "DependsOn": "AlcesClusterwareMasterNode",
             "Properties": {
-                "DesiredCapacity": {
-                    "Ref": "ComputeNumber"
-                },
+                "DesiredCapacity": "16",
                 "LaunchConfigurationName": {
                     "Ref": "ComputeConfig"
                 },
+                "PlacementGroup": {
+                    "Ref": "PlacementGroup"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "", [ {"Ref": "AWS::StackName"}, "-compute" ] ]},
+                        "PropagateAtLaunch": "true"
+                    }
+                ],
                 "MinSize": "1",
                 "MaxSize": "100",
                 "VPCZoneIdentifier": [
@@ -498,41 +567,63 @@
                 ]
             }
         },
-        "ScaleUp": {
+        "ScaleUp10": {
             "Type": "AWS::AutoScaling::ScalingPolicy",
             "Properties": {
-                "AdjustmentType": "ChangeInCapacity",
+                "AdjustmentType": "PercentChangeInCapacity",
                 "AutoScalingGroupName": {
                     "Ref": "ComputeGroup"
                 },
                 "Cooldown": "3300",
-                "ScalingAdjustment": "1"
+                "ScalingAdjustment": "10"
             }
         },
-        "ScaleDown": {
+        "ScaleDown10": {
             "Type": "AWS::AutoScaling::ScalingPolicy",
             "Properties": {
-                "AdjustmentType": "ChangeInCapacity",
+                "AdjustmentType": "PercentChangeInCapacity",
                 "AutoScalingGroupName": {
                     "Ref": "ComputeGroup"
                 },
                 "Cooldown": "3300",
-                "ScalingAdjustment": "-1"
+                "ScalingAdjustment": "-10"
             }
         },
-        "CPUAlarmHigh": {
+        "ScaleUp25": {
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+            "Properties": {
+                "AdjustmentType": "PercentChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "ComputeGroup"
+                },
+                "Cooldown": "3300",
+                "ScalingAdjustment": "25"
+            }
+        },
+        "ScaleDown25": {
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+            "Properties": {
+                "AdjustmentType": "PercentChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "ComputeGroup"
+                },
+                "Cooldown": "3300",
+                "ScalingAdjustment": "-25"
+            }
+        },
+        "CPUAlarmHigh10": {
             "Type": "AWS::CloudWatch::Alarm",
             "Properties": {
-                "AlarmDescription": "Scale-up if CPU > 90% for 20 minutes",
-                "MetricName": "CPUUtilization",
-                "Namespace": "AWS/EC2",
+                "AlarmDescription": "Scale-up by 10% if currently queued jobs > 50 for 20 minutes",
+                "MetricName": "Queued",
+                "Namespace": "ALCES/SGE",
                 "Statistic": "Average",
                 "Period": "60",
                 "EvaluationPeriods": "20",
                 "Threshold": "90",
                 "AlarmActions": [
                     {
-                        "Ref": "ScaleUp"
+                        "Ref": "ScaleUp10"
                     }
                 ],
                 "Dimensions": [
@@ -546,19 +637,19 @@
                 "ComparisonOperator": "GreaterThanThreshold"
             }
         },
-        "CPUAlarmLow": {
+        "CPUAlarmLow10": {
             "Type": "AWS::CloudWatch::Alarm",
             "Properties": {
                 "AlarmDescription": "Scale-down if CPU < 10% for 55 minutes",
-                "MetricName": "CPUUtilization",
-                "Namespace": "AWS/EC2",
+                "MetricName": "Queued",
+                "Namespace": "ALCES/SGE",
                 "Statistic": "Average",
                 "Period": "60",
                 "EvaluationPeriods": "55",
                 "Threshold": "10",
                 "AlarmActions": [
                     {
-                        "Ref": "ScaleDown"
+                        "Ref": "ScaleDown10"
                     }
                 ],
                 "Dimensions": [
@@ -570,6 +661,32 @@
                     }
                 ],
                 "ComparisonOperator": "LessThanThreshold"
+            }
+        },
+        "CPUAlarmHigh25": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "Scale-up by 25% if currently queued jobs > 100 for 20 minutes",
+                "MetricName": "Queued",
+                "Namespace": "ALCES/SGE",
+                "Statistic": "Average",
+                "Period": "60",
+                "EvaluationPeriods": "20",
+                "Threshold": "100",
+                "AlarmActions": [
+                    {
+                        "Ref": "ScaleUp25"
+                    }
+                ],
+                "Dimensions": [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": {
+                            "Ref": "ComputeGroup"
+                        }
+                    }
+                ],
+                "ComparisonOperator": "GreaterThanThreshold"
             }
         }
     },
