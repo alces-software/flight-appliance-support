@@ -519,11 +519,8 @@
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
-                            "VolumeSize": "1000"
+                            "VolumeSize": { "Ref": "SystemDiskSize" }
                         }
-                    },
-                    {
-                      "DeviceName": "ephemeral0"
                     }
                 ],
                 "SpotPrice": {
@@ -550,6 +547,8 @@
                                 "#cloud-config",
                                 "\n",
                                 "write_files:",
+                                "\n",
+                                "- content: |",
                                 "\n",
                                 "    #!/bin/bash",
                                 "\n",
