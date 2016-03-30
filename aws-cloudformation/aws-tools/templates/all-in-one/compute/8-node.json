@@ -317,6 +317,7 @@
         },
         "AlcesClusterwareMasterNode": {
             "Type": "AWS::EC2::Instance",
+            "DependsOn": "MasterIAM",
             "Properties": {
                 "Tags": [
                     {
@@ -510,6 +511,7 @@
         },
         "ComputeGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "DependsOn": "AlcesClusterwareMasterNode",
                 "Properties": {
                 "DesiredCapacity": "8",
                 "LaunchConfigurationName": {
