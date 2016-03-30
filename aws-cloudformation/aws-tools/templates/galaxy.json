@@ -58,6 +58,14 @@
 					"GroupSet": [{
 						"Ref": "SECURITYGROUP"
 					}],
+					"BlockDeviceMappings": [
+							{
+									"DeviceName": "/dev/sda1",
+									"Ebs": {
+											"VolumeSize": "500"
+									}
+							}
+					],
 					"SubnetId": {
 						"Ref": "SUBNETID"
 					}
@@ -75,12 +83,12 @@
 								"#cloud-config",
 								"\n",
 								"hostname: master1",
-                                                                "\n",
-                                                                "fqdn: master1.", {
-                                                                "Ref": "CLUSTERNAME"
-                                                                },
-                                                                ".alces.network",
-                                                                "\n",
+                "\n",
+                "fqdn: master1.", {
+                "Ref": "CLUSTERNAME"
+                },
+                ".alces.network",
+                "\n",
 								"write_files:",
 								"\n",
 								"- content: |",
@@ -101,8 +109,8 @@
 								"\n",
 								"        galaxy_roles: ':master:compute:'",
 								"\n",
-                                                                "        storage_roles: ':master:'",
-                                                                "\n",
+                "        storage_roles: ':master:'",
+                "\n",
 								"  owner: root:root",
 								"\n",
 								"  path: /opt/clusterware/etc/config.yml",

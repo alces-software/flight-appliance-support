@@ -230,6 +230,14 @@
                         }
                     }
                 ],
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": "500"
+                        }
+                    }
+                ],
                 "InstanceType": {
                     "Fn::FindInMap": [
                         "InstanceType2Flavour",
@@ -315,6 +323,14 @@
                         "instanceflavour"
                     ]
                 },
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": "500"
+                        }
+                    }
+                ],
                 "SpotPrice": {
                     "Ref": "SpotPrice"
                 },
