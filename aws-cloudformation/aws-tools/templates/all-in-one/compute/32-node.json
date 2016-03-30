@@ -291,7 +291,10 @@
               "Statement": [ {
                 "Effect": "Allow",
                 "Action": [
-                  "cloudwatch:PutMetricData"
+                  "cloudwatch:PutMetricData",
+                  "autoscaling:DescribeAutoScalingGroups",
+                  "autoscaling:SetDesiredCapacity",
+                  "autoscaling:UpdateAutoScalingGroup"
                 ],
                 "Resource": [
                   "*"
@@ -318,9 +321,6 @@
                         },
                         "centos7"
                     ]
-                },
-                "IamInstanceProfile": {
-                  "Ref": "MasterIAMProfile"
                 },
                 "NetworkInterfaces": [
                     {
