@@ -101,6 +101,7 @@
                         }
                     }
                 ]
+            }
             },
             "Condition": "CreateNetwork"
         },
@@ -159,6 +160,8 @@
             },
             "Condition": "CreateNetwork"
         },
+<<<<<<< HEAD
+=======
         "ClusterwareNetACL": {
             "Type": "AWS::EC2::NetworkAcl",
             "Properties": {
@@ -218,6 +221,7 @@
             },
             "Condition": "CreateNetwork"
         },
+>>>>>>> master
         "AlcesClusterwareSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
@@ -229,23 +233,29 @@
                         }
                     }
                 ],
-                "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
+                "GroupDescription": "Open communication between cluster hosts",
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
                 },
                 "SecurityGroupIngress": [
                     {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "NetworkCIDR"
-                        }
-                    },
-                    {
                         "IpProtocol": "-1",
                         "FromPort": "0",
                         "ToPort": "65535",
+                        "CidrIp": "10.75.0.0/24"
+                    },
+                    {
+                        "IpProtocol": "6",
+                        "FromPort": "5900",
+                        "ToPort": "5920",
+                        "CidrIp": {
+			                     "Ref": "NetworkCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "6",
+                        "FromPort": "22",
+                        "ToPort": "22",
                         "CidrIp": {
                             "Ref": "NetworkCIDR"
                         }
@@ -397,6 +407,8 @@
                         "instanceflavour"
                     ]
                 },
+<<<<<<< HEAD
+=======
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
@@ -405,11 +417,15 @@
                         }
                     }
                 ],
+>>>>>>> master
                 "SpotPrice": {
                     "Ref": "SpotPrice"
                 },
                 "SecurityGroups": [
                     {
+<<<<<<< HEAD
+                        "Ref": "AlcesClusterwareSecurityGroup"
+=======
                         "Fn::If": [
                             "CreateNetwork",
                             {
@@ -419,6 +435,7 @@
                                 "Ref": "SecurityGroup"
                             }
                         ]
+>>>>>>> master
                     }
                 ],
                 "UserData": {
