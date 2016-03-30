@@ -221,7 +221,6 @@
             },
             "Condition": "CreateNetwork"
         },
->>>>>>> master
         "AlcesClusterwareSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
@@ -407,8 +406,6 @@
                         "instanceflavour"
                     ]
                 },
-<<<<<<< HEAD
-=======
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
@@ -417,15 +414,10 @@
                         }
                     }
                 ],
->>>>>>> master
                 "SpotPrice": {
                     "Ref": "SpotPrice"
                 },
                 "SecurityGroups": [
-                    {
-<<<<<<< HEAD
-                        "Ref": "AlcesClusterwareSecurityGroup"
-=======
                         "Fn::If": [
                             "CreateNetwork",
                             {
@@ -435,8 +427,6 @@
                                 "Ref": "SecurityGroup"
                             }
                         ]
->>>>>>> master
-                    }
                 ],
                 "UserData": {
                     "Fn::Base64": {
