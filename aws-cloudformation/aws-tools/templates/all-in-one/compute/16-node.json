@@ -565,17 +565,6 @@
                 "ScalingAdjustment": "10"
             }
         },
-        "ScaleDown10": {
-            "Type": "AWS::AutoScaling::ScalingPolicy",
-            "Properties": {
-                "AdjustmentType": "PercentChangeInCapacity",
-                "AutoScalingGroupName": {
-                    "Ref": "ComputeGroup"
-                },
-                "Cooldown": "3300",
-                "ScalingAdjustment": "-10"
-            }
-        },
         "ScaleUp25": {
             "Type": "AWS::AutoScaling::ScalingPolicy",
             "Properties": {
@@ -585,17 +574,6 @@
                 },
                 "Cooldown": "3300",
                 "ScalingAdjustment": "25"
-            }
-        },
-        "ScaleDown25": {
-            "Type": "AWS::AutoScaling::ScalingPolicy",
-            "Properties": {
-                "AdjustmentType": "PercentChangeInCapacity",
-                "AutoScalingGroupName": {
-                    "Ref": "ComputeGroup"
-                },
-                "Cooldown": "3300",
-                "ScalingAdjustment": "-25"
             }
         },
         "CPUAlarmHigh10": {
@@ -622,32 +600,6 @@
                     }
                 ],
                 "ComparisonOperator": "GreaterThanThreshold"
-            }
-        },
-        "CPUAlarmLow10": {
-            "Type": "AWS::CloudWatch::Alarm",
-            "Properties": {
-                "AlarmDescription": "Scale-down if CPU < 10% for 55 minutes",
-                "MetricName": "Queued",
-                "Namespace": "ALCES/SGE",
-                "Statistic": "Average",
-                "Period": "60",
-                "EvaluationPeriods": "55",
-                "Threshold": "10",
-                "AlarmActions": [
-                    {
-                        "Ref": "ScaleDown10"
-                    }
-                ],
-                "Dimensions": [
-                    {
-                        "Name": "AutoScalingGroupName",
-                        "Value": {
-                            "Ref": "ComputeGroup"
-                        }
-                    }
-                ],
-                "ComparisonOperator": "LessThanThreshold"
             }
         },
         "CPUAlarmHigh25": {
