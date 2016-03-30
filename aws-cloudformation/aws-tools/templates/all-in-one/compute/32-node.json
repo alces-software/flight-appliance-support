@@ -102,7 +102,13 @@
                 "VpcId": {
                     "Ref": "ClusterwareVPC"
                 },
-                "CidrBlock": "10.75.0.0/24"
+                "CidrBlock": "10.75.0.0/24",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Fn::Join": [ "", [ {"Ref": "AWS::StackName"}, "-subnet" ] ]}
+                    }
+                ]
             },
             "Condition": "CreateNetwork"
         },
