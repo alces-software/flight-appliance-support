@@ -357,6 +357,7 @@
                     "Ref": "SpotPrice"
                 },
                 "SecurityGroups": [
+                    {
                         "Fn::If": [
                             "CreateNetwork",
                             {
@@ -366,6 +367,7 @@
                                 "Ref": "SecurityGroup"
                             }
                         ]
+                    }
                 ],
                 "UserData": {
                     "Fn::Base64": {
