@@ -5,15 +5,10 @@
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "SubnetId": {
-            "Description": "Enter the ID of your existing subnet. If you wish to have one created for you, select None. The SecurityGroup field must also be set to None.",
-            "Type": "String",
-            "Default": "None"
-        },
-        "SecurityGroup": {
-            "Description": "Enter the ID of your existing security group. If you wish to have one created for you, select None. The Subnet ID field must also be set to None.",
-            "Type": "String",
-            "Default": "None"
+        "Username": {
+              "Description": "Enter a username - this is used for the cluster administrator account",
+              "Type": "String",
+              "Default": "alces"
         },
         "SpotPrice": {
             "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing.",
@@ -45,20 +40,10 @@
             "ConstraintDescription": "Please specify a valid IP range, e.g. 101.21.2.0/16"
         }
     },
-    "Conditions": {
-        "CreateNetwork": {
-            "Fn::Equals": [
-                {
-                    "Ref": "SubnetId"
-                },
-                "None"
-            ]
-        }
-    },
     "Mappings": {
         "AWSRegionArch2AMI": {
             "eu-west-1": {
-                "centos7": "ami-3758e244"
+                "centos7": "ami-0b28ae78"
             }
         }
     },
@@ -77,8 +62,7 @@
                 "CidrBlock": "10.75.0.0/16",
                 "EnableDnsSupport": "true",
                 "EnableDnsHostnames": "true"
-            },
-            "Condition": "CreateNetwork"
+            }
         },
         "ClusterwareRouteTable": {
             "Type": "AWS::EC2::RouteTable",
@@ -95,8 +79,7 @@
                         }
                     }
                 ]
-            },
-            "Condition": "CreateNetwork"
+            }
         },
         "ClusterwarePublicNet": {
             "Type": "AWS::EC2::Subnet",
@@ -111,13 +94,11 @@
                         "Value": { "Fn::Join": [ "", [ {"Ref": "AWS::StackName"}, "-subnet" ] ]}
                     }
                 ]
-            },
-            "Condition": "CreateNetwork"
+            }
         },
         "ClusterwareGateway": {
             "Type": "AWS::EC2::InternetGateway",
-            "DependsOn": "ClusterwareVPC",
-            "Condition": "CreateNetwork"
+            "DependsOn": "ClusterwareVPC"
         },
         "ClusterwareAttachGW": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
@@ -129,8 +110,7 @@
                 "InternetGatewayId": {
                     "Ref": "ClusterwareGateway"
                 }
-            },
-            "Condition": "CreateNetwork"
+            }
         },
         "ClusterwareRoute": {
             "Type": "AWS::EC2::Route",
@@ -143,8 +123,7 @@
                 "GatewayId": {
                     "Ref": "ClusterwareGateway"
                 }
-            },
-            "Condition": "CreateNetwork"
+            }
         },
         "SubnetToRouteTable": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
@@ -156,8 +135,7 @@
                 "RouteTableId": {
                     "Ref": "ClusterwareRouteTable"
                 }
-            },
-            "Condition": "CreateNetwork"
+            }
         },
         "AlcesClusterwareSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
@@ -206,8 +184,7 @@
                         "CidrIp": "0.0.0.0/0"
                     }
                 ]
-            },
-            "Condition": "CreateNetwork"
+            }
         },
         "MasterIAM": {
           "Type": "AWS::IAM::Role",
@@ -327,6 +304,13 @@
                             [
                                 "#cloud-config",
                                 "\n",
+                                "system_info:",
+                                "\n",
+                                "  default_user:",
+                                "\n",
+                                "    name: ",
+                                { "Ref": "Username" },
+                                "\n",
                                 "hostname: login1",
                                 "\n",
                                 "write_files:",
@@ -411,6 +395,13 @@
                             "",
                             [
                                 "#cloud-config",
+                                "\n",
+                                "system_info:",
+                                "\n",
+                                "  default_user:",
+                                "\n",
+                                "    name: ",
+                                { "Ref": "Username" },
                                 "\n",
                                 "write_files:",
                                 "\n",
