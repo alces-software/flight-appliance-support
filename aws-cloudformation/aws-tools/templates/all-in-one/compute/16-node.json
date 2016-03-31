@@ -22,8 +22,10 @@
         },
         "SystemDiskSize": {
             "Description": "Select the size in GB of root system disk to use for all deployed nodes in the environment",
-            "Type": "String",
-            "Default": "500"
+            "Type": "Number",
+            "Default": "500",
+            "MinValue": "8",
+            "MaxValue": "16000"
         },
         "LoginType": {
             "Description": "Select the login node instance type to deploy - this defines the number of cores and memory available",
