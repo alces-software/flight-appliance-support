@@ -18,10 +18,32 @@
             "Description": "Environment login node internal IP",
             "Type": "String"
         },
+        "STORAGETYPE": {
+            "Description": "Select the type of storage server to deploy. This defines the number of cores and memory available - affecting the read/write performance of your storage",
+            "Type": "String",
+            "Default": "Medium",
+            "AllowedValues": [
+                "Small",
+                "Medium",
+                "Large"
+            ]
+        },
+        "USERNAME": {
+            "Description": "Enter the name of your environments cluster administrator user",
+            "Type": "String",
+            "Default": "alces"
+        },
+        "PLACEMENTGROUP": {
+            "Description": "Enter the name of your existing clusters placement group - if your cluster is not part of one, select None",
+            "Type": "String",
+            "Default": "None"
+        },
         "STORAGESIZE": {
             "Description": "NFS server storage size in GB",
             "Type": "Number",
-            "Default": "5000"
+            "Default": "5000",
+            "MaxValue": "16000",
+            "MinValue": "1"
         },
         "PIOPS": {
             "Description": "Choose whether to provision your shared storage with Provisioned IOPS",
@@ -35,6 +57,19 @@
         "KEYPAIR": {
             "Description": "Administrator keypair",
             "Type": "AWS::EC2::KeyPair::KeyName"
+        }
+    },
+    "Mappings": {
+        "StorageTypeFlavour": {
+            "Small": {
+                "instanceflavour": "t2.large"
+            },
+            "Medium": {
+                "instanceflavour": "c4.xlarge"
+            },
+            "Large": {
+                "instanceflavour": "c4.4xlarge"
+            }
         }
     },
     "Conditions": {
@@ -53,6 +88,14 @@
           },
           "No"
         ]
+      },
+      "UsePlacementGroup": {
+        "Fn::Equals": [
+          {
+            "Ref": "PLACEMENTGROUP"
+          },
+          "None"
+        ]
       }
     },
     "Resources": {
@@ -67,7 +110,7 @@
                         }
                     }
                 ],
-                "ImageId": "ami-3758e244",
+                "ImageId": "ami-0b28ae78",
                 "NetworkInterfaces": [
                     {
                         "AssociatePublicIpAddress": "True",
@@ -90,7 +133,26 @@
                         }
                     }
                 ],
-                "InstanceType": "c4.large",
+                "PlacementGroupName": {
+                  "Fn::If": [
+                    "UsePlacementGroup",
+                    {
+                        "Ref": "AWS::NoValue"
+                    },
+                    {
+                        "Ref": "PLACEMENTGROUP"
+                    }
+                  ]
+                },
+                "InstanceType": {
+                    "Fn::FindInMap": [
+                        "StorageTypeFlavour",
+                        {
+                            "Ref": "STORAGETYPE"
+                        },
+                        "instanceflavour"
+                    ]
+                },
                 "KeyName": {
                     "Ref": "KEYPAIR"
                 },
@@ -100,6 +162,15 @@
                             "",
                             [
                                 "#cloud-config",
+                                "\n",
+                                "system_info:",
+                                "\n",
+                                "  default_user:",
+                                "\n",
+                                "    name: ",
+                                {
+                                  "Ref": "USERNAME"
+                                },
                                 "\n",
                                 "hostname: storage1",
                                 "\n",
@@ -205,6 +276,16 @@
               }
             },
             "Condition": "NoPIOPS"
+        }
+    },
+    "Outputs": {
+        "AccessIP": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "NFS",
+                    "PublicIp"
+                ]
+            }
         }
     }
 }
