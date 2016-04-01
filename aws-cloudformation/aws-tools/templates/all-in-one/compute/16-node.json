@@ -8,7 +8,12 @@
         "Username": {
               "Description": "Enter a username - this is used for the cluster administrator account",
               "Type": "String",
-              "Default": "alces"
+              "Default": "alces",
+              "MaxLength": "16",
+              "MinLength": "1",
+              "AllowedPattern": "[-a-z0-9]*",
+              "ConstraintDescription": "Enter a username between 1 and 16 characters using a-z, 1 to 9 and -"
+
         },
         "SpotPrice": {
             "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing.",
