@@ -48,7 +48,7 @@
         }
     },
     "Resources": {
-        "ClusterwareVPC": {
+        "FlightVPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
                 "Tags": [
@@ -64,12 +64,12 @@
                 "EnableDnsHostnames": "true"
             }
         },
-        "ClusterwareRouteTable": {
+        "FlightRouteTable": {
             "Type": "AWS::EC2::RouteTable",
-            "DependsOn": "ClusterwareVPC",
+            "DependsOn": "FlightVPC",
             "Properties": {
                 "VpcId": {
-                    "Ref": "ClusterwareVPC"
+                    "Ref": "FlightVPC"
                 },
                 "Tags": [
                     {
@@ -81,11 +81,11 @@
                 ]
             }
         },
-        "ClusterwarePublicNet": {
+        "FlightSubnet": {
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "VpcId": {
-                    "Ref": "ClusterwareVPC"
+                    "Ref": "FlightVPC"
                 },
                 "CidrBlock": "10.75.0.0/24",
                 "Tags": [
@@ -96,48 +96,48 @@
                 ]
             }
         },
-        "ClusterwareGateway": {
+        "FlightGW": {
             "Type": "AWS::EC2::InternetGateway",
-            "DependsOn": "ClusterwareVPC"
+            "DependsOn": "FlightVPC"
         },
-        "ClusterwareAttachGW": {
+        "FlightGWAttach": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
-            "DependsOn": "ClusterwareVPC",
+            "DependsOn": "FlightVPC",
             "Properties": {
                 "VpcId": {
-                    "Ref": "ClusterwareVPC"
+                    "Ref": "FlightVPC"
                 },
                 "InternetGatewayId": {
-                    "Ref": "ClusterwareGateway"
+                    "Ref": "FlightGW"
                 }
             }
         },
-        "ClusterwareRoute": {
+        "FlightRoute": {
             "Type": "AWS::EC2::Route",
-            "DependsOn": "ClusterwareAttachGW",
+            "DependsOn": "FlightGWAttach",
             "Properties": {
                 "RouteTableId": {
-                    "Ref": "ClusterwareRouteTable"
+                    "Ref": "FlightRouteTable"
                 },
                 "DestinationCidrBlock": "0.0.0.0/0",
                 "GatewayId": {
-                    "Ref": "ClusterwareGateway"
+                    "Ref": "FlightGW"
                 }
             }
         },
         "SubnetToRouteTable": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "DependsOn": "ClusterwareRouteTable",
+            "DependsOn": "FlightRouteTable",
             "Properties": {
                 "SubnetId": {
-                    "Ref": "ClusterwarePublicNet"
+                    "Ref": "FlightSubnet"
                 },
                 "RouteTableId": {
-                    "Ref": "ClusterwareRouteTable"
+                    "Ref": "FlightRouteTable"
                 }
             }
         },
-        "AlcesClusterwareSecurityGroup": {
+        "FlightSG": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "Tags": [
@@ -150,7 +150,7 @@
                 ],
                 "GroupDescription": "Enable SSH access to the Alces Clusterware master node",
                 "VpcId": {
-                    "Ref": "ClusterwareVPC"
+                    "Ref": "FlightVPC"
                 },
                 "SecurityGroupIngress": [
                     {
@@ -236,7 +236,7 @@
             "Roles": [ { "Ref": "MasterIAM" } ]
           }
         },
-        "AlcesClusterwareMasterNode": {
+        "FlightLogin": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
                 "Tags": [
@@ -260,11 +260,11 @@
                         "DeviceIndex": "0",
                         "GroupSet": [
                           {
-                              "Ref": "AlcesClusterwareSecurityGroup"
+                              "Ref": "FlightSG"
                           }
                         ],
                         "SubnetId": {
-                              "Ref": "ClusterwarePublicNet"
+                              "Ref": "FlightSubnet"
                         }
                     }
                 ],
@@ -377,7 +377,7 @@
                 },
                 "SecurityGroups": [
                     {
-                        "Ref": "AlcesClusterwareSecurityGroup"
+                        "Ref": "FlightSG"
                     }
                 ],
                 "UserData": {
@@ -414,7 +414,7 @@
                                 "      master: ",
                                 {
                                     "Fn::GetAtt": [
-                                        "AlcesClusterwareMasterNode",
+                                        "FlightLogin",
                                         "PrivateIp"
                                     ]
                                 },
@@ -441,9 +441,9 @@
                 "Strategy": "cluster"
             }
         },
-        "ComputeGroup": {
+        "FlightCompute": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
-            "DependsOn": "AlcesClusterwareMasterNode",
+            "DependsOn": "FlightLogin",
             "Properties": {
                 "DesiredCapacity": "16",
                 "LaunchConfigurationName": {
@@ -463,7 +463,7 @@
                 "MaxSize": "100",
                 "VPCZoneIdentifier": [
                     {
-                        "Ref": "ClusterwarePublicNet"
+                        "Ref": "FlightSubnet"
                     }
                 ]
             }
@@ -473,7 +473,7 @@
             "Properties": {
                 "AdjustmentType": "PercentChangeInCapacity",
                 "AutoScalingGroupName": {
-                    "Ref": "ComputeGroup"
+                    "Ref": "FlightCompute"
                 },
                 "Cooldown": "3300",
                 "ScalingAdjustment": "10"
@@ -484,7 +484,7 @@
             "Properties": {
                 "AdjustmentType": "PercentChangeInCapacity",
                 "AutoScalingGroupName": {
-                    "Ref": "ComputeGroup"
+                    "Ref": "FlightCompute"
                 },
                 "Cooldown": "3300",
                 "ScalingAdjustment": "25"
@@ -509,7 +509,7 @@
                     {
                         "Name": "AutoScalingGroupName",
                         "Value": {
-                            "Ref": "ComputeGroup"
+                            "Ref": "FlightCompute"
                         }
                     }
                 ],
@@ -535,7 +535,7 @@
                     {
                         "Name": "AutoScalingGroupName",
                         "Value": {
-                            "Ref": "ComputeGroup"
+                            "Ref": "FlightCompute"
                         }
                     }
                 ],
@@ -547,7 +547,7 @@
         "AccessIP": {
             "Value": {
                 "Fn::GetAtt": [
-                    "AlcesClusterwareMasterNode",
+                    "FlightLogin",
                     "PublicIp"
                 ]
             }
