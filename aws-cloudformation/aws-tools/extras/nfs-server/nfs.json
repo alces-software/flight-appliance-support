@@ -248,7 +248,7 @@
             "DependsOn": "NFS",
             "Properties": {
                 "AvailabilityZone": { "Fn::GetAtt": [ "NFS", "AvailabilityZone" ] },
-                "VolumeType": "standard",
+                "VolumeType": "gp2",
                 "Size": {
                   "Ref": "STORAGESIZE"
                 },
