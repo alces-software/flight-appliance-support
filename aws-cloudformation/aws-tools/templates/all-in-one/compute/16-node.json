@@ -243,6 +243,7 @@
         },
         "FlightLogin": {
             "Type": "AWS::EC2::Instance",
+            "DependsOn": "FlightGWAttach",
             "Properties": {
                 "Tags": [
                     {
