@@ -539,6 +539,7 @@
     },
     "Outputs": {
         "AccessIP": {
+            "Description": "Public access IP for your Flight Compute environment. Use together with your chosen username to gain SSH access",
             "Value": {
                 "Fn::GetAtt": [
                     "FlightLogin",
