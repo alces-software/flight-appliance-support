@@ -269,28 +269,12 @@
                         "AssociatePublicIpAddress": "True",
                         "DeviceIndex": "0",
                         "GroupSet": [
-                            {
-                                "Fn::If": [
-                                    "CreateNetwork",
-                                    {
-                                        "Ref": "AlcesClusterwareSecurityGroup"
-                                    },
-                                    {
-                                        "Ref": "SecurityGroup"
-                                    }
-                                ]
-                            }
+                          {
+                              "Ref": "AlcesClusterwareSecurityGroup"
+                          }
                         ],
                         "SubnetId": {
-                            "Fn::If": [
-                                "CreateNetwork",
-                                {
-                                    "Ref": "ClusterwarePublicNet"
-                                },
-                                {
-                                    "Ref": "SubnetId"
-                                }
-                            ]
+                              "Ref": "ClusterwarePublicNet"
                         }
                     }
                 ],
@@ -387,15 +371,7 @@
                 },
                 "SecurityGroups": [
                     {
-                        "Fn::If": [
-                            "CreateNetwork",
-                            {
-                                "Ref": "AlcesClusterwareSecurityGroup"
-                            },
-                            {
-                                "Ref": "SecurityGroup"
-                            }
-                        ]
+                        "Ref": "AlcesClusterwareSecurityGroup"
                     }
                 ],
                 "UserData": {
@@ -481,15 +457,7 @@
                 "MaxSize": "100",
                 "VPCZoneIdentifier": [
                     {
-                        "Fn::If": [
-                            "CreateNetwork",
-                            {
-                                "Ref": "ClusterwarePublicNet"
-                            },
-                            {
-                                "Ref": "SubnetId"
-                            }
-                        ]
+                        "Ref": "ClusterwarePublicNet"
                     }
                 ]
             }
