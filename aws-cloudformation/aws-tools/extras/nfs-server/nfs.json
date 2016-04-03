@@ -21,11 +21,11 @@
         "STORAGETYPE": {
             "Description": "Select the type of storage server to deploy. This defines the number of cores and memory available - affecting the read/write performance of your storage",
             "Type": "String",
-            "Default": "Medium",
+            "Default": "Medium-12TB",
             "AllowedValues": [
-                "Small",
-                "Medium",
-                "Large"
+                "Small-6TB",
+                "Medium-12TB",
+                "Large-48TB"
             ]
         },
         "USERNAME": {
@@ -38,21 +38,10 @@
             "Type": "String",
             "Default": "None"
         },
-        "STORAGESIZE": {
-            "Description": "NFS server storage size in GB",
-            "Type": "Number",
-            "Default": "5000",
-            "MaxValue": "16000",
-            "MinValue": "1"
-        },
-        "PIOPS": {
-            "Description": "Choose whether to provision your shared storage with Provisioned IOPS",
+        "SPOTPRICE": {
+            "Description": "Enter your spot price in USD per-hour. If you do not wish to use spot, please enter None",
             "Type": "String",
-            "Default": "No",
-            "AllowedValues": [
-                "Yes",
-                "No"
-            ]
+            "Default": "1"
         },
         "KEYPAIR": {
             "Description": "Administrator keypair",
@@ -61,89 +50,48 @@
     },
     "Mappings": {
         "StorageTypeFlavour": {
-            "Small": {
-                "instanceflavour": "t2.large"
+            "Small-6TB": {
+                "instanceflavour": "d2.xlarge"
             },
-            "Medium": {
-                "instanceflavour": "c4.xlarge"
+            "Medium-12TB": {
+                "instanceflavour": "d2.2xlarge"
             },
-            "Large": {
-                "instanceflavour": "c4.4xlarge"
+            "Large-48TB": {
+                "instanceflavour": "d2.8xlarge"
             }
         }
     },
     "Conditions": {
-      "UsePIOPS" : {
-        "Fn::Equals" : [
-          {
-            "Ref" : "PIOPS"
-          },
-          "Yes"
-        ]
-      },
-      "NoPIOPS": {
-        "Fn::Equals": [
-          {
-            "Ref": "PIOPS"
-          },
-          "No"
-        ]
-      },
-      "UsePlacementGroup": {
-        "Fn::Equals": [
-          {
-            "Ref": "PLACEMENTGROUP"
-          },
-          "None"
-        ]
-      }
+        "UsePlacementGroup": {
+            "Fn::Equals": [
+                {
+                    "Ref": "PLACEMENTGROUP"
+                },
+                "None"
+            ]
+        },
+        "UseSpot": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "SPOTPRICE"
+                        },
+                        "None"
+                    ]
+                }
+            ]
+        }
     },
     "Resources": {
-        "NFS": {
-            "Type": "AWS::EC2::Instance",
+        "StorageConfig": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Ref": "AWS::StackName"
-                        }
-                    }
-                ],
-                "ImageId": "ami-0b28ae78",
-                "NetworkInterfaces": [
-                    {
-                        "AssociatePublicIpAddress": "True",
-                        "DeviceIndex": "0",
-                        "GroupSet": [
-                            {
-                                "Ref": "SECURITYGROUP"
-                            }
-                        ],
-                        "SubnetId": {
-                            "Ref": "SUBNETID"
-                        }
-                    }
-                ],
-                "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/sda1",
-                        "Ebs": {
-                            "VolumeSize": "100"
-                        }
-                    }
-                ],
-                "PlacementGroupName": {
-                  "Fn::If": [
-                    "UsePlacementGroup",
-                    {
-                        "Ref": "AWS::NoValue"
-                    },
-                    {
-                        "Ref": "PLACEMENTGROUP"
-                    }
-                  ]
+                "AssociatePublicIpAddress": "True",
+                "KeyName": {
+                    "Ref": "KEYPAIR"
                 },
+                "ImageId": "ami-0b28ae78",
                 "InstanceType": {
                     "Fn::FindInMap": [
                         "StorageTypeFlavour",
@@ -153,9 +101,126 @@
                         "instanceflavour"
                     ]
                 },
-                "KeyName": {
-                    "Ref": "KEYPAIR"
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": "100"
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdba",
+                        "VirtualName": "ephemeral0"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbb",
+                        "VirtualName": "ephemeral1"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbc",
+                        "VirtualName": "ephemeral2"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbd",
+                        "VirtualName": "ephemeral3"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbe",
+                        "VirtualName": "ephemeral4"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbf",
+                        "VirtualName": "ephemeral5"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbg",
+                        "VirtualName": "ephemeral6"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbh",
+                        "VirtualName": "ephemeral7"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbi",
+                        "VirtualName": "ephemeral8"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbj",
+                        "VirtualName": "ephemeral9"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbk",
+                        "VirtualName": "ephemeral10"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbl",
+                        "VirtualName": "ephemeral11"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbm",
+                        "VirtualName": "ephemeral12"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbn",
+                        "VirtualName": "ephemeral13"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbo",
+                        "VirtualName": "ephemeral14"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbp",
+                        "VirtualName": "ephemeral15"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbq",
+                        "VirtualName": "ephemeral16"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbr",
+                        "VirtualName": "ephemeral17"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbs",
+                        "VirtualName": "ephemeral18"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbt",
+                        "VirtualName": "ephemeral19"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbu",
+                        "VirtualName": "ephemeral20"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbv",
+                        "VirtualName": "ephemeral21"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbw",
+                        "VirtualName": "ephemeral22"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbx",
+                        "VirtualName": "ephemeral23"
+                    }
+                ],
+                "SpotPrice": {
+                    "Fn::If": [
+                        "UseSpot",
+                        {
+                            "Ref": "SPOTPRICE"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
                 },
+                "SecurityGroups": [
+                    {
+                        "Ref": "SECURITYGROUP"
+                    }
+                ],
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -169,7 +234,7 @@
                                 "\n",
                                 "    name: ",
                                 {
-                                  "Ref": "USERNAME"
+                                    "Ref": "USERNAME"
                                 },
                                 "\n",
                                 "hostname: storage1",
@@ -208,82 +273,47 @@
                 }
             }
         },
-        "StoragePIOPS": {
-            "Type": "AWS::EC2::Volume",
-            "DependsOn": "NFS",
+        "Storage": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
-                "AvailabilityZone": { "Fn::GetAtt": [ "NFS", "AvailabilityZone" ] },
-                "VolumeType": "io1",
-                "Size": {
-                  "Ref": "STORAGESIZE"
+                "DesiredCapacity": "1",
+                "LaunchConfigurationName": {
+                    "Ref": "StorageConfig"
                 },
-                "Iops": "5000",
-                "Tags": [
-                  {
-                    "Key": "Name",
-                    "Value": {
-                      "Ref": "AWS::StackName"
-                    }
-                  }
-                ]
-            },
-            "Condition": "UsePIOPS"
-        },
-        "AttachStoragePIOPS": {
-            "Type": "AWS::EC2::VolumeAttachment",
-            "DependsOn": "StoragePIOPS",
-            "Properties": {
-              "Device": "/dev/sdb",
-              "InstanceId": {
-                "Ref": "NFS"
-              },
-              "VolumeId": {
-                "Ref": "StoragePIOPS"
-              }
-            },
-            "Condition": "UsePIOPS"
-        },
-        "StorageStandard": {
-            "Type": "AWS::EC2::Volume",
-            "DependsOn": "NFS",
-            "Properties": {
-                "AvailabilityZone": { "Fn::GetAtt": [ "NFS", "AvailabilityZone" ] },
-                "VolumeType": "gp2",
-                "Size": {
-                  "Ref": "STORAGESIZE"
+                "PlacementGroup": {
+                    "Fn::If": [
+                        "UsePlacementGroup",
+                        {
+                            "Ref": "AWS::NoValue"
+                        },
+                        {
+                            "Ref": "PLACEMENTGROUP"
+                        }
+                    ]
                 },
                 "Tags": [
-                  {
-                    "Key": "Name",
-                    "Value": {
-                      "Ref": "AWS::StackName"
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "CLUSTERNAME"
+                                    },
+                                    "-storage"
+                                ]
+                            ]
+                        },
+                        "PropagateAtLaunch": "true"
                     }
-                  }
-                ]
-            },
-            "Condition": "NoPIOPS"
-        },
-        "AttachStorageStandard": {
-            "Type": "AWS::EC2::VolumeAttachment",
-            "DependsOn": "StorageStandard",
-            "Properties": {
-              "Device": "/dev/sdb",
-              "InstanceId": {
-                "Ref": "NFS"
-              },
-              "VolumeId": {
-                "Ref": "StorageStandard"
-              }
-            },
-            "Condition": "NoPIOPS"
-        }
-    },
-    "Outputs": {
-        "AccessIP": {
-            "Value": {
-                "Fn::GetAtt": [
-                    "NFS",
-                    "PublicIp"
+                ],
+                "MinSize": "1",
+                "MaxSize": "100",
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "SUBNETID"
+                    }
                 ]
             }
         }

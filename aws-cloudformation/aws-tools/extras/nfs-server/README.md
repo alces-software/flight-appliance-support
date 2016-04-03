@@ -17,15 +17,15 @@ The `nfs.json` CloudFormation template should be used to attach an NFS server to
 6. Enter your previously deployed cluster `CLUSTERNAME` - for example `mycluster`
 7. Select your AWS keypair, this is used for administrator access to the NFS server
 8. Enter your previously deployed cluster login node internal IP - this is used to register your NFS server with the environment; for example `10.75.0.10`
-9. Select whether to use Provisioned IOPS or not (`PIOPS`); if selected, this significantly increases the storage performance of your NFS server
-10. *Optional* Enter the name of your clusters placement group; this will greatly increase the performance of your NFS server when using Medium or above
-11. Select the security group of your existing compute environment
-12. Select the amount of storage to deploy with the NFS server in GB. For example, to deploy with 10TB - enter `1024000`
-13. Select the `STORAGETYPE` - this defines the number of CPU cores and memory available to the NFS server; which may greatly impact on the performance of your NFS server.
+9. *Optional* Enter the name of your clusters placement group; this will greatly increase the performance of your NFS server when using Medium or above
+10. Select the security group of your existing compute environment
+11. Enter the spot price you wish to pay per hour in USD for your instance. If you do not wish to use spot - please enter `None`
+13. Select the `STORAGETYPE` - this defines the number of CPU cores and memory and storage available to the NFS server.
 14. Select the subnet ID of your existing compute environment
-15. Click **Next**
-16. On the **Tags** page, click the **Next** button
-17. On the **Review** page, click the **Create** button to deploy your NFS server and storage
+15. Enter the administrator username used in your existing cluster, for example `alces`
+16. Click **Next**
+17. On the **Tags** page, click the **Next** button
+18. On the **Review** page, click the **Create** button to deploy your NFS server and storage
 
 Once the stack deployment has finished, your NFS server will automatically register in your compute environment. From your cluster login node - as the administrator user, SSH to `storage1` to start using your NFS server.
 
