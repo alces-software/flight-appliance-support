@@ -45,11 +45,13 @@ Before running the following commands - source the `settings` file:
 . settings
 ```
 
-Network creation:
+To create your cluster network, use the following command. The `NetworkCIDR` parameter allows you to limit access to the instance to certain IP ranges.
+
 ```bash
 aws cloudformation create-stack \
 	--stack-name ${CLUSTERNAME}-network \
 	--template-body file://templates/network.json
+        --parameters ParameterKey=NetworkCIDR,ParameterValue="0.0.0.0/0"
 ```
 
 Check the status of the network creation using: 

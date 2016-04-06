@@ -1,7 +1,16 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Launch an Alces network for use with Alces compute environments",
-    "Resources": {
+    "Parameters": {
+        "NetworkCIDR": {
+            "Description": "Enter an address range that is permitted to access the Clusterware master node. Leave blank if unknown",
+            "Type": "String",
+            "Default": "0.0.0.0/0",
+            "AllowedPattern": "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/[0-9]{1,2}",
+            "ConstraintDescription": "Please specify a valid IP range, e.g. 101.21.2.0/16"
+        }
+      },
+        "Resources": {
         "ClusterVPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
@@ -178,11 +187,6 @@
         "SUBNETID": {
             "Value": {
                 "Ref": "ClusterSubnet"
-            }
-        },
-        "NETWORKACL": {
-            "Value": {
-                "Ref": "ClusterNetACL"
             }
         },
         "SECURITYGROUP": {
