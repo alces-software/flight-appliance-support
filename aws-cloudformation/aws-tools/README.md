@@ -62,7 +62,7 @@ aws cloudformation describe-stacks \
 
 Once the network stack has successfully created - add the network resource IDs to the `settings` file: 
 ```bash
-for resource in VPCID GATEWAYID ROUTETABLEID SUBNETID NETWORKACL SECURITYGROUP; do
+for resource in VPCID GATEWAYID ROUTETABLEID SUBNETID SECURITYGROUP; do
   id=$(aws cloudformation describe-stacks --stack-name ${CLUSTERNAME}-network | grep $resource | awk '{print $4}');
   echo "${resource}=\"${id}\"" >> settings;
 done
@@ -88,7 +88,6 @@ aws cloudformation create-stack \
                      ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
                      ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
                      ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
-                     ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
                      ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=LOGINAMI,ParameterValue="$LOGINAMI" \
