@@ -18,10 +18,6 @@
 			"Description": "Subnet ID",
 			"Type": "String"
 		},
-		"NETWORKACL": {
-			"Description": "Network ACL",
-			"Type": "String"
-		},
 		"SECURITYGROUP": {
 			"Description": "Security Group ID",
 			"Type": "String"
