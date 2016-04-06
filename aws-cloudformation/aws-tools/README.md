@@ -140,7 +140,6 @@ aws cloudformation create-stack \
                      ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
                      ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
                      ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
-                     ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
                      ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
@@ -171,7 +170,6 @@ aws cloudformation create-stack \
                      ParameterKey=GATEWAYID,ParameterValue="$GATEWAYID" \
                      ParameterKey=ROUTETABLEID,ParameterValue="$ROUTETABLEID" \
                      ParameterKey=SUBNETID,ParameterValue="$SUBNETID" \
-                     ParameterKey=NETWORKACL,ParameterValue="$NETWORKACL" \
                      ParameterKey=SECURITYGROUP,ParameterValue="$SECURITYGROUP" \
                      ParameterKey=CLUSTERNAME,ParameterValue="$CLUSTERNAME" \
                      ParameterKey=KEYPAIR,ParameterValue="$KEYPAIR" \
