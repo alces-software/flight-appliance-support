@@ -17,7 +17,7 @@ Use the `lustre.json` CloudFormation template included to launch the Lustre clus
 
 #Configuration
 ##MDS configuration
-From your Flight compute environment, SSH to `mds1` - which is automatically configured with the appropriate cluster key upon enjoying the environment. 
+SSH to the MDS node using the `centos` administrator user, together with the public IP address of the MDS node. 
 
 Once on the `mds1` node - switch to the `root` user to begin configuration. Run the following command to initiate configuration: 
 
@@ -44,3 +44,22 @@ curl -ssL https://git.io/vV5di | /bin/bash
 ```
 
 Each of your nodes will now have the Lustre filesystem mounted at `/mnt/data`. 
+
+#Guideline performance figures
+The following figures are simply a guideline to show the possible performance of a Lustre cluster with Flight Compute using AWS.
+
+##1 x MDS/1 x OSS (10GbE enabled)
+The following setup was used to achieve the below figures: 
+
+- Single MDS/MGT node (`i2.xlarge` with 2 x SSDs)
+- Single OSS with 24 x instance store disks in a single logical volume (`d2.8xlarge`)
+- Three compute node clients with the Lustre filesystem mounted and 10GbE enabled (`c4.8xlarge`)
+
+- Three clients writing to a single OST: 
+  - 1.1GB/sec write total throughput
+  - 367MB/sec write per client
+
+- Single client writing to a single OST:
+  - 1.05GB/sec write total throughput
+
+

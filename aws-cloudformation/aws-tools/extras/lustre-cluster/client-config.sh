@@ -6,6 +6,9 @@ if [ "$HOSTNAME" -ne login1 ];
   exit 1
 fi
 
+echo "Please enter the private IP address of the Lustre MDS instance:"
+read MDSIP
+
 cat << EOF > $HOME/lustre.repo
 [lustre-client]
 name=Lustre client for el7
@@ -19,4 +22,4 @@ EOF
 pdsh -g cluster 'sudo cp $HOME/lustre.repo /etc/yum.repos.d/lustre.repo'
 pdsh -g cluster 'sudo yum -y install lustre-client'
 pdsh -g cluster 'sudo mkdir -p /mnt/lustre'
-pdsh -g cluster 'sudo mount -t lustre mds1@tcp0:/${clustername} /mnt/lustre'
+pdsh -g cluster 'sudo mount -t lustre ${MDSIP}@tcp0:/${clustername} /mnt/lustre'

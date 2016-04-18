@@ -24,7 +24,7 @@ case $instancetype in
 
 esac
 
-modprobe lustre
+modprobe -v lustre
 pvcreate $disks
 vgcreate $HOSTNAME $disks
 vgsize=$(vgdisplay | grep "Total PE" | awk '{print $3}')

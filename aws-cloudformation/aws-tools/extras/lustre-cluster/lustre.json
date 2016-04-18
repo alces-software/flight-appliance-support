@@ -1,0 +1,491 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Launch a Lustre filesystem for use with your Alces Flight compute environment",
+    "Parameters": {
+        "SUBNETID": {
+            "Description": "Subnet ID",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "SECURITYGROUP": {
+            "Description": "Security Group ID",
+            "Type": "AWS::EC2::SecurityGroup::Id"
+        },
+        "MDSTYPE": {
+            "Description": "Select the type of Lustre MDS node to deploy. This defines the amount of storage, number of cores and memory available to the instance.",
+            "Type": "String",
+            "Default": "Medium",
+            "AllowedValues": [
+                "Small",
+                "Medium",
+                "Large"
+            ]
+        },
+        "OSSTYPE": {
+            "Description": "Select the type of Lustre OSS node to deploy. This defines the amount of storage per OSS deployed, number of cores and memory available to the instance.",
+            "Type": "String",
+            "Default": "Medium-12TB",
+            "AllowedValues": [
+                "Small-6TB",
+                "Medium-12TB",
+                "Large-48TB"
+            ]
+        },
+        "USERNAME": {
+            "Description": "Enter the name of your environments cluster administrator user",
+            "Type": "String",
+            "Default": "alces"
+        },
+        "PLACEMENTGROUP": {
+            "Description": "Enter the name of your existing clusters placement group - if your cluster is not part of one, select None",
+            "Type": "String",
+            "Default": "None"
+        },
+        "SPOTPRICE": {
+            "Description": "Enter your spot price in USD per-hour. If you do not wish to use spot, please enter None",
+            "Type": "String",
+            "Default": "1"
+        },
+        "KEYPAIR": {
+            "Description": "Administrator keypair",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        }
+    },
+    "Mappings": {
+        "MDSTypeToFlavour": {
+            "Small": {
+                "instanceflavour": "i2.xlarge"
+            },
+            "Medium": {
+                "instanceflavour": "i2.2xlarge"
+            },
+            "Large": {
+                "instanceflavour": "i2.8xlarge"
+            }
+        },
+        "OSSTypeToFlavour": {
+            "Small-6TB": {
+                "instanceflavour": "d2.xlarge"
+            },
+            "Medium-12TB": {
+                "instanceflavour": "d2.2xlarge"
+            },
+            "Large-48TB": {
+                "instanceflavour": "d2.8xlarge"
+            }
+        }
+    },
+    "Conditions": {
+        "UsePlacementGroup": {
+            "Fn::Equals": [
+                {
+                    "Ref": "PLACEMENTGROUP"
+                },
+                "None"
+            ]
+        },
+        "UseSpot": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "SPOTPRICE"
+                        },
+                        "None"
+                    ]
+                }
+            ]
+        }
+    },
+    "Resources": {
+        "MDSConfig": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Properties": {
+                "AssociatePublicIpAddress": "True",
+                "KeyName": {
+                    "Ref": "KEYPAIR"
+                },
+                "ImageId": "ami-2891135b",
+                "InstanceType": {
+                    "Fn::FindInMap": [
+                        "MDSTypeToFlavour",
+                        {
+                            "Ref": "MDSTYPE"
+                        },
+                        "instanceflavour"
+                    ]
+                },
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": "100"
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdba",
+                        "VirtualName": "ephemeral0"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbb",
+                        "VirtualName": "ephemeral1"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbc",
+                        "VirtualName": "ephemeral2"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbd",
+                        "VirtualName": "ephemeral3"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbe",
+                        "VirtualName": "ephemeral4"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbf",
+                        "VirtualName": "ephemeral5"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbg",
+                        "VirtualName": "ephemeral6"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbh",
+                        "VirtualName": "ephemeral7"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbi",
+                        "VirtualName": "ephemeral8"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbj",
+                        "VirtualName": "ephemeral9"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbk",
+                        "VirtualName": "ephemeral10"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbl",
+                        "VirtualName": "ephemeral11"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbm",
+                        "VirtualName": "ephemeral12"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbn",
+                        "VirtualName": "ephemeral13"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbo",
+                        "VirtualName": "ephemeral14"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbp",
+                        "VirtualName": "ephemeral15"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbq",
+                        "VirtualName": "ephemeral16"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbr",
+                        "VirtualName": "ephemeral17"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbs",
+                        "VirtualName": "ephemeral18"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbt",
+                        "VirtualName": "ephemeral19"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbu",
+                        "VirtualName": "ephemeral20"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbv",
+                        "VirtualName": "ephemeral21"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbw",
+                        "VirtualName": "ephemeral22"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbx",
+                        "VirtualName": "ephemeral23"
+                    }
+                ],
+                "SpotPrice": {
+                    "Fn::If": [
+                        "UseSpot",
+                        {
+                            "Ref": "SPOTPRICE"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "SECURITYGROUP"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#cloud-config",
+                                "\n",
+                                "hostname: mds1"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "MDSGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "DesiredCapacity": "1",
+                "LaunchConfigurationName": {
+                    "Ref": "MDSConfig"
+                },
+                "PlacementGroup": {
+                    "Fn::If": [
+                        "UsePlacementGroup",
+                        {
+                            "Ref": "AWS::NoValue"
+                        },
+                        {
+                            "Ref": "PLACEMENTGROUP"
+                        }
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "-storage0"
+                                ]
+                            ]
+                        },
+                        "PropagateAtLaunch": "true"
+                    }
+                ],
+                "MinSize": "1",
+                "MaxSize": "100",
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "SUBNETID"
+                    }
+                ]
+            }
+        },
+        "OSSConfig": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Properties": {
+                "AssociatePublicIpAddress": "True",
+                "KeyName": {
+                    "Ref": "KEYPAIR"
+                },
+                "ImageId": "ami-2891135b",
+                "InstanceType": {
+                    "Fn::FindInMap": [
+                        "OSSTypeToFlavour",
+                        {
+                            "Ref": "OSSTYPE"
+                        },
+                        "instanceflavour"
+                    ]
+                },
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": "100"
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdba",
+                        "VirtualName": "ephemeral0"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbb",
+                        "VirtualName": "ephemeral1"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbc",
+                        "VirtualName": "ephemeral2"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbd",
+                        "VirtualName": "ephemeral3"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbe",
+                        "VirtualName": "ephemeral4"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbf",
+                        "VirtualName": "ephemeral5"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbg",
+                        "VirtualName": "ephemeral6"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbh",
+                        "VirtualName": "ephemeral7"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbi",
+                        "VirtualName": "ephemeral8"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbj",
+                        "VirtualName": "ephemeral9"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbk",
+                        "VirtualName": "ephemeral10"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbl",
+                        "VirtualName": "ephemeral11"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbm",
+                        "VirtualName": "ephemeral12"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbn",
+                        "VirtualName": "ephemeral13"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbo",
+                        "VirtualName": "ephemeral14"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbp",
+                        "VirtualName": "ephemeral15"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbq",
+                        "VirtualName": "ephemeral16"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbr",
+                        "VirtualName": "ephemeral17"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbs",
+                        "VirtualName": "ephemeral18"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbt",
+                        "VirtualName": "ephemeral19"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbu",
+                        "VirtualName": "ephemeral20"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbv",
+                        "VirtualName": "ephemeral21"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbw",
+                        "VirtualName": "ephemeral22"
+                    },
+                    {
+                        "DeviceName": "/dev/xvdbx",
+                        "VirtualName": "ephemeral23"
+                    }
+                ],
+                "SpotPrice": {
+                    "Fn::If": [
+                        "UseSpot",
+                        {
+                            "Ref": "SPOTPRICE"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "SECURITYGROUP"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#cloud-config",
+                                "\n",
+                                "hostname: oss1"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "OSS1Group": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "DesiredCapacity": "1",
+                "LaunchConfigurationName": {
+                    "Ref": "OSSConfig"
+                },
+                "PlacementGroup": {
+                    "Fn::If": [
+                        "UsePlacementGroup",
+                        {
+                            "Ref": "AWS::NoValue"
+                        },
+                        {
+                            "Ref": "PLACEMENTGROUP"
+                        }
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "-oss1"
+                                ]
+                            ]
+                        },
+                        "PropagateAtLaunch": "true"
+                    }
+                ],
+                "MinSize": "1",
+                "MaxSize": "100",
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "SUBNETID"
+                    }
+                ]
+            }
+        }
+    }
+}
