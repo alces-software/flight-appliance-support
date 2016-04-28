@@ -47,7 +47,7 @@ This should be performed prior to any Alces ClusterWare tools performing `/home`
 5. Switch to the administrator user, e.g. `alces` - and you should see the contents of your previous clusters' home directory: 
 
 ```bash
-[alces@login1(hola) ~]$ ls
+[alces@login1(alces-cluster) ~]$ ls
 myjob.1.output  clusterware-setup-sshkey.log  job-scripts 
 ```
 
