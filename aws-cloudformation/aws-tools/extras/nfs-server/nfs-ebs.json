@@ -21,11 +21,12 @@
         "STORAGETYPE": {
             "Description": "Select the type of storage server to deploy. This defines the number of cores and memory available - affecting the read/write performance of your storage",
             "Type": "String",
-            "Default": "Medium-12TB",
+            "Default": "Medium-5TB",
             "AllowedValues": [
-                "Small-6TB",
-                "Medium-12TB",
-                "Large-48TB"
+                "Small-2TB",
+                "Medium-5TB",
+                "Large-10TB",
+		"XLarge-15TB"
             ]
         },
         "USERNAME": {
@@ -49,15 +50,32 @@
         }
     },
     "Mappings": {
-        "StorageTypeFlavour": {
-            "Small-6TB": {
-                "instanceflavour": "d2.xlarge"
+        "StorageSize": {
+            "Small-2TB": {
+                "volumesize": "2000"
             },
-            "Medium-12TB": {
-                "instanceflavour": "d2.2xlarge"
+            "Medium-5TB": {
+                "volumesize": "5000"
             },
-            "Large-48TB": {
-                "instanceflavour": "d2.8xlarge"
+            "Large-10TB": {
+                "volumesize": "10000"
+            },
+            "XLarge-15TB": {
+                "volumesize": "15000"
+            }
+        },
+        "InstanceFlavour": {
+            "Small-2TB": {
+                "instancetype": "m4.xlarge"
+            },
+            "Medium-5TB": {
+                "instancetype": "m4.2xlarge"
+            },
+            "Large-10TB": {
+                "instancetype": "m4.4xlarge"
+            },
+            "XLarge-15TB": {
+                "instancetype": "m4.10xlarge"
             }
         }
     },
@@ -91,14 +109,14 @@
                 "KeyName": {
                     "Ref": "KEYPAIR"
                 },
-                "ImageId": "ami-0b28ae78",
+                "ImageId": "ami-b9ff71ca",
                 "InstanceType": {
                     "Fn::FindInMap": [
-                        "StorageTypeFlavour",
+                        "InstanceFlavour",
                         {
                             "Ref": "STORAGETYPE"
                         },
-                        "instanceflavour"
+                        "instancetype"
                     ]
                 },
                 "BlockDeviceMappings": [
@@ -109,100 +127,19 @@
                         }
                     },
                     {
-                        "DeviceName": "/dev/xvdba",
-                        "VirtualName": "ephemeral0"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbb",
-                        "VirtualName": "ephemeral1"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbc",
-                        "VirtualName": "ephemeral2"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbd",
-                        "VirtualName": "ephemeral3"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbe",
-                        "VirtualName": "ephemeral4"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbf",
-                        "VirtualName": "ephemeral5"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbg",
-                        "VirtualName": "ephemeral6"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbh",
-                        "VirtualName": "ephemeral7"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbi",
-                        "VirtualName": "ephemeral8"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbj",
-                        "VirtualName": "ephemeral9"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbk",
-                        "VirtualName": "ephemeral10"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbl",
-                        "VirtualName": "ephemeral11"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbm",
-                        "VirtualName": "ephemeral12"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbn",
-                        "VirtualName": "ephemeral13"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbo",
-                        "VirtualName": "ephemeral14"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbp",
-                        "VirtualName": "ephemeral15"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbq",
-                        "VirtualName": "ephemeral16"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbr",
-                        "VirtualName": "ephemeral17"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbs",
-                        "VirtualName": "ephemeral18"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbt",
-                        "VirtualName": "ephemeral19"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbu",
-                        "VirtualName": "ephemeral20"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbv",
-                        "VirtualName": "ephemeral21"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbw",
-                        "VirtualName": "ephemeral22"
-                    },
-                    {
-                        "DeviceName": "/dev/xvdbx",
-                        "VirtualName": "ephemeral23"
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "VolumeType": "st1",
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "StorageSize",
+                                    {
+                                        "Ref": "STORAGETYPE"
+                                    },
+                                    "volumesize"
+                                ]
+                            }
+                        }
                     }
                 ],
                 "SpotPrice": {
