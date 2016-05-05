@@ -8,6 +8,7 @@ case $instancetype in
     sudo vgcreate data /dev/xvdba /dev/xvdbb /dev/xvdbc
     vgsize=$(sudo vgdisplay | grep "Total PE" | awk '{print $3}')
     sudo lvcreate --name storage1 -l $vgsize -i $disknum -I 256 data
+    mountpoint="/dev/mapper/data-storage1"
     ;;
 
   d2.2xlarge)
@@ -18,6 +19,7 @@ case $instancetype in
                        /dev/xvdbd /dev/xvdbe /dev/xvdbf
     vgsize=$(sudo vgdisplay | grep "Total PE" | awk '{print $3}')
     sudo lvcreate --name storage1 -l $vgsize -i $disknum -I 256 data
+    mountpoint="/dev/mapper/data-storage1"
     ;;
 
   d2.8xlarge)
@@ -40,16 +42,22 @@ case $instancetype in
                   /dev/xvdbw /dev/xvdbx
     vgsize=$(sudo vgdisplay | grep "Total PE" | awk '{print $3}')
     sudo lvcreate --name storage1 -l $vgsize -i $disknum -I 256 data
+    mountpoint="/dev/mapper/data-storage1"
+    ;;
+
+    m4.xlarge|m4.2xlarge|m4.4xlarge|m4.10xlarge)
+      mountpoint="/dev/xvdb"
     ;;
 
     *)
       echo "Invalid instance type"
       exit 1
 esac
+
 sudo -s <<EOF
-  mkfs.xfs /dev/mapper/data-storage1
+  mkfs.xfs ${mountpoint}
   mkdir /mnt/data
-  mount /dev/mapper/data-storage1 /mnt/data
+  mount ${mountpoint} /mnt/data
   chmod 0777 /mnt/data
   echo "/mnt/data 10.75.0.0/16(rw,no_root_squash,no_subtree_check,sync)" >> /etc/exports
   sed -i '/RPCNFSDCOUNT/c\RPCNFSDCOUNT=320' /etc/sysconfig/nfs
@@ -58,4 +66,4 @@ sudo -s <<EOF
   exportfs -a
 EOF
 ssh login1 'pdsh -g cluster sudo mkdir /mnt/data'
-ssh login1 'pdsh -g cluster sudo mount storage1:/mnt/data /mnt/data -t nfs -o wsize=65536,rsize=65536'
+ssh login1 'pdsh -g cluster sudo mount -t nfs storage1:/mnt/data /mnt/data -o wsize=65536,rsize=65536'
