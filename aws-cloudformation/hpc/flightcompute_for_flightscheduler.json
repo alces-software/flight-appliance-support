@@ -1,11 +1,11 @@
 {
     "Description": "Launch an Alces HPC environment with a single SGE master node together with 8 initial compute nodes using EC2 spot.",
     "Parameters": {
-        "KeyPair": {
+        "AdminKey": {
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "Username": {
+        "AdminUser": {
             "Description": "Enter a username - this is used for the cluster administrator account",
             "Type": "String",
             "Default": "alces",
@@ -477,7 +477,7 @@
                     "Fn::FindInMap": [ "FlightTypeToInstanceType", { "Ref": "LoginType" }, "InstanceType" ]
                 },
                 "KeyName": {
-                    "Ref": "KeyPair"
+                    "Ref": "AdminKey"
                 },
                 "UserData": {
                     "Fn::Base64": {
@@ -492,7 +492,7 @@
                                 "\n",
                                 "    name: ",
                                 {
-                                    "Ref": "Username"
+                                    "Ref": "AdminUser"
                                 },
                                 "\n",
                                 "hostname: login1",
@@ -538,7 +538,7 @@
             "Properties": {
                 "AssociatePublicIpAddress": "True",
                 "KeyName": {
-                    "Ref": "KeyPair"
+                    "Ref": "AdminKey"
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
@@ -600,7 +600,7 @@
                                 "\n",
                                 "    name: ",
                                 {
-                                    "Ref": "Username"
+                                    "Ref": "AdminUser"
                                 },
                                 "\n",
                                 "write_files:",
@@ -736,7 +736,7 @@
         }
     },
     "Outputs": {
-        "Username": {
+        "AdminUser": {
             "Description": "Administrator username used to log in to your environment with. This should be used in conjunction with your selected AWS keypair - together with the provided access IP",
             "Value": {
                 "Ref": "Username"
