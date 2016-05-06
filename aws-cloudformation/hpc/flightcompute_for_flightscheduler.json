@@ -1,11 +1,53 @@
 {
     "Description": "Launch an Alces HPC environment with a single SGE master node together with 8 initial compute nodes using EC2 spot.",
     "Parameters": {
-        "KeyPair": {
+        "ClusterName": {
+            "Description": "Choose a cluster name",
+            "Type": "String",
+            "AllowedPattern": "[-a-z0-9]*"
+        },
+        "ClusterUUID": {
+            "Description": "Enter a cluster UUID",
+            "Type": "String",
+            "AllowedPattern": "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}",
+            "ConstraintDescription": "Please specify a valid UUID"
+        },
+        "ClusterwareToken": {
+            "Description": "Enter a Clusterware token - or leave default if unknown",
+            "Type": "String",
+            "MinLength": "24",
+            "MaxLength": "64",
+            "NoEcho": true
+        },
+        "ClusterUser": {
+            "Description": "Choose a username for the cluster user",
+            "Type": "String",
+            "MinLength": "3",
+            "MaxLength": "16",
+            "AllowedPattern": "[-a-z0-9]*",
+            "Default": "alces-cluster",
+            "ConstraintDescription": "Username can only contain alphanumeric characters and dashes"
+        },
+        "ClusterUserKey": {
+            "Description": "Enter a public SSH key for cluster user access",
+            "Type": "String",
+            "Default": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZzUmsgywX4nsvpviq2aqnDX4kSgGF8nWjUMvD7KRV4uuOhtR56dgHwBSXne0PrR+KMmFt8ExH9valnZqYnL6sTG3vB8sFtdXrnXmx+1DjgqWc4Liq3RehJ589K1x8U6692Zoc9ecNZHd/I+r0SPUf2PGypFc4G28BPee/qdIuDDFSu4TWQv2E+f1mv14qRYQK9p7E+f+8UBJ2EBLmAwOeKV+uVGUtSZQvl8nTZDONzY88qHDHpjwu5zbk4l0pDXznNY3tO7A4TMnhoKr0I1Q0KX6I/S11Jq52pubfPlmq4Xdcefg0Ou0M7NXozhsgEhM5KYTs/qkNrMCXTPJLGSbL clouduser"
+        },
+        "FlightServiceUrl": {
+            "Description": "The URL for the Alces Flight service.",
+            "Type": "String"
+        },
+        "FlightInstanceUUID": {
+            "Description": "The UUID assigned to this instance by Alces Flight.  This is used for identifiying this instance in communication with the Alces Flight service.",
+            "Type": "String",
+            "AllowedPattern": "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}",
+            "ConstraintDescription": "Please specify a valid UUID"
+        },
+        "AdminKey": {
             "Description": "Choose an existing AWS key for administrator access",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "Username": {
+        "AdminUser": {
             "Description": "Enter a username - this is used for the cluster administrator account",
             "Type": "String",
             "Default": "alces",
@@ -67,7 +109,7 @@
                 }
             ]
         },
-	"UseAlarms": {
+        "UseAlarms": {
             "Fn::Not": [
                 {
                     "Fn::Equals": [
@@ -79,18 +121,18 @@
                 }
             ]
         },
-	"LoginUsePlacement": {
-	    "Fn::Not": [
-		{
-		    "Fn::Equals": [
-			{
-			    "Ref": "LoginType"
-			},
-			"small-t2.large"
-		    ]
-		}
-	    ]
-	}
+        "LoginUsePlacement": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "LoginType"
+                        },
+                        "small-t2.large"
+                    ]
+                }
+            ]
+        }
     },
     "Mappings": {
         "AWSRegionArch2AMI": {
@@ -99,23 +141,23 @@
             }
         },
         "FlightTypeToInstanceType": {
-          "compute.small-c4.large": { "InstanceType": "c4.large" },
-          "compute.medium-c4.2xlarge": { "InstanceType": "c4.2xlarge" },
-          "compute.large-c4-4xlarge": { "InstanceType": "c4.4xlarge" },
-          "compute.dedicated-c4.8xlarge": { "InstanceType": "c4.8xlarge" },
-          "balanced.small-m3.xlarge": { "InstanceType": "m2.xlarge" },
-          "balanced.medium-m3.2xlarge": { "InstanceType": "m3.2xlarge" },
-          "balanced.large-m4.4xlarge": { "InstanceType": "m4.4xlarge" },
-          "balanced.dedicated-m4.10xlarge": { "InstanceType": "m4.10xlarge" },
-          "memory.small-r3.xlarge": { "InstanceType": "r3.xlarge" },
-          "memory.medium-r3.2xlarge": { "InstanceType": "r3.2xlarge" },
-          "memory.large-r3.4xlarge": { "InstanceType": "r3.4xlarge" },
-          "memory.dedicated-r3.8xlarge": { "InstanceType": "r3.8xlarge" },
-          "gpu.medium-g2.2xlarge": { "InstanceType": "g2.2xlarge" },
-          "gpu.dedicated-g2.8xlarge": { "InstanceType": "g2.8xlarge" },
-          "small-t2.large": { "InstanceType": "t2.large" },
-          "medium-r3.2xlarge": { "InstanceType": "r3.2xlarge" },
-          "large-c4.8xlarge": { "InstanceType": "c4.8xlarge" }
+            "compute.small-c4.large": { "InstanceType": "c4.large" },
+            "compute.medium-c4.2xlarge": { "InstanceType": "c4.2xlarge" },
+            "compute.large-c4-4xlarge": { "InstanceType": "c4.4xlarge" },
+            "compute.dedicated-c4.8xlarge": { "InstanceType": "c4.8xlarge" },
+            "balanced.small-m3.xlarge": { "InstanceType": "m2.xlarge" },
+            "balanced.medium-m3.2xlarge": { "InstanceType": "m3.2xlarge" },
+            "balanced.large-m4.4xlarge": { "InstanceType": "m4.4xlarge" },
+            "balanced.dedicated-m4.10xlarge": { "InstanceType": "m4.10xlarge" },
+            "memory.small-r3.xlarge": { "InstanceType": "r3.xlarge" },
+            "memory.medium-r3.2xlarge": { "InstanceType": "r3.2xlarge" },
+            "memory.large-r3.4xlarge": { "InstanceType": "r3.4xlarge" },
+            "memory.dedicated-r3.8xlarge": { "InstanceType": "r3.8xlarge" },
+            "gpu.medium-g2.2xlarge": { "InstanceType": "g2.2xlarge" },
+            "gpu.dedicated-g2.8xlarge": { "InstanceType": "g2.8xlarge" },
+            "small-t2.large": { "InstanceType": "t2.large" },
+            "medium-r3.2xlarge": { "InstanceType": "r3.2xlarge" },
+            "large-c4.8xlarge": { "InstanceType": "c4.8xlarge" }
         }
     },
     "Resources": {
@@ -316,7 +358,7 @@
                                 "autoscaling:SetDesiredCapacity",
                                 "autoscaling:UpdateAutoScalingGroup",
                                 "autoscaling:SetInstanceProtection",
-				"autoscaling:TerminateInstanceInAutoScalingGroup"
+                                "autoscaling:TerminateInstanceInAutoScalingGroup"
                             ],
                             "Resource": [
                                 "*"
@@ -421,17 +463,17 @@
                         }
                     ]
                 },
-		"PlacementGroupName": {
+                "PlacementGroupName": {
                     "Fn::If": [
-			"LoginUsePlacement",
-			{
-			    "Ref": "PlacementGroup"
-			},
-			{
-			    "Ref": "AWS::NoValue"
-			}
-		    ]
-		},
+                        "LoginUsePlacement",
+                        {
+                            "Ref": "PlacementGroup"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
@@ -460,7 +502,7 @@
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
                             "VolumeSize": {
-			        "Ref": "LoginSystemDiskSize"
+                                "Ref": "LoginSystemDiskSize"
                             }
                         }
                     },
@@ -477,7 +519,7 @@
                     "Fn::FindInMap": [ "FlightTypeToInstanceType", { "Ref": "LoginType" }, "InstanceType" ]
                 },
                 "KeyName": {
-                    "Ref": "KeyPair"
+                    "Ref": "AdminKey"
                 },
                 "UserData": {
                     "Fn::Base64": {
@@ -492,7 +534,7 @@
                                 "\n",
                                 "    name: ",
                                 {
-                                    "Ref": "Username"
+                                    "Ref": "AdminUser"
                                 },
                                 "\n",
                                 "hostname: login1",
@@ -503,14 +545,13 @@
                                 "\n",
                                 "    cluster:",
                                 "\n",
-                                "      uuid: '11111111-2222-3333-444444444444'",
+                                "      uuid: '", {"Ref": "ClusterUUID"}, "'",
                                 "\n",
-                                "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
+                                "      token: '", {"Ref": "ClusterwareToken"}, "'",
                                 "\n",
-                                "      name: ",
-                                {
-                                    "Ref": "AWS::StackName"
-                                },
+                                "      service_url: '", {"Ref": "FlightServiceUrl"}, "'",
+                                "\n",
+                                "      name: ", {"Ref": "ClusterName"},
                                 "\n",
                                 "      role: 'master'",
                                 "\n",
@@ -521,6 +562,20 @@
                                 "        storage_roles: ':master:'",
                                 "\n",
                                 "        access_roles: ':master:'",
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      flight:",
+                                "\n",
+                                "        uuid: '", {"Ref": "FlightInstanceUUID"}, "'",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: '", {"Ref": "ClusterUser"}, "'",
+                                "\n",
+                                "        ssh_public_key: |",
+                                "\n",
+                                "          ", { "Ref": "ClusterUserKey" },
                                 "\n",
                                 "  owner: root:root",
                                 "\n",
@@ -538,7 +593,7 @@
             "Properties": {
                 "AssociatePublicIpAddress": "True",
                 "KeyName": {
-                    "Ref": "KeyPair"
+                    "Ref": "AdminKey"
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
@@ -549,7 +604,7 @@
                         "centos7"
                     ]
                 },
-		"IamInstanceProfile": {
+                "IamInstanceProfile": {
                     "Fn::If": [
                         "UseAlarms",
                         {
@@ -561,7 +616,7 @@
                     ]
                 },
                 "InstanceType": {
-                     "Fn::FindInMap": [ "FlightTypeToInstanceType", { "Ref": "ComputeType" }, "InstanceType" ]
+                    "Fn::FindInMap": [ "FlightTypeToInstanceType", { "Ref": "ComputeType" }, "InstanceType" ]
                 },
                 "BlockDeviceMappings": [
                     {
@@ -600,7 +655,7 @@
                                 "\n",
                                 "    name: ",
                                 {
-                                    "Ref": "Username"
+                                    "Ref": "AdminUser"
                                 },
                                 "\n",
                                 "write_files:",
@@ -609,14 +664,13 @@
                                 "\n",
                                 "    cluster:",
                                 "\n",
-                                "      uuid: '11111111-2222-3333-444444444444'",
+                                "      uuid: '", {"Ref": "ClusterUUID"}, "'",
                                 "\n",
-                                "      token: '1A0a1aaAA1aAAA/aaa1aAA=='",
+                                "      token: '", {"Ref": "ClusterwareToken"}, "'",
                                 "\n",
-                                "      name: ",
-                                {
-                                    "Ref": "AWS::StackName"
-                                },
+                                "      service_url: '", {"Ref": "FlightServiceUrl"}, "'",
+                                "\n",
+                                "      name: ", {"Ref": "ClusterName"},
                                 "\n",
                                 "      role: 'slave'",
                                 "\n",
@@ -631,6 +685,20 @@
                                 "      tags:",
                                 "\n",
                                 "        scheduler_roles: ':compute:'",
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      flight:",
+                                "\n",
+                                "        uuid: '", {"Ref": "FlightInstanceUUID"}, "'",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: '", {"Ref": "ClusterUser"}, "'",
+                                "\n",
+                                "        ssh_public_key: |",
+                                "\n",
+                                "          ", { "Ref": "ClusterUserKey" },
                                 "\n",
                                 "  owner: root:root",
                                 "\n",
@@ -651,10 +719,10 @@
             }
         },
         "FlightCompute": {
-              "Type": "AWS::AutoScaling::AutoScalingGroup",
-              "DependsOn": "FlightLogin",
-              "Properties": {
-                  "DesiredCapacity": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "DependsOn": "FlightLogin",
+            "Properties": {
+                "DesiredCapacity": {
                     "Fn::If": [
                         "UseAlarms",
                         {
@@ -662,17 +730,17 @@
                         },
                         "8"
                     ]
-                  },
-                  "LaunchConfigurationName": {
-                      "Ref": "ComputeConfig"
-                  },
-                  "PlacementGroup": {
-                      "Ref": "PlacementGroup"
-                  },
-                  "Tags": [
-                      {
-                          "Key": "Name",
-                          "Value": {
+                },
+                "LaunchConfigurationName": {
+                    "Ref": "ComputeConfig"
+                },
+                "PlacementGroup": {
+                    "Ref": "PlacementGroup"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
                             "Fn::Join": [
                                 "",
                                 [
@@ -684,33 +752,33 @@
                             ]
                         },
                         "PropagateAtLaunch": "true"
-                      }
-                  ],
-                  "MinSize": "1",
-                  "MaxSize": "8",
-                  "VPCZoneIdentifier": [
+                    }
+                ],
+                "MinSize": "1",
+                "MaxSize": "8",
+                "VPCZoneIdentifier": [
                     {
                         "Ref": "FlightSubnet"
                     }
-                  ]
-              }
+                ]
+            }
         },
         "ScaleUp": {
-              "Condition":  "UseAlarms",
-              "Type": "AWS::AutoScaling::ScalingPolicy",
-              "Properties": {
+            "Condition":  "UseAlarms",
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+            "Properties": {
                 "AdjustmentType": "ChangeInCapacity",
                 "AutoScalingGroupName": {
                     "Ref": "FlightCompute"
                 },
                 "Cooldown": "300",
                 "ScalingAdjustment": "1"
-              }
+            }
         },
         "CPUAlarmHigh": {
-              "Condition":  "UseAlarms",
-              "Type": "AWS::CloudWatch::Alarm",
-              "Properties": {
+            "Condition":  "UseAlarms",
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
                 "AlarmDescription": "Scale-up if currently queued jobs exceeds limit",
                 "MetricName": "JobStatus_qw",
                 "Namespace": "ALCES-SGE",
@@ -732,17 +800,17 @@
                     }
                 ],
                 "ComparisonOperator": "GreaterThanThreshold"
-              }
+            }
         }
     },
     "Outputs": {
-          "Username": {
+        "AdminUser": {
             "Description": "Administrator username used to log in to your environment with. This should be used in conjunction with your selected AWS keypair - together with the provided access IP",
             "Value": {
-                "Ref": "Username"
+                "Ref": "AdminUser"
             }
-          },
-          "AccessIP": {
+        },
+        "AccessIP": {
             "Description": "Public access IP for your Flight Compute environment. Use together with your chosen username to gain SSH access",
             "Value": {
                 "Fn::GetAtt": [
@@ -750,6 +818,30 @@
                     "PublicIp"
                 ]
             }
-          }
+        },
+        "ClusterUser": {
+            "Value": {
+                "Ref": "ClusterUser"
+            },
+            "Description": "Cluster user username, access with user SSH key provided"
+        },
+        "ClusterName": {
+            "Value": {
+                "Ref": "ClusterName"
+            },
+            "Description": "Cluster Name"
+        },
+        "ClusterUUID": {
+            "Value": {
+                "Ref": "ClusterUUID"
+            },
+            "Description": "Cluster UUID"
+        },
+        "FlightInstanceUUID": {
+            "Description": "The Alces Flight UUID for this instance",
+            "Value": {
+                "Ref": "FlightInstanceUUID"
+            }
+        }
     }
 }
