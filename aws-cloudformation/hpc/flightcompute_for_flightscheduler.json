@@ -16,7 +16,8 @@
             "Description": "Enter a Clusterware token - or leave default if unknown",
             "Type": "String",
             "MinLength": "24",
-            "MaxLength": "64"
+            "MaxLength": "64",
+            "NoEcho": true
         },
         "ClusterUser": {
             "Description": "Choose a username for the cluster user",
@@ -835,12 +836,6 @@
                 "Ref": "ClusterUUID"
             },
             "Description": "Cluster UUID"
-        },
-        "ClusterwareToken": {
-            "Value": {
-                "Ref": "ClusterwareToken"
-            },
-            "Description": "Clusterware Token"
         },
         "FlightInstanceUUID": {
             "Description": "The Alces Flight UUID for this instance",
