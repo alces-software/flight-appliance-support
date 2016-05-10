@@ -91,7 +91,7 @@
                 "HVM64": "NOT_SUPPORTED"
             },
             "eu-west-1": {
-                "HVM64": "ami-ca50dbb9"
+                "HVM64": "ami-31e76d42"
             },
             "ap-southeast-1": {
                 "HVM64": "NOT_SUPPORTED"

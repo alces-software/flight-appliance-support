@@ -173,7 +173,7 @@
                 "KeyName": {
                     "Ref": "KeyPair"
                 },
-                "ImageId": "ami-ca50dbb9",
+                "ImageId": "ami-31e76d42",
                 "IamInstanceProfile": {
                     "Ref": "ComputeIAMProfile"
                 },
