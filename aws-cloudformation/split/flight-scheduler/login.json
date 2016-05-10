@@ -369,16 +369,10 @@
                     }
                 }
             }
-        },
-        "PlacementGroup": {
-            "Type": "AWS::EC2::PlacementGroup",
-            "Properties": {
-                "Strategy": "cluster"
-            }
         }
     },
     "Outputs": {
-        "InternalIP": {
+        "LoginIP": {
             "Description": "Cluster login node internal IP",
             "Value": {
                 "Fn::GetAtt": [
