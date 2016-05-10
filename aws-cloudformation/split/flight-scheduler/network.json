@@ -1,0 +1,104 @@
+{
+    "Description": "Launch an AWS Virtual Private Cloud with appropriate configuration  to support an Alces Flight Compute environment",
+     "Parameters": {
+         "NetworkCIDR": {
+             "Description": "Enter an address range that is permitted to access the environment via SSH/VNC. Enter 0.0.0.0/ if unknown",
+             "Type": "String",
+             "AllowedPattern": "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/[0-9]{1,2}",
+             "ConstraintDescription": "Please specify a valid IP range, e.g. 101.21.2.0/ 16"
+         }
+     },
+     "Resources": {
+         "FlightVPC": {
+             "Type": "AWS::EC2::VPC",
+             "Properties": {
+                 "Tags": [
+                     { "Key": "Name", "Value": { "Ref": "AWS::StackName" } }
+                 ],
+                 "CidrBlock": "10.75.0.0/16",
+                 "EnableDnsSupport": "true",
+                 "EnableDnsHostnames": "true"
+             }
+         },
+         "FlightRouteTable": {
+             "Type": "AWS::EC2::RouteTable",
+             "DependsOn": "FlightVPC",
+             "Properties": {
+                 "VpcId": { "Ref": "FlightVPC" },
+                 "Tags": [
+                     { "Key": "Application", "Value": { "Ref": "AWS::StackId" } }
+                 ]
+             }
+         },
+         "FlightSubnet": {
+             "Type": "AWS::EC2::Subnet",
+             "Properties": {
+                 "VpcId": { "Ref": "FlightVPC" },
+                 "CidrBlock": "10.75.0.0/24",
+                 "Tags": [
+                     { 
+                         "Key": "Name", 
+                         "Value": { "Fn::Join": [ "", [ { "Ref": "AWS::StackName" }, "-subnet" ] ] }
+                     }
+                 ]
+             }
+         },
+         "FlightGW": {
+             "Type": "AWS::EC2::InternetGateway",
+             "DependsOn": "FlightVPC"
+         },
+         "FlightGWAttach": {
+             "Type": "AWS::EC2::VPCGatewayAttachment",
+             "DependsOn": "FlightVPC",
+             "Properties": {
+                 "VpcId": { "Ref": "FlightVPC" },
+                 "InternetGatewayId": { "Ref": "FlightGW" }
+             }
+         },
+         "FlightRoute": {
+             "Type": "AWS::EC2::Route",
+             "DependsOn": "FlightGWAttach",
+             "Properties": {
+                 "RouteTableId": { "Ref": "FlightRouteTable" },
+                 "DestinationCidrBlock": "0.0.0.0/0",
+                 "GatewayId": { "Ref": "FlightGW" }
+             }
+         },
+         "SubnetToRouteTable": {
+             "Type": "AWS::EC2::SubnetRouteTableAssociation",
+             "DependsOn": "FlightRouteTable",
+             "Properties": {
+                 "SubnetId": { "Ref": "FlightSubnet" },
+                 "RouteTableId": { "Ref": "FlightRouteTable" }
+             }
+         },
+         "FlightSG": {
+             "Type": "AWS::EC2::SecurityGroup",
+             "Properties": { 
+                 "Tags": [
+                     { "Key": "Name", "Value": { "Ref": "AWS::StackName" } }
+                 ],
+                 "GroupDescription": "Enable SSH access to the Flight environment",
+                 "VpcId": { "Ref": "FlightVPC" },
+                 "SecurityGroupIngress": [
+                     { "IpProtocol": "-1", "FromPort": "0", "ToPort": "65535", "CidrIp": "10.75.0.0/24" },
+                     { "IpProtocol": "6", "FromPort": "5900", "ToPort": "5920", "CidrIp": { "Ref": "NetworkCIDR" } },
+                     { "IpProtocol": "6", "FromPort": "22", "ToPort": "22", "CidrIp": { "Ref": "NetworkCIDR" } }
+                 ],
+                 "SecurityGroupEgress": [
+                     { "IpProtocol": "-1", "FromPort": "0", "ToPort": "65535", "CidrIp": "0.0.0.0/0" }
+                 ]
+             }
+         }
+     },
+     "Outputs": {
+         "SecurityGroupID": {
+             "Description": "Security Group ID",
+             "Value": { "Ref": "FlightSG" }
+         },
+         "SubnetID": {
+             "Description": "Subnet ID",
+             "Value": { "Ref": "FlightSubnet" }
+         }
+     }
+}

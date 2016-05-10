@@ -1,0 +1,348 @@
+{
+    "Description": "Launch an Alces HPC environment with a single SGE master node together with 8 initial compute nodes using EC2 spot.",
+    "Parameters": {
+        "KeyPair": {
+            "Description": "Choose an existing AWS key for administrator access",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "SecurityGroupID": {
+            "Description": "Select your Security Group",
+            "Type": "AWS::EC2::SecurityGroup::Id"
+        },
+        "SubnetID": {
+            "Description": "Select your Subnet",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "ClusterName": {
+            "Description": "Choose a cluster name",
+            "Type": "String",
+            "AllowedPattern": "[-a-z0-9]*"
+        },
+        "ClusterUUID": {
+            "Description": "Enter a cluster UUID",
+            "Type": "String",
+            "ConstraintDescription": "Please specify a valid UUID"
+        },
+        "ClusterwareToken": {
+            "Description": "Enter a Clusterware token - or leave default if unknown",
+            "Type": "String",
+            "MinLength": "24",
+            "MaxLength": "64",
+            "NoEcho": true
+        },
+        "ClusterUser": {
+            "Description": "Choose a username for the cluster user",
+            "Type": "String",
+            "MinLength": "3",
+            "MaxLength": "16",
+            "AllowedPattern": "[-a-z0-9]*",
+            "Default": "alces-cluster",
+            "ConstraintDescription": "Username can only contain alphanumeric characters and dashes"
+        },
+        "ClusterUserKey": {
+            "Description": "Enter a public SSH key for cluster user access",
+            "Type": "String",
+            "Default": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZzUmsgywX4nsvpviq2aqnDX4kSgGF8nWjUMvD7KRV4uuOhtR56dgHwBSXne0PrR+KMmFt8ExH9valnZqYnL6sTG3vB8sFtdXrnXmx+1DjgqWc4Liq3RehJ589K1x8U6692Zoc9ecNZHd/I+r0SPUf2PGypFc4G28BPee/qdIuDDFSu4TWQv2E+f1mv14qRYQK9p7E+f+8UBJ2EBLmAwOeKV+uVGUtSZQvl8nTZDONzY88qHDHpjwu5zbk4l0pDXznNY3tO7A4TMnhoKr0I1Q0KX6I/S11Jq52pubfPlmq4Xdcefg0Ou0M7NXozhsgEhM5KYTs/qkNrMCXTPJLGSbL clouduser"
+        },
+        "FlightServiceUrl": {
+            "Description": "The URL for the Alces Flight service.",
+            "Type": "String"
+        },
+        "FlightInstanceUUID": {
+            "Description": "The UUID assigned to this instance by Alces Flight.  This is used for identifiying this instance in communication with the Alces Flight service.",
+            "Type": "String",
+            "AllowedPattern": "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}",
+            "ConstraintDescription": "Please specify a valid UUID"
+        },
+        "Username": {
+            "Description": "Enter a username - this is used for the cluster administrator account",
+            "Type": "String",
+            "Default": "alces",
+            "MaxLength": "16",
+            "MinLength": "1",
+            "AllowedPattern": "[-a-z0-9]*",
+            "ConstraintDescription": "Enter a username between 1 and 16 characters using a-z, 1 to 9 and -"
+        },
+        "LoginIP": {
+            "Description": "Enter the private IP address of your cluster login node",
+            "Type": "String"
+        },
+        "ComputeSpotPrice": {
+            "Description": "Enter your maximum bid per hour for each compute instance. View the Spot Request calculator for information on spot pricing. (Enter 0 for on-demand)",
+            "Type": "Number",
+            "Default": "0"
+        },
+        "ComputeType": {
+            "Description": "Select the compute node instance type to deploy - this defines the number of cores and memory available",
+            "Type": "String",
+            "Default": "c4.large",
+            "AllowedValues": [
+                "c4.large",
+                "c4.2xlarge"
+            ]
+        },
+        "InitialNodes": {
+            "Description": "Enter how many nodes to start initially. For efficiency, we recommend starting with a small number and allow autoscaling to add nodes when you have jobs waiting in the queue. (Enter 0 to disable autoscaling and start all nodes at init)",
+            "Type": "Number",
+            "Default": "1",
+            "MinValue": "1",
+            "MaxValue": "8"
+        }
+    },
+    "Conditions": {
+        "UseSpotCompute": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "ComputeSpotPrice"
+                        },
+                        "0"
+                    ]
+                }
+            ]
+        }
+    },
+    "Resources": {
+        "ComputeIAM": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "ComputeIAMProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "ComputeIAM"
+                    }
+                ]
+            }
+        },
+        "ComputePermissions": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "ComputePermissions",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "autoscaling:DescribeAutoScalingGroups"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "ComputeIAM"
+                    }
+                ]
+            }
+        },
+        "PlacementGroup": {
+            "Type": "AWS::EC2::PlacementGroup",
+            "Properties": {
+                "Strategy": "cluster"
+            }
+        },
+        "ComputeConfig": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Properties": {
+                "AssociatePublicIpAddress": "True",
+                "KeyName": {
+                    "Ref": "KeyPair"
+                },
+                "ImageId": "ami-31e76d42",
+                "IamInstanceProfile": {
+                    "Ref": "ComputeIAMProfile"
+                },
+                "InstanceType": {
+                    "Ref": "ComputeType"
+                },
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": "20"
+                        }
+                    }
+                ],
+                "SpotPrice": {
+                    "Fn::If": [
+                        "UseSpotCompute",
+                        {
+                            "Ref": "ComputeSpotPrice"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "SecurityGroupID"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#cloud-config",
+                                "\n",
+                                "system_info:",
+                                "\n",
+                                "  default_user:",
+                                "\n",
+                                "    name: ",
+                                {
+                                    "Ref": "Username"
+                                },
+                                "\n",
+                                "write_files:",
+                                "\n",
+                                "- content: |",
+                                "\n",
+                                "    cluster:",
+                                "\n",
+                                "      uuid: '", {"Ref": "ClusterUUID"}, "'",
+                                "\n",
+                                "      token: '", {"Ref": "ClusterwareToken"}, "'",
+                                "\n",
+                                "      service_url: '", {"Ref": "FlightServiceUrl"}, "'",
+                                "\n",
+                                "      name: ", {"Ref": "ClusterName"},
+                                "\n",
+                                "      role: 'slave'",
+                                "\n",
+                                "      master: ",
+                                { "Ref": "LoginIP" },
+                                "\n",
+                                "      tags:",
+                                "\n",
+                                "        scheduler_roles: ':compute:'",
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      flight:",
+                                "\n",
+                                "        uuid: '", {"Ref": "FlightInstanceUUID"}, "'",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: '", {"Ref": "ClusterUser"}, "'",
+                                "\n",
+                                "        ssh_public_key: |",
+                                "\n",
+                                "          ", { "Ref": "ClusterUserKey" },
+                                "\n",
+                                "  owner: root:root",
+                                "\n",
+                                "  path: /opt/clusterware/etc/config.yml",
+                                "\n",
+                                "  permissions: '0640'",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "FlightCompute": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "DesiredCapacity": {
+                    "Ref": "InitialNodes"
+                },
+                "LaunchConfigurationName": {
+                    "Ref": "ComputeConfig"
+                },
+                "PlacementGroup": {
+                    "Ref": "PlacementGroup"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "-compute"
+                                ]
+                            ]
+                        },
+                        "PropagateAtLaunch": "true"
+                    }
+                ],
+                "MinSize": "1",
+                "MaxSize": "8",
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "SubnetID"
+                    }
+                ]
+            }
+        },
+        "ScaleUp": {
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+            "Properties": {
+                "AdjustmentType": "ChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "FlightCompute"
+                },
+                "Cooldown": "300",
+                "ScalingAdjustment": "1"
+            }
+        },
+        "CPUAlarmHigh": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "Scale-up if currently queued jobs exceeds limit",
+                "MetricName": "JobStatus_qw",
+                "Namespace": "ALCES-SGE",
+                "Statistic": "Average",
+                "Period": "60",
+                "EvaluationPeriods": "3",
+                "Threshold": "0",
+                "AlarmActions": [
+                    {
+                        "Ref": "ScaleUp"
+                    }
+                ],
+                "Dimensions": [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": {
+                            "Ref": "FlightCompute"
+                        }
+                    }
+                ],
+                "ComparisonOperator": "GreaterThanThreshold"
+            }
+        }
+    }
+}
