@@ -209,68 +209,60 @@
                         "Fn::Join": [
                             "",
                             [
-                                "#cloud-config\n",
-                                "system_info:\n",
-                                "  default_user:\n",
+                                "#cloud-config",
+                                "\n",
+                                "system_info:",
+                                "\n",
+                                "  default_user:",
+                                "\n",
                                 "    name: ",
                                 {
                                     "Ref": "Username"
                                 },
                                 "\n",
-                                "hostname: login1\n",
-                                "write_files:\n",
-                                "- content: |\n",
-                                "    cluster:\n",
-                                "      uuid: uuid: '",
-                                {
-                                    "Ref": "ClusterUUID"
-                                },
-                                "'",
+                                "write_files:",
                                 "\n",
-                                "      token: '",
-                                {
-                                    "Ref": "ClusterwareToken"
-                                },
-                                "'",
+                                "- content: |",
                                 "\n",
-                                "      name: ",
-                                {
-                                    "Ref": "ClusterName"
-                                },
+                                "    cluster:",
                                 "\n",
-                                "      role: 'slave'\n",
+                                "      uuid: '", {"Ref": "ClusterUUID"}, "'",
+                                "\n",
+                                "      token: '", {"Ref": "ClusterwareToken"}, "'",
+                                "\n",
+                                "      service_url: '", {"Ref": "FlightServiceUrl"}, "'",
+                                "\n",
+                                "      name: ", {"Ref": "ClusterName"},
+                                "\n",
+                                "      role: 'slave'",
+                                "\n",
                                 "      master: ",
-                                {
-                                    "Ref": "LoginIP"
-                                },
+                                { "Ref": "LoginIP" },
                                 "\n",
-                                "      tags:\n",
-                                "        scheduler_roles: ':compute:'\n",
-                                "    instance:\n",
-                                "      flight:\n",
-                                "        uuid: '",
-                                {
-                                    "Ref": "FlightInstanceUUID"
-                                },
-                                "'",
+                                "      tags:",
                                 "\n",
-                                "      users:\n",
-                                "      - username: '",
-                                {
-                                    "Ref": "ClusterUser"
-                                },
-                                "'",
+                                "        scheduler_roles: ':compute:'",
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      flight:",
+                                "\n",
+                                "        uuid: '", {"Ref": "FlightInstanceUUID"}, "'",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: '", {"Ref": "ClusterUser"}, "'",
                                 "\n",
                                 "        ssh_public_key: |",
                                 "\n",
-                                "          ",
-                                {
-                                    "Ref": "ClusterUserKey"
-                                },
+                                "          ", { "Ref": "ClusterUserKey" },
                                 "\n",
-                                "  owner: root:root\n",
-                                "  path: /opt/clusterware/etc/config.yml\n",
-                                "  permissions: '0640'\n"
+                                "  owner: root:root",
+                                "\n",
+                                "  path: /opt/clusterware/etc/config.yml",
+                                "\n",
+                                "  permissions: '0640'",
+                                "\n"
                             ]
                         ]
                     }

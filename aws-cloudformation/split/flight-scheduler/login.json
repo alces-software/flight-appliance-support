@@ -305,65 +305,62 @@
                         "Fn::Join": [
                             "",
                             [
-                                "#cloud-config\n",
-                                "system_info:\n",
-                                "  default_user:\n",
+                                "#cloud-config",
+                                "\n",
+                                "system_info:",
+                                "\n",
+                                "  default_user:",
+                                "\n",
                                 "    name: ",
                                 {
                                     "Ref": "Username"
                                 },
                                 "\n",
-                                "hostname: login1\n",
-                                "write_files:\n",
-                                "- content: |\n",
-                                "    cluster:\n",
-                                "      uuid: uuid: '",
-                                {
-                                    "Ref": "ClusterUUID"
-                                },
-                                "'",
+                                "hostname: login1",
                                 "\n",
-                                "      token: '",
-                                {
-                                    "Ref": "ClusterwareToken"
-                                },
-                                "'",
+                                "write_files:",
                                 "\n",
-                                "      name: ",
-                                {
-                                    "Ref": "ClusterName"
-                                },
+                                "- content: |",
                                 "\n",
-                                "      role: 'master'\n",
-                                "      tags:\n",
-                                "        scheduler_roles: ':master:'\n",
-                                "        storage_roles: ':master:'\n",
-                                "        access_roles: ':master:'\n",
-                                "    instance:\n",
-                                "      flight:\n",
-                                "        uuid: '",
-                                {
-                                    "Ref": "FlightInstanceUUID"
-                                },
-                                "'",
+                                "    cluster:",
                                 "\n",
-                                "      users:\n",
-                                "      - username: '",
-                                {
-                                    "Ref": "ClusterUser"
-                                },
-                                "'",
+                                "      uuid: '", {"Ref": "ClusterUUID"}, "'",
+                                "\n",
+                                "      token: '", {"Ref": "ClusterwareToken"}, "'",
+                                "\n",
+                                "      service_url: '", {"Ref": "FlightServiceUrl"}, "'",
+                                "\n",
+                                "      name: ", {"Ref": "ClusterName"},
+                                "\n",
+                                "      role: 'master'",
+                                "\n",
+                                "      tags:",
+                                "\n",
+                                "        scheduler_roles: ':master:'",
+                                "\n",
+                                "        storage_roles: ':master:'",
+                                "\n",
+                                "        access_roles: ':master:'",
+                                "\n",
+                                "    instance:",
+                                "\n",
+                                "      flight:",
+                                "\n",
+                                "        uuid: '", {"Ref": "FlightInstanceUUID"}, "'",
+                                "\n",
+                                "      users:",
+                                "\n",
+                                "      - username: '", {"Ref": "ClusterUser"}, "'",
                                 "\n",
                                 "        ssh_public_key: |",
                                 "\n",
-                                "          ",
-                                {
-                                    "Ref": "ClusterUserKey"
-                                },
+                                "          ", { "Ref": "ClusterUserKey" },
                                 "\n",
-                                "  owner: root:root\n",
-                                "  path: /opt/clusterware/etc/config.yml\n",
-                                "  permissions: '0640'\n"
+                                "  owner: root:root",
+                                "\n",
+                                "  path: /opt/clusterware/etc/config.yml",
+                                "\n",
+                                "  permissions: '0640'", "\n"
                             ]
                         ]
                     }
