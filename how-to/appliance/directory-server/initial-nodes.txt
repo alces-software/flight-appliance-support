@@ -1,0 +1,117 @@
+directory server
+
+PREREQ:
+generic image
+hostname & fqdn set via cloudinit (directory.int.cluster.alces.network)
+
+Prep hosts file:
+echo -ne "\n#localip entry\n`hostname -I`     `hostname -f` `hostname -s`"  >> /etc/hosts
+delete lines mapping localhost to hostname -f
+
+Stop dhcp changing resolv.conf:
+sed -i -e "s/^PEERDNS.*$/PEERDNS=\"no\"/g" /etc/sysconfig/network-scripts/ifcfg-eth0
+
+
+Set Vars;
+CLUSTER=cluster
+DOMAIN=$CLUSTER.alces.network
+REALM=`echo $DOMAIN | sed -e 's/\(.*\)/\U\1/'`
+FORWARDER=`grep nameserver /etc/resolv.conf | awk '{print $2}'`
+PASSWORD=Pa55W0rd
+REVERSEZONE="0/20.31.172.in-addr.arpa."
+
+Install ipa:
+yum -y install ipa-server bind bind-dyndb-ldap ipa-server-dns
+
+Run ipa configuration:
+ipa-server-install -a "$PASSWORD" --hostname `hostname -f`  -r "$REALM" -p "$PASSWORD" -n "$DOMAIN" --no-ntp  --setup-dns --forwarder="$FORWARDER" --reverse-zone="$REVERSEZONE" --ssh-trust-dns --unattended
+
+Add Firewall rules:
+-A INPUT -i eth0 -p tcp -m multiport --dports 80,443,389,636,88,464,53 -j ACCEPT
+-A INPUT -i eth0 -p udp -m multiport --dports 88,464,53 -j ACCEPT
+
+Customize:
+ipa config-mod --defaultshell /bin/bash
+ipa config-mod --homedirectory /users
+ipa group-add ClusterUsers --desc="Generic Cluster Users"
+ipa group-add AdminUsers --desc="Admin Cluster Users"
+ipa config-mod --defaultgroup ClusterUsers
+ipa pwpolicy-mod --maxlife=999
+ipa user-add alces-cluster --first Alces --last Software --random
+ipa group-add-member AdminUsers --users alces-cluster
+ipa hbacrule-disable allow_all
+ipa hostgroup-add usernodes --desc "All nodes allowing standard user access"
+ipa hostgroup-add adminnodes --desc "All nodes allowing only admin user access"
+ipa hbacrule-add adminaccess --desc "Allow admin access to admin hosts"
+ipa hbacrule-add useraccess --desc "Allow user access to user hosts"
+ipa hbacrule-add-service adminaccess --hbacsvcs sshd
+ipa hbacrule-add-service useraccess --hbacsvcs sshd
+ipa hbacrule-add-user adminaccess --groups AdminUsers
+ipa hbacrule-add-user useraccess --groups ClusterUsers
+ipa hbacrule-add-host adminaccess --hostgroups adminnodes
+ipa hbacrule-add-host useraccess --hostgroups usernodes
+ipa sudorule-add --cmdcat=all All
+ipa sudorule-add-user --groups=adminusers All
+ipa sudorule-mod All --hostcat='all'
+ipa sudorule-add-option All --sudooption '!authenticate'
+
+
+
+Client
+CLUSTER=cluster
+DOMAIN=$CLUSTER.alces.network
+REALM=`echo $DOMAIN | sed -e 's/\(.*\)/\U\1/'`
+ONETIMEPASS='moose'
+DIRECTORY_IP=172.31.4.139
+
+CLIENTNAME=test1.int
+CLIENTIP=172.31.10.210
+
+on directory:
+ipa host-add $CLIENTNAME.$DOMAIN --ip-address=$CLIENTIP
+ipa host-mod $CLIENTNAME.$DOMAIN --password $ONETIMEPASS
+
+
+on client:
+sed -i -e "s/^PEERDNS.*$/PEERDNS=\"no\"/g" /etc/sysconfig/network-scripts/ifcfg-eth0
+yum install ipa-client ipa-admintools
+ipa-client-install --no-ntp --mkhomedir --no-ssh --no-sshd --force-join --realm="$REALM" --server="DIRECTORY_IP" -w "$ONETIMEPASS" --domain="$DOMAIN" --unattended
+
+
+Other stuff to think about..
+
+/users nfs share
+ipa login on the directory can be done with a ticket rather than password
+cloudint / AWS req blocks out password login - maybe put ssh key into ipa?
+
+admin passwords need to come from somewhere
+
+
+To Enable scripted host adding (from directory)..
+CLUSTER=cluster
+DOMAIN=$CLUSTER.alces.network
+REALM=`echo $DOMAIN | sed -e 's/\(.*\)/\U\1/'`
+
+kinit admin
+ipa user-add --first=Host --last=Adder hadder
+ipa privilege-add "Add computers" --desc "Add computers" 
+ipa privilege-add-permission "Add computers" --permissions="System: Add Hosts" 
+ipa privilege-add-permission "Add computers" --permissions="System: Add DNS Entries"
+ipa privilege-add-permission "Add computers" --permissions="System: Read DNS Entries"
+ipa privilege-add-permission "Add computers" --permissions="System: Modify Hosts"
+ipa privilege-add-permission "Add computers" --permissions="System: Manage Host Enrollment Password"
+ipa privilege-add-permission "Add computers" --permissions="System: Manage Host Keytab"
+
+ipa role-add "Host Adder" --desc="Can add new hosts" 
+ipa role-add-privilege "Host Adder" --privilege="Add computers" 
+ipa role-add-member "Host Adder" --user=hadder
+
+ipa-getkeytab -s `hostname` -p hadder@$REALM -k /root/hadder.keytab
+kinit -kt /root/hadder.keytab hadder@$REALM
+klist
+
+To use to do useful…
+
+kinit -kt /root/hadder.keytab hadder@$REALM
+
+
