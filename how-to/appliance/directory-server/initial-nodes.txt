@@ -71,7 +71,7 @@ CLIENTIP=172.31.10.210
 on directory:
 ipa host-add $CLIENTNAME.$DOMAIN --ip-address=$CLIENTIP
 ipa host-mod $CLIENTNAME.$DOMAIN --password $ONETIMEPASS
-
+ipa hostgroup-add-member usernodes --hosts $CLIENTNAME.$DOMAIN
 
 on client:
 sed -i -e "s/^PEERDNS.*$/PEERDNS=\"no\"/g" /etc/sysconfig/network-scripts/ifcfg-eth0
@@ -87,7 +87,7 @@ ipa login on the directory can be done with a ticket rather than password
 cloudint / AWS req blocks out password login - maybe put ssh key into ipa?
 
 admin passwords need to come from somewhere
-
+nodes won't use the same ip twice, so we'd need to completely delete the hostgroup-entry host-entry dns forward and reverse entries that we created on host shutdown.
 
 To Enable scripted host adding (from directory)..
 CLUSTER=cluster
@@ -103,6 +103,8 @@ ipa privilege-add-permission "Add computers" --permissions="System: Read DNS Ent
 ipa privilege-add-permission "Add computers" --permissions="System: Modify Hosts”
 ipa privilege-add-permission "Add computers" --permissions="System: Manage Host Enrollment Password"
 ipa privilege-add-permission "Add computers" --permissions="System: Manage Host Keytab"
+ipa privilege-add-permission "Add computers" --permissions="System: Modify Hostgroup Membership"
+
 
 ipa role-add "Host Adder" --desc="Can add new hosts" 
 ipa role-add-privilege "Host Adder" --privilege="Add computers" 
