@@ -63,6 +63,7 @@ DOMAIN=$CLUSTER.alces.network
 REALM=`echo $DOMAIN | sed -e 's/\(.*\)/\U\1/'`
 ONETIMEPASS='moose'
 DIRECTORY_IP=172.31.4.139
+DIRECTORY_SERVER=directory.int.$DOMAIN
 
 CLIENTNAME=test1.int
 CLIENTIP=172.31.10.210
@@ -74,8 +75,9 @@ ipa host-mod $CLIENTNAME.$DOMAIN --password $ONETIMEPASS
 
 on client:
 sed -i -e "s/^PEERDNS.*$/PEERDNS=\"no\"/g" /etc/sysconfig/network-scripts/ifcfg-eth0
+echo -e "search int.$DOMAIN $DOMAIN\nnameserver $DIRECTORY_IP" > /etc/resolv.conf
 yum install ipa-client ipa-admintools
-ipa-client-install --no-ntp --mkhomedir --no-ssh --no-sshd --force-join --realm="$REALM" --server="DIRECTORY_IP" -w "$ONETIMEPASS" --domain="$DOMAIN" --unattended
+ipa-client-install --no-ntp --mkhomedir --force-join --realm="$REALM" --server="DIRECTORY_IP" -w "$ONETIMEPASS" --domain="$DOMAIN" --unattended
 
 
 Other stuff to think about..
@@ -98,7 +100,7 @@ ipa privilege-add "Add computers" --desc "Add computers"
 ipa privilege-add-permission "Add computers" --permissions="System: Add Hosts" 
 ipa privilege-add-permission "Add computers" --permissions="System: Add DNS Entries"
 ipa privilege-add-permission "Add computers" --permissions="System: Read DNS Entries"
-ipa privilege-add-permission "Add computers" --permissions="System: Modify Hosts"
+ipa privilege-add-permission "Add computers" --permissions="System: Modify Hosts”
 ipa privilege-add-permission "Add computers" --permissions="System: Manage Host Enrollment Password"
 ipa privilege-add-permission "Add computers" --permissions="System: Manage Host Keytab"
 
@@ -113,5 +115,17 @@ klist
 To use to do useful…
 
 kinit -kt /root/hadder.keytab hadder@$REALM
+
+
+SSH keys from IPA..
+ipa user-mod alces-cluster --sshpubkey=“”
+
+NB this is added to sshd_config..
+AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys
+GSSAPIAuthentication yes
+AuthorizedKeysCommandUser nobody
+
+
+
 
 
