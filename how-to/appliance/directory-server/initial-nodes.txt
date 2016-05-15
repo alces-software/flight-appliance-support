@@ -89,6 +89,8 @@ cloudint / AWS req blocks out password login - maybe put ssh key into ipa?
 admin passwords need to come from somewhere
 nodes won't use the same ip twice, so we'd need to completely delete the hostgroup-entry host-entry dns forward and reverse entries that we created on host shutdown.
 
+SSL - ipa installs a self signed cert and sets up apache forwards to the internal dns name, we'd need to think about doing proper certs and internet dns entries if we applianceified..
+
 To Enable scripted host adding (from directory)..
 CLUSTER=cluster
 DOMAIN=$CLUSTER.alces.network
