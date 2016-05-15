@@ -104,7 +104,8 @@ ipa privilege-add-permission "Add computers" --permissions="System: Modify Hosts
 ipa privilege-add-permission "Add computers" --permissions="System: Manage Host Enrollment Password"
 ipa privilege-add-permission "Add computers" --permissions="System: Manage Host Keytab"
 ipa privilege-add-permission "Add computers" --permissions="System: Modify Hostgroup Membership"
-
+ipa privilege-add-permission "Add computers" --permissions="System: Remove Hosts"
+ipa privilege-add-permission "Add computers" --permissions="System: Remove DNS Entries"
 
 ipa role-add "Host Adder" --desc="Can add new hosts" 
 ipa role-add-privilege "Host Adder" --privilege="Add computers" 
@@ -128,6 +129,9 @@ GSSAPIAuthentication yes
 AuthorizedKeysCommandUser nobody
 
 
-
+Delete host entry..
+ipa host-del test1
+ipa dnsrecord-del int.cluster.alces.network test1 --del-all
+ipa dnsrecord-del 31.172.in-addr.arpa. 210.10 --del-all
 
 
