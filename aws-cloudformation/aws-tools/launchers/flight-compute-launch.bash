@@ -5,14 +5,6 @@
 # For detailed launch help - please visit the documentation:
 #   - http://docs.alces-flight.com/en/latest/launch-aws/launching_on_aws.html
 
-# Available compute instance types include the following:
-#     compute.small-c4.large, compute.medium-c4.2xlarge, compute.large-c4.4xlarge, compute.dedicated-c4.8xlarge 
-#     balanced.small-m4.xlarge, balanced.medium-m4.2xlarge, balanced.large-m4.4xlarge, balanced.dedicated-m4.10xlarge
-#     memory.small-r3.xlarge, memory.medium-r3.2xlarge, memory.large-r3.4xlarge, memory.dedicated-r3.8xlarge
-
-# Available login node instance types include the following:
-#     small-t2.large, medium-r3.2xlarge, large-c4.8xlarge
-
 #Enter your desired cluster name
 CLUSTERNAME="flight-cluster"
 
@@ -25,13 +17,19 @@ USERNAME="alces"
 #Initial number of compute nodes
 INITIALNODES=3
 
-#Compute node machine type, choose from small or large
+#Select the compute node instance type to use
+# Available compute instance types include the following:
+#     compute.small-c4.large, compute.medium-c4.2xlarge, compute.large-c4.4xlarge, compute.dedicated-c4.8xlarge 
+#     balanced.small-m4.xlarge, balanced.medium-m4.2xlarge, balanced.large-m4.4xlarge, balanced.dedicated-m4.10xlarge
+#     memory.small-r3.xlarge, memory.medium-r3.2xlarge, memory.large-r3.4xlarge, memory.dedicated-r3.8xlarge
 COMPUTENODETYPE="compute.small-c4.large"
 
 #Highest spot price you are prepared to pay - enter 0 for on-demand instances
 COMPUTESPOTPRICE=0.5
 
 #Select the login node machine type
+# Available login node instance types include the following:
+#     small-t2.large, medium-r3.2xlarge, large-c4.8xlarge
 LOGINTYPE="small-t2.large"
 
 #Choose the size in GB of storage to provision with the cluster login node 
