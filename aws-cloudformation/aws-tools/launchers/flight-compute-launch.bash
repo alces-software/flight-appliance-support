@@ -9,10 +9,10 @@
 #   - http://docs.alces-flight.com/en/latest/launch-aws/launching_on_aws.html
 
 #Enter your desired cluster name
-CLUSTERNAME="flight-cluster1"
+CLUSTERNAME="flight-cluster"
 
 #Your amazon keypair name
-KEYPAIR="aws_ireland"
+KEYPAIR=""
 
 #Choose a username for the administrator account
 USERNAME="alces"
