@@ -6,7 +6,7 @@
 #   - http://docs.alces-flight.com/en/latest/launch-aws/launching_on_aws.html
 
 #Enter your desired cluster name
-CLUSTERNAME="flight-cluster"
+CLUSTERNAME="flight-cluster1"
 
 #Your amazon keypair name
 KEYPAIR="aws_ireland"
@@ -72,5 +72,5 @@ aws cloudformation create-stack \
                      ParameterKey=FlightCustomBucket,ParameterValue="$FLIGHTCUSTOMBUCKET" \
                      ParameterKey=FlightCustomProfiles,ParameterValue="$FLIGHTCUSTOMPROFILES"
 
-echo "To view status of your stack, run 'aws cloudformation describe-stacks --stack-name $CLUSTERNAME'"
-echo "To delete the stack, run 'aws cloudformation delete-stack --stack-name $CLUSTERNAME'"
+echo "To view status of your stack, run 'aws cloudformation describe-stacks --stack-name ${CLUSTERNAME}'"
+echo "To delete the stack, run 'aws cloudformation delete-stack --stack-name ${CLUSTERNAME}'"
