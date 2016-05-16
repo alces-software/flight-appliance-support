@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # This script will start an example Alces Flight Compute HPC Cluster using Spot, Auto scaling groups and CloudWatch monitors
+# The following template used is the 8-node template `2016.2` release. For additional templates, please visit
+# the GitHub repository at the following URL: 
+#   - https://github.com/alces-software/flight-aws-marketplace/tree/2016.2r1/flight-compute
 
 # For detailed launch help - please visit the documentation:
 #   - http://docs.alces-flight.com/en/latest/launch-aws/launching_on_aws.html
