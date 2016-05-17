@@ -19,6 +19,11 @@ parameters:
     constraints:
     - custom_constraint: nova.keypair
 
+  admin_username:
+    type: string
+    label: Administrator username
+    description: Enter the username of the administrator user you wish to create
+
   cluster_type:
     type: string
     label: Cluster type
@@ -95,6 +100,9 @@ resources:
     type: OS::Heat::CloudConfig
     properties:
       cloud_config:
+            system_info:
+              default_user:
+                name: %ADMIN_USERNAME%
             write_files:
             - path: /opt/clusterware/etc/config.yml
               permissions: '0640'
@@ -113,11 +121,15 @@ resources:
                     "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
                     "%UUID%": { get_resource: cluster_uuid }
                     "%TOKEN%": { get_resource: cluster_token }
+                    "%ADMIN_USERNAME%": { get_param: admin_username }
 
   node_config:
     type: OS::Heat::CloudConfig
     properties:
       cloud_config:
+            system_info:
+              default_user:
+                name: %ADMIN_USERNAME%
             write_files:
             - path: /opt/clusterware/etc/config.yml
               permissions: '0640'
@@ -136,6 +148,7 @@ resources:
                     "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
                     "%UUID%": { get_resource: cluster_uuid }
                     "%TOKEN%": { get_resource: cluster_token }
+                    "%ADMIN_USERNAME%": { get_param: admin_username }
            
   login1:
     type: OS::Nova::Server
