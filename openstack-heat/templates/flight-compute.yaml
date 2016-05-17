@@ -23,6 +23,7 @@ parameters:
     type: string
     label: Administrator username
     description: Enter the username of the administrator user you wish to create
+    default: alces
 
   cluster_type:
     type: string
@@ -43,6 +44,7 @@ parameters:
     type: number
     label: Number of compute nodes
     description: Number of compute nodes to deploy
+    default: 3
 
 resources:
   cluster_uuid:
