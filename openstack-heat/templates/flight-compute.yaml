@@ -102,7 +102,7 @@ resources:
       cloud_config:
             system_info:
               default_user:
-                name: %ADMIN_USERNAME%
+                name: '%ADMIN_USERNAME%'
             write_files:
             - path: /opt/clusterware/etc/config.yml
               permissions: '0640'
@@ -129,7 +129,7 @@ resources:
       cloud_config:
             system_info:
               default_user:
-                name: %ADMIN_USERNAME%
+                name: '%ADMIN_USERNAME%'
             write_files:
             - path: /opt/clusterware/etc/config.yml
               permissions: '0640'
