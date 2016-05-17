@@ -5,7 +5,7 @@
 heat_template_version: 2013-05-23
 
 description: >
-  Launch an Alces Clusterware environment, complete with 1
+  Launch an Alces Flight Compute environment, complete with 1
   login node and 3 compute nodes.
   The stack includes all necessary separated networking
   to create a private research environment.
