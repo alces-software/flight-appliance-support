@@ -27,7 +27,7 @@ parameters:
 
   cluster_type:
     type: string
-    label: Cluster type
+    label: Flight Compute image 
     description: Choose an Alces Flight Compute image to use
     constraints:
     - custom_constraint: glance.image
