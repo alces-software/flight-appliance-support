@@ -104,7 +104,7 @@ resources:
       cloud_config:
             system_info:
               default_user:
-                name: '%ADMIN_USERNAME%'
+                  name: { get_param: admin_username }
             write_files:
             - path: /opt/clusterware/etc/config.yml
               permissions: '0640'
@@ -123,7 +123,6 @@ resources:
                     "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
                     "%UUID%": { get_resource: cluster_uuid }
                     "%TOKEN%": { get_resource: cluster_token }
-                    "%ADMIN_USERNAME%": { get_param: admin_username }
 
   node_config:
     type: OS::Heat::CloudConfig
@@ -131,7 +130,7 @@ resources:
       cloud_config:
             system_info:
               default_user:
-                name: '%ADMIN_USERNAME%'
+                  name: { get_param: admin_username }
             write_files:
             - path: /opt/clusterware/etc/config.yml
               permissions: '0640'
@@ -150,7 +149,6 @@ resources:
                     "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
                     "%UUID%": { get_resource: cluster_uuid }
                     "%TOKEN%": { get_resource: cluster_token }
-                    "%ADMIN_USERNAME%": { get_param: admin_username }
            
   login1:
     type: OS::Nova::Server
