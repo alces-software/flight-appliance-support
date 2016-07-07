@@ -574,12 +574,37 @@
                                 "autoscaling:DescribeAutoScalingGroups",
                                 "autoscaling:SetDesiredCapacity",
                                 "autoscaling:UpdateAutoScalingGroup",
-                                "autoscaling:TerminateInstanceInAutoScalingGroup",
+                                "autoscaling:TerminateInstanceInAutoScalingGroup"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "MasterIAM"
+                    }
+                ]
+            }
+        },
+        "MasterNetInterfacePermissions": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "MasterNetInterfacePermissions",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
                                 "ec2:AttachNetworkInterface",
                                 "ec2:CreateNetworkInterface",
                                 "ec2:DeleteNetworkInterface",
                                 "ec2:DetachNetworkInterface",
-                                "ec2:ModifyNetworkInterfaceAttribute"
+                                "ec2:ModifyNetworkInterfaceAttribute",
+                                "ec2:DescribeSubnets"
                             ],
                             "Resource": [
                                 "*"
@@ -666,13 +691,36 @@
                         {
                             "Effect": "Allow",
                             "Action": [
-                                "autoscaling:DescribeAutoScalingGroups",
+                                "autoscaling:DescribeAutoScalingGroups"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "ComputeIAM"
+                    }
+                ]
+            }
+        },
+        "ComputeNetInterfacePermissions": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "ComputeNetInterfacePermissions",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
                                 "ec2:AttachNetworkInterface",
                                 "ec2:CreateNetworkInterface",
                                 "ec2:DeleteNetworkInterface",
                                 "ec2:DetachNetworkInterface",
                                 "ec2:ModifyNetworkInterfaceAttribute",
-
                                 "ec2:DescribeSubnets"
                             ],
                             "Resource": [
