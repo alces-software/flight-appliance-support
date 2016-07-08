@@ -455,30 +455,6 @@
                 }
             }
         },
-        "BuildSubnetToRouteTable": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "DependsOn": "FlightRouteTable",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "FlightExtSubnet"
-                },
-                "RouteTableId": {
-                    "Ref": "FlightRouteTable"
-                }
-            }
-        },
-        "PrvSubnetToRouteTable": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "DependsOn": "FlightRouteTable",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "FlightPrvSubnet"
-                },
-                "RouteTableId": {
-                    "Ref": "FlightRouteTable"
-                }
-            }
-        },
         "FlightSG": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
