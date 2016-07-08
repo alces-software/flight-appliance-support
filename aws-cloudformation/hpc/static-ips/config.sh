@@ -8,8 +8,8 @@ clustername=$(cat /opt/clusterware/etc/config.yml | grep "name:\ " | awk '{print
 buildsubnet=$($awsbin ec2 --region $awsregion describe-subnets \
 				--filters Name=tag:Name,Values=${clustername}-build | grep SubnetId | awk '{print $2}' | tr -d '",')
 prvsubnet=$($awsbin ec2 --region $awsregion describe-subnets \
-				--filters Name=tag:Name,Values=${clustername}-prv | grep SubnetId | awk '{print $2}' | tr -d "',")
-nodetype=$(cat /opt/clusterware/etc/config.yml | grep "role:" | awk '{print $2}')
+				--filters Name=tag:Name,Values=${clustername}-prv | grep SubnetId | awk '{print $2}' | tr -d '",')
+nodetype=$(cat /opt/clusterware/etc/config.yml | grep "role:" | awk '{print $2}' | tr -d "'")
 
 ## Fetch from external source, preferably the master, which personality
 ## slot to use - e.g. `node4` with an IP tail of `.5`
