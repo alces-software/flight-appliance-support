@@ -1,15 +1,15 @@
 #!/bin/bash -l
 set -ex
+awsbin="/opt/clusterware/opt/aws/bin/aws"
 ## Gather required information
 awsregion=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//')
 instanceid=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-clustername=$(cat /opt/clusterware/etc/config.yml | grep "name:\ " | awk '{print $2}')
-buildsubnet=$(aws ec2 --region $awsregion describe-subnets \
+clustername=$(cat /opt/clusterware/etc/config.yml | grep "name:\ " | awk '{print $2}' | tr -d "'")
+buildsubnet=$($awsbin ec2 --region $awsregion describe-subnets \
 				--filters Name=tag:Name,Values=${clustername}-build | grep SubnetId | awk '{print $2}' | tr -d '",')
-prvsubnet=$(aws ec2 --region $awsregion describe-subnets \
-				--filters Name=tag:Name,Values=${clustername}-prv | grep SubnetId | awk '{print $2}' | tr -d '",')
+prvsubnet=$($awsbin ec2 --region $awsregion describe-subnets \
+				--filters Name=tag:Name,Values=${clustername}-prv | grep SubnetId | awk '{print $2}' | tr -d "',")
 nodetype=$(cat /opt/clusterware/etc/config.yml | grep "role:" | awk '{print $2}')
-awsbin="/opt/clusterware/opt/aws/bin/aws"
 
 ## Fetch from external source, preferably the master, which personality
 ## slot to use - e.g. `node4` with an IP tail of `.5`
