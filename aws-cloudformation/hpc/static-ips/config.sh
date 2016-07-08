@@ -9,11 +9,12 @@ buildsubnet=$(aws ec2 --region $awsregion describe-subnets \
 prvsubnet=$(aws ec2 --region $awsregion describe-subnets \
 				--filters Name=tag:Name,Values=${clustername}-prv | grep SubnetId | awk '{print $2}' | tr -d '",')
 nodetype=$(cat /opt/clusterware/etc/config.yml | grep "role:" | awk '{print $2}')
+awsbin="/opt/clusterware/opt/aws/bin/aws"
 
 ## Fetch from external source, preferably the master, which personality
 ## slot to use - e.g. `node4` with an IP tail of `.5`
 ## For example purposes, set example tails and hostnames
-domain="alces.cluster"
+domain="vlj.alces.network"
 logintail="10"
 nodetail="11"
 if [ $nodetype == "master" ];
@@ -26,28 +27,43 @@ else
 fi
 
 ## Add `build` and `prv` interfaces
-buildintcreate=$(aws ec2 --output table --region $awsregion create-network-interface \
+buildintcreate=$($awsbin ec2 --output table --region $awsregion create-network-interface \
 					--subnet-id $buildsubnet \
 					--description "Build interface for $HOSTNAME" \
 					--private-ip-address "10.75.10.$tail" | grep NetworkInterfaceId | awk '{print $4}')
-prvintcreate=$(aws ec2 --output table --region $awsregion create-network-interface \
+prvintcreate=$($awsbin ec2 --output table --region $awsregion create-network-interface \
                     --subnet-id $prvsubnet \
                     --description "Prv interface for $HOSTNAME" \
                     --private-ip-address "10.75.20.$tail" | grep NetworkInterfaceId | awk '{print $4}')
-buildintattach=$(aws ec2 --output table --region $awsregion attach-network-interface \
+buildintattach=$($awsbin ec2 --output table --region $awsregion attach-network-interface \
                     --network-interface-id ${buildintcreate} \
                     --instance-id $instanceid \
                     --device-index 1 | grep AttachmentId | awk '{print $4}')
-prvintattach=$(aws ec2 --output table --region $awsregion attach-network-interface \
+prvintattach=$($awsbin ec2 --output table --region $awsregion attach-network-interface \
                     --network-interface-id ${prvintcreate} \
                     --instance-id $instanceid \
                     --device-index 2 | grep AttachmentId | awk '{print $4}')
-aws ec2 --region $awsregion modify-network-interface-attribute \
+$awsbin ec2 --region $awsregion modify-network-interface-attribute \
     --network-interface-id $buildintcreate \
     --attachment "AttachmentId=${buildintattach},DeleteOnTermination=true"
-aws ec2 --region $awsregion modify-network-interface-attribute \
+$awsbin ec2 --region $awsregion modify-network-interface-attribute \
     --network-interface-id $prvintcreate \
     --attachment "AttachmentId=${prvintattach},DeleteOnTermination=true"
+
+## Set hostname
+hostnamectl set-hostname ${profilename}.${domain}
+hostnamectl set-hostname --transient ${profilename}.${domain}
+
+## Populate hosts file
+cat << EOF > /etc/hosts
+127.0.0.1 localhost.localdomain localhost
+127.0.0.1 localhost4.localdomain4 localhost4
+::1 localhost.localdomain localhost
+::1 localhost6.localdomain6 localhost6
+
+10.75.10.${logintail} login1.vlj.alces.network login1
+10.75.10.${nodetail} node1.vlj.alces.network node1
+EOF
 
 ## Generate config files for additional interfaces
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth1
@@ -68,5 +84,10 @@ NETMASK="255.255.255.0"
 EOF
 
 ## Bring each interface up
-sleep 10
+while [ ! "$(ip addr | grep "eth2")" ] || [ ! "$(ip addr | grep "eth1")" ]; 
+do 
+    sleep 1 
+done
+echo "Found build interface: eth1"
+echo "Found prv interface: eth2"
 ifup eth1 && ifup eth2
