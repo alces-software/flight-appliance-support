@@ -30,3 +30,8 @@ Performs the following activities:
 * Modify each network interface created to add the `DeleteOnTerminate` tag, which ensures the interfaces will be deleted when an instance is uncleanly shut down
 * Configure each newly attached interface with the correct IP for the chosen personality (although this is currently just set to an example configuration)
 * Bring the interfaces up ready for use
+
+#Known issues
+
+* Not able to limit the IAM permissions, can edit any resource so root on one instance would be able to attach/detach network interfaces for all other instances in that AWS account
+* Stack can sometimes fail to delete, despite the `DeleteOnTermination` tag being set - CloudFormation seems to get upset as it doesn't give enough time for the interfaces to delete once the kill signal has been given to the instance(s)
