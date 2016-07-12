@@ -83,19 +83,16 @@ NETMASK="255.255.255.0"
 EOF
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth2
 DEVICE="eth2"
-BOOTPROTO="none"
+BOOTPROTO="none
 ONBOOT="yes"
 TYPE="Ethernet"
 IPADDR="10.75.20.${tail}"
 NETMASK="255.255.255.0"
 EOF
 
-## Allow SSH/SGE over build network
-sed '/#SSH/a -A input -m state --state NEW -m tcp -p tcp -i eth1 --dport 22 -j ACCEPT' /etc/sysconfig/iptables
-sed '/#APPLIANCERULES/a -A input -m state --state NEW -m tcp -p tcp -i eth1 --dport 6444 -j ACCEPT' /etc/sysconfig/iptables
-sed '/#APPLIANCERULES/a -A input -m state --state NEW -m tcp -p tcp -i eth1 --dport 6445 -j ACCEPT' /etc/sysconfig/iptables
-sed '/#APPLIANCERULES/a -A input -m state --state NEW -m tcp -p tcp -i eth1 --dport 6446 -j ACCEPT' /etc/sysconfig/iptables
-service iptables restart
+## Disable iptables for now
+systemctl disable iptables
+systemctl stop iptables
 
 ## Bring each interface up
 while [ ! "$(ip addr | grep "eth2")" ] || [ ! "$(ip addr | grep "eth1")" ]; 
