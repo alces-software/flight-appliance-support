@@ -67,8 +67,8 @@ cat << EOF > /etc/cloud/templates/hosts.rhel.tmpl
 ::1 localhost.localdomain localhost
 ::1 localhost6.localdomain6 localhost6
 
-10.75.10.${logintail} login1.vlj.alces.network login1
-10.75.10.${nodetail} node1.vlj.alces.network node1
+10.75.10.${logintail} login1.${clustername}.alces.network login1
+10.75.10.${nodetail} node1.${clustername}.alces.network node1
 EOF
 
 ## Generate config files for additional interfaces
