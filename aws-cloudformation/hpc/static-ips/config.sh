@@ -14,7 +14,7 @@ nodetype=$(cat /opt/clusterware/etc/config.yml | grep "role:" | awk '{print $2}'
 ## Fetch from external source, preferably the master, which personality
 ## slot to use - e.g. `node4` with an IP tail of `.5`
 ## For example purposes, set example tails and hostnames
-domain="vlj.alces.network"
+domain="${clustername}.alces.network"
 logintail="10"
 nodetail="11"
 if [ $nodetype == "master" ];
