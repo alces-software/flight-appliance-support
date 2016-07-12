@@ -55,7 +55,7 @@ hostnamectl set-hostname ${profilename}.${domain}
 hostnamectl set-hostname --transient ${profilename}.${domain}
 
 ## Populate hosts file
-cat << EOF > /etc/hosts
+cat << EOF > /etc/cloud/templates/hosts.rhel.tmpl
 127.0.0.1 localhost.localdomain localhost
 127.0.0.1 localhost4.localdomain4 localhost4
 ::1 localhost.localdomain localhost
