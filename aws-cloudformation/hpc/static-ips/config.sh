@@ -2,6 +2,7 @@
 set -ex
 
 if [ -f /etc/cw-interfaces ];
+then
     echo "Interfaces exist"
     exit 1
 fi
