@@ -83,6 +83,8 @@ IPADDR="10.75.20.${tail}"
 NETMASK="255.255.255.0"
 EOF
 
+sed '/#SSH/a -A input -m state --state NEW -m tcp -p tcp -i eth1 --dport 22 -j ACCEPT' /etc/sysconfig/iptables
+
 ## Bring each interface up
 while [ ! "$(ip addr | grep "eth2")" ] || [ ! "$(ip addr | grep "eth1")" ]; 
 do 
