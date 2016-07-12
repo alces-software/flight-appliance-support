@@ -1,5 +1,11 @@
 #!/bin/bash -l
 set -ex
+
+if [ -f /etc/cw-interfaces ];
+    echo "Interfaces exist"
+    exit 1
+fi
+
 awsbin="/opt/clusterware/opt/aws/bin/aws"
 ## Gather required information
 awsregion=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//')
@@ -93,3 +99,6 @@ done
 echo "Found build interface: eth1"
 echo "Found prv interface: eth2"
 ifup eth1 && ifup eth2
+
+## Prevent customization from running on reboot
+touch /etc/cw-interfaces
