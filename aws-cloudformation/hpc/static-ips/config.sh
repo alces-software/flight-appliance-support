@@ -62,7 +62,7 @@ hostnamectl set-hostname ${profilename}.${domain}
 hostnamectl set-hostname --transient ${profilename}.${domain}
 
 ## Populate hosts file
-cat << EOF > /etc/cloud/templates/hosts.rhel.tmpl
+cat << EOF > /etc/hosts
 127.0.0.1 localhost.localdomain localhost
 127.0.0.1 localhost4.localdomain4 localhost4
 ::1 localhost.localdomain localhost
@@ -90,7 +90,12 @@ IPADDR="10.75.20.${tail}"
 NETMASK="255.255.255.0"
 EOF
 
+## Allow SSH/SGE over build network
 sed '/#SSH/a -A input -m state --state NEW -m tcp -p tcp -i eth1 --dport 22 -j ACCEPT' /etc/sysconfig/iptables
+sed '/#APPLIANCERULES/a -A input -m state --state NEW -m tcp -p tcp -i eth1 --dport 6444 -j ACCEPT' /etc/sysconfig/iptables
+sed '/#APPLIANCERULES/a -A input -m state --state NEW -m tcp -p tcp -i eth1 --dport 6445 -j ACCEPT' /etc/sysconfig/iptables
+sed '/#APPLIANCERULES/a -A input -m state --state NEW -m tcp -p tcp -i eth1 --dport 6446 -j ACCEPT' /etc/sysconfig/iptables
+service iptables restart
 
 ## Bring each interface up
 while [ ! "$(ip addr | grep "eth2")" ] || [ ! "$(ip addr | grep "eth1")" ]; 
@@ -100,6 +105,9 @@ done
 echo "Found build interface: eth1"
 echo "Found prv interface: eth2"
 ifup eth1 && ifup eth2
+
+## Stop ClusterWare from editing `/etc/hosts`
+sed -i 's/.*manage_etc_hosts.*/cw_CLUSTERABLE_manage_etc_hosts=false/' /opt/clusterware/etc/clusterable.rc
 
 ## Prevent customization from running on reboot
 touch /etc/cw-interfaces
