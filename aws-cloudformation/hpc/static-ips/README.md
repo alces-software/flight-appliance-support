@@ -35,3 +35,4 @@ Performs the following activities:
 
 * Not able to limit the IAM permissions, can edit any resource so root on one instance would be able to attach/detach network interfaces for all other instances in that AWS account
 * Stack can sometimes fail to delete, despite the `DeleteOnTermination` tag being set - CloudFormation seems to get upset as it doesn't give enough time for the interfaces to delete once the kill signal has been given to the instance(s)
+* During SGE member joins, the existing IP addresses for each node entry are replaced by ClusterWare with its `ext` network address
