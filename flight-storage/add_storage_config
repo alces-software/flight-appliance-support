@@ -17,6 +17,8 @@ read_config() {
 
 storage_setup() {
 
+  sed -i -e '/.*RPCNFSDCOUNT.*/c RPCNFSDCOUNT=64' \
+            /etc/sysconfig/nfs && systemctl restart nfs
   while IFS= read -r config; do
       export_path=`echo $config | awk '{print $1}'`
       export_range=`echo $config | awk '{print $2}'`
