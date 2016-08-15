@@ -17,40 +17,39 @@ read_config() {
 
 storage_setup() {
 
-  export_dir="/mnt"
   while IFS= read -r config; do
-      export_name=`echo $config | awk '{print $1}'`
+      export_path=`echo $config | awk '{print $1}'`
       export_range=`echo $config | awk '{print $2}'`
       export_type=`echo $config | awk '{print $3}'`
       volume_mount=`echo $config | awk '{print $4}'`
-      if [[ -z "$export_name" ]] || [[ -z "$export_range" ]] || [[ -z "$export_type" ]]; then
+      if [[ -z "$export_path" ]] || [[ -z "$export_range" ]] || [[ -z "$export_type" ]]; then
           continue
       else
-          if [ ! "$(grep "${export_name}" /etc/exports)" ]; then
-              mkdir -p ${export_dir}/${export_name} \
-                    && chmod 777 ${export_dir}/${export_name}
-              echo "${export_dir}/${export_name} ${export_range}(rw,no_root_squash,no_subtree_check,sync)" \
+          if [ ! "$(grep "${export_path}" /etc/exports)" ]; then
+              mkdir -p ${export_path} \
+                    && chmod 777 ${export_path}
+              echo "${export_path} ${export_range}(rw,no_root_squash,no_subtree_check,sync)" \
                   >> /etc/exports
-              echo "Adding export for ${export_name}"
+              echo "Adding export for ${export_path}"
               if [ "$export_type" == "instance" ]; then
                   exportfs -a
                   continue
               elif [ "$export_type" == "volume" ]; then
                 if [ ! "$(fdisk -l | grep "${volume_mount}")" ]; then
-                  echo "${export_name} volume does not exist as ${volume_mount}"
+                  echo "${export_path} volume does not exist as ${volume_mount}"
                   continue
                 else
                   mkfs.xfs ${volume_mount}
                   if [ "$(echo $?)" -eq 0 ]; then
-                    echo "${volume_mount} ${export_dir}/${export_name} xfs defaults,nofail 0 0" \
+                    echo "${volume_mount} ${export_path} xfs defaults,nofail 0 0" \
                          >> /etc/fstab && mount -a && exportfs -a
                   elif [ "$(echo $?)" -eq 1 ]; then
-                    echo "Unable to format disk for ${export_name} - skipping"
+                    echo "Unable to format disk for ${export_path} - skipping"
                     continue
                   fi
               fi
-          elif [ "$(grep "${export_name}" /etc/exports)" ]; then
-              echo "Configuration for ${export_name} exists - skipping"
+          elif [ "$(grep "${export_path}" /etc/exports)" ]; then
+              echo "Configuration for ${export_path} exists - skipping"
               continue
           fi
       fi
