@@ -1,5 +1,8 @@
 #!/bin/bash
 
+DOMAIN=`hostname -d`
+REALM=`echo $DOMAIN | sed -e 's/\(.*\)/\U\1/'`
+
 read_config() {
 
   storage_config="/opt/flight-storage/etc/config"
@@ -14,7 +17,7 @@ read_config() {
 
 storage_setup() {
 
-  export_dir="/exports"
+  export_dir="/mnt"
   while IFS= read -r config; do
       export_name=`echo $config | awk '{print $1}'`
       export_range=`echo $config | awk '{print $2}'`
@@ -50,4 +53,19 @@ storage_setup() {
 
 }
 
+push_config() {
+
+  _s3cmd=/opt/clusterware/opt/s3cmd/s3cmd
+  source /opt/clusterware/etc/cluster-customizer.rc
+  echo "STORAGE_PRV=`hostname -i`" >> /opt/flight-storage/etc/storage_config
+  chmod 0640 /opt/flight-storage/etc/storage_config
+  $_s3cmd --access_key=${cw_CLUSTER_CUSTOMIZER_access_key_id} \
+          --secret_key=${cw_CLUSTER_CUSTOMIZER_secret_access_key} \
+          --region=${cw_CLUSTER_CUSTOMIZER_region} \
+          put /opt/flight-storage/etc/storage_config \
+          ${cw_CLUSTER_CUSTOMIZER_bucket}/directory/${REALM}/storage_config
+
+}
+
 read_config
+push_config

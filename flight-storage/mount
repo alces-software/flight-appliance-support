@@ -1,0 +1,35 @@
+#!/bin/bash
+
+DOMAIN=`hostname -d`
+REALM=`echo $DOMAIN | sed -e 's/\(.*\)/\U\1/'`
+
+pull_config() {
+
+  _s3bin="/opt/clusterware/opt/s3cmd/s3cmd"
+  source /opt/clusterware/etc/cluster-customizer.rc
+  storage_config_dir="/opt/symphony-directory/etc"
+  storage_config="/opt/symphony-directory/etc/storage_config"
+  $_s3bin --access_key=${cw_CLUSTER_CUSTOMIZER_access_key_id} \
+          --secret_key=${cw_CLUSTER_CUSTOMIZER_secret_access_key} \
+          --region=${cw_CLUSTER_CUSTOMIZER_region} \
+          get ${cw_CLUSTER_CUSTOMIZER_bucket}/directory/${REALM}/storage_config \
+          ${storage_config}
+  chmod 0640 ${storage_config}
+  source ${storage_config}
+  setup_storage
+
+}
+
+setup_storage() {
+
+  mount_list="/opt/symphony-directory/etc/mounts"
+  showmount -e ${STORAGE_PRV} | awk 'NR >1 {print $1}' > $mount_list
+  while read mounts; do
+    mkdir -p $mounts
+    echo "${STORAGE_PRV}:/${mounts} $mounts nfs rsize=8192,wsize=8192,timeo=16,intr" >> /etc/fstab
+    mount -a
+  done < "$mount_list"
+
+}
+
+pull_config
