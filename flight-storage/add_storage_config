@@ -27,7 +27,8 @@ storage_setup() {
           continue
       else
           if [ ! "$(grep "${export_name}" /etc/exports)" ]; then
-              mkdir -p ${export_dir}/${export_name}
+              mkdir -p ${export_dir}/${export_name} \
+                    && chmod 777 ${export_dir}/${export_name}
               echo "${export_dir}/${export_name} ${export_range}(rw,no_root_squash,no_subtree_check,sync)" \
                   >> /etc/exports
               echo "Adding export for ${export_name}"
