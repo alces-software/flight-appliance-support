@@ -1,0 +1,53 @@
+#!/bin/bash
+
+read_config() {
+
+  storage_config="/opt/flight-storage/etc/config"
+  if [ ! -f "$storage_config" ]; then
+    echo "No storage configurations detected"
+    exit 1
+  elif [ -f "$storage_config" ]; then
+    storage_setup
+  fi
+
+}
+
+storage_setup() {
+
+  export_dir="/exports"
+  while IFS= read -r config; do
+      export_name=`echo $config | awk '{print $1}'`
+      export_range=`echo $config | awk '{print $2}'`
+      export_type=`echo $config | awk '{print $3}'`
+      volume_mount=`echo $config | awk '{print $4}'`
+      if [[ -z "$export_name" ]] || [[ -z "$export_range" ]] || [[ -z "$export_type" ]]; then
+          continue
+      else
+          if [ ! "$(grep "${export_name}" /etc/exports)" ]; then
+              mkdir -p ${export_dir}/${export_name}
+              echo "${export_dir}/${export_name} ${export_range}(rw,no_root_squash,no_subtree_check,sync)" \
+                  >> /etc/exports
+              echo "Adding export for ${export_name}"
+              if [ "$export_type" == "instance" ]; then
+                  exportfs -a
+                  continue
+              elif [ "$export_type" == "volume" ]; then
+                  mkfs.xfs ${volume_mount}
+                  if [ "$(echo $?)" -eq 0 ]; then
+                    echo "${volume_mount} ${export_dir}/${export_name} xfs defaults,nofail 0 0" \
+                         >> /etc/fstab && mount -a && exportfs -a
+                  elif [ "$(echo $?)" -eq 1 ]; then
+                    echo "Unable to format disk for ${export_name} - skipping"
+                    continue
+                  fi
+              fi
+          elif [ "$(grep "${export_name}" /etc/exports)" ]; then
+              echo "Configuration for ${export_name} exists - skipping"
+              continue
+          fi
+      fi
+  done < "$storage_config"
+
+}
+
+read_config
