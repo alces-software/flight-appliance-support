@@ -1,6 +1,13 @@
 #!/bin/bash
 
-DOMAIN=`hostname -d`
+DOMAIN=$(hostname -d | grep -o "\." | wc -l)
+if [ "$DOMAIN" == "2" ];
+then
+  DOMAIN=$(hostname -d)
+elif [ "$DOMAIN" == "3" ];
+then
+  DOMAIN=$(hostname -d | cut -d . -f 2-4)
+fi
 REALM=`echo $DOMAIN | sed -e 's/\(.*\)/\U\1/'`
 
 pull_config() {
