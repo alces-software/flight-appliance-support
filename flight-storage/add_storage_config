@@ -35,6 +35,10 @@ storage_setup() {
                   exportfs -a
                   continue
               elif [ "$export_type" == "volume" ]; then
+                if [ ! "$(fdisk -l | grep "${volume_mount}")" ]; then
+                  echo "${export_name} volume does not exist as ${volume_mount}"
+                  continue
+                else
                   mkfs.xfs ${volume_mount}
                   if [ "$(echo $?)" -eq 0 ]; then
                     echo "${volume_mount} ${export_dir}/${export_name} xfs defaults,nofail 0 0" \
