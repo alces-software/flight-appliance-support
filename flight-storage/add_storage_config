@@ -55,6 +55,7 @@ storage_setup() {
               continue
           fi
       fi
+    fi
   done < "$storage_config"
 
 }
