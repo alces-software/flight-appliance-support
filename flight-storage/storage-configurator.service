@@ -1,0 +1,13 @@
+[Unit]
+Description=Alces Flight Storage Configurator
+After=bumblebee-configurator.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/flight-storage/configurator
+RemainAfterExit=yes
+TimeoutSec=0
+StandardOutput=journal+console
+
+[Install]
+WantedBy=multi-user.target
