@@ -67,6 +67,9 @@ push_config() {
   echo "STORAGE_PRV=`hostname -i`" >> /opt/flight-storage/etc/storage_config
   chmod 0640 /opt/flight-storage/etc/storage_config
   if [ -z $cw_CLUSTER_CUSTOMIZER_access_key_id ]; then
+    while [ ! -f /opt/clusterware/etc/config/cluster/instance-aws-iam.rc ]; do
+        sleep 1
+    done
     source /opt/clusterware/etc/config/cluster/instance-aws.rc
     source /opt/clusterware/etc/config/cluster/instance-aws-iam.rc
     cw_CLUSTER_CUSTOMIZER_bucket="s3://alces-flight-${cw_INSTANCE_aws_account_hash}"
