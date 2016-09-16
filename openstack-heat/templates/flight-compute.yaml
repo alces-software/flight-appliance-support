@@ -1,38 +1,51 @@
-# Note - some of the defaults below are for an
-# Alces Software OpenStack environment.
-# Please verify the configuration below before launching
-# external_network: `public`
-heat_template_version: 2013-05-23
+heat_template_version: 2015-04-30
 
 description: >
-  Launch an Alces Flight Compute environment, complete with 1
-  login node and 3 compute nodes.
-  The stack includes all necessary separated networking
-  to create a private research environment.
-  All resources are destroyed on destruction of the stack
+    Launch an Alces Flight Compute environment complete with
+    choice of cluster scheduler
+
+parameter_groups:
+  - label: Access and security
+    description: Access and security 
+    parameters:
+    - admin_keypair
+    - admin_username
+  - label: Alces Flight configuration and customization
+    description: Alces Flight configuration and customization
+    parameters:
+    - flight_compute_image
+  - label: Login node
+    description: Login node
+    parameters:
+    - login_instance_type
+  - label: Compute estate
+    description: Compute estate
+    parameters:
+    - compute_instance_type
+    - flight_compute_autoscaling_group_size
 
 parameters:
-  admin_key:
+  admin_keypair:
     type: string
     label: Cluster admin key
-    description: Enter the name of an OpenStack nova keypair for administrator access
+    description: Select your OpenStack keypair used for access
     constraints:
     - custom_constraint: nova.keypair
 
   admin_username:
     type: string
     label: Administrator username
-    description: Enter the username of the administrator user you wish to create
+    description: Enter the username of the default user you wish to create
     default: alces
 
-  cluster_type:
+  flight_compute_image:
     type: string
     label: Flight Compute image 
     description: Choose an Alces Flight Compute image to use
     constraints:
     - custom_constraint: glance.image
 
-  compute_flavour:
+  compute_instance_type:
     type: string
     label: >
       Compute node instance type
@@ -40,40 +53,48 @@ parameters:
     constraints:
     - custom_constraint: nova.flavor
 
-  compute_number:
+  login_instance_type:
+    type: string
+    label: >
+      Login node instance type
+    description: Login node type
+    constraints:
+    - custom_constraint: nova.flavor
+
+  flight_compute_autoscaling_group_size:
     type: number
     label: Number of compute nodes
     description: Number of compute nodes to deploy
     default: 3
 
 resources:
-  cluster_uuid:
+  clusterware_uuid:
     type: OS::Heat::RandomString
     properties:
       length: 24
       sequence: digits
 
-  cluster_token:
+  clusterware_token:
     type: OS::Heat::RandomString
     properties:
       length: 20
       sequence: lettersdigits
 
-  cluster_network:
+  flight_compute_network:
     type: OS::Neutron::Net
     properties:
       name: { get_param: 'OS::stack_name' }
 
-  cluster_subnet:
+  flight_compute_subnet:
     type: OS::Neutron::Subnet
     properties:
-      network_id: { get_resource: cluster_network }
-      cidr: 10.75.0.0/16
-      gateway_ip: 10.75.0.254
+      network_id: { get_resource: flight_compute_network }
+      cidr: 10.75.1.0/24
+      gateway_ip: 10.75.1.254
       dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
       allocation_pools:
-        - start: 10.75.0.2
-          end: 10.75.0.253
+        - start: 10.75.1.2
+          end: 10.75.1.253
 
   router:
     type: OS::Neutron::Router
@@ -85,9 +106,9 @@ resources:
     type: OS::Neutron::RouterInterface
     properties:
       router_id: { get_resource: router }
-      subnet_id: { get_resource: cluster_subnet }
+      subnet_id: { get_resource: flight_compute_subnet }
 
-  cluster_sg:
+  flight_compute_access_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
       name: { get_param: 'OS::stack_name' }
@@ -98,7 +119,7 @@ resources:
         port_range_min: 22
         port_range_max: 22
 
-  master_config:
+  flight_compute_login_config:
     type: OS::Heat::CloudConfig
     properties:
       cloud_config:
@@ -113,18 +134,18 @@ resources:
                 str_replace:
                   template: |
                     cluster:
-                      uuid: '%UUID%'
-                      token: '%TOKEN%'
-                      name: '%CLUSTER_NAME%'
+                      uuid: '%uuid%'
+                      token: '%token%'
+                      name: '%cluster_name%'
                       role: 'master'
                       tags:
                         scheduler_roles: ':master:'
                   params:
-                    "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
-                    "%UUID%": { get_resource: cluster_uuid }
-                    "%TOKEN%": { get_resource: cluster_token }
+                    "%cluster_name%": { get_param: 'OS::stack_name' }
+                    "%uuid%": { get_resource: clusterware_uuid }
+                    "%token%": { get_resource: clusterware_token }
 
-  node_config:
+  flight_compute_node_config:
     type: OS::Heat::CloudConfig
     properties:
       cloud_config:
@@ -139,59 +160,61 @@ resources:
                 str_replace:
                   template: |
                     cluster:
-                      uuid: '%UUID%'
-                      token: '%TOKEN%'
-                      name: '%CLUSTER_NAME%'
+                      uuid: '%uuid%'
+                      token: '%token%'
+                      name: '%cluster_name%'
                       role: 'slave'
                       tags:
                         scheduler_roles: ':compute:'
                   params:
-                    "%CLUSTER_NAME%": { get_param: 'OS::stack_name' }
-                    "%UUID%": { get_resource: cluster_uuid }
-                    "%TOKEN%": { get_resource: cluster_token }
+                    "%cluster_name%": { get_param: 'OS::stack_name' }
+                    "%uuid%": { get_resource: clusterware_uuid }
+                    "%token%": { get_resource: clusterware_token }
            
-  login1:
+  flight_login:
     type: OS::Nova::Server
+    depends_on: [ router, flight_login_port ]
     properties:
       name: login1
-      image: { get_param: cluster_type }
-      flavor: { get_param: compute_flavour }
-      key_name: { get_param: admin_key }
+      image: { get_param: flight_compute_image }
+      flavor: { get_param: login_instance_type }
+      key_name: { get_param: admin_keypair }
       networks:
-        - port: { get_resource: login1_port }
+        - port: { get_resource: flight_login_port }
       user_data_format: RAW
-      user_data: { get_resource: master_config }
+      user_data: { get_resource: flight_compute_login_config }
 
-  login1_port:
+  flight_login_port:
     type: OS::Neutron::Port
-    depends_on: cluster_subnet
+    depends_on: flight_compute_subnet
     properties:
-      network_id: { get_resource: cluster_network }
+      network_id: { get_resource: flight_compute_network }
       fixed_ips:
-        - subnet_id: { get_resource: cluster_subnet }
+        - subnet_id: { get_resource: flight_compute_subnet }
 
-  login1_access:
+  flight_login_access:
     type: OS::Neutron::FloatingIP
     depends_on: router
     properties:
       floating_network: public
-      port_id: { get_resource: login1_port }
+      port_id: { get_resource: flight_login_port }
 
-  compute_group:
+  flight_compute_autoscaling_group:
     type: OS::Heat::ResourceGroup
+    depends_on: router
     properties:
-      count: { get_param: compute_number }
+      count: { get_param: flight_compute_autoscaling_group_size }
       resource_def:
         type: OS::Nova::Server
         properties:
           name: node0%index%
-          flavor: { get_param: compute_flavour }
-          image: { get_param: cluster_type }
+          flavor: { get_param: compute_instance_type }
+          image: { get_param: flight_compute_image }
           user_data_format: RAW
-          user_data: { get_resource: node_config }
-          networks: [{ network: { get_resource: cluster_network } }]
+          user_data: { get_resource: flight_compute_node_config }
+          networks: [{ network: { get_resource: flight_compute_network } }]
 
 outputs:
-  login1_public_ip:
-    description: Floating IP address of login1 in public network
-    value: { get_attr: [ login1_access, floating_ip_address ] }
+  flight_login_public_ip:
+    description: Floating IP address of flight_login in public network
+    value: { get_attr: [ flight_login_access, floating_ip_address ] }
