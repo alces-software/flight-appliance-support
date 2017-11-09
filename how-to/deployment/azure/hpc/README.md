@@ -9,7 +9,7 @@ The following steps will help you to deploy and configure an Alces Flight Comput
 
 The following resources are also used:
 
-* Azure Resource Manager (ARM) template: <insert link here>
+* Azure Resource Manager (ARM) template in this directory (`flight.json`)
 
 Creating an ARM template
 ------------------------
@@ -37,7 +37,8 @@ Now that you have created an Alces Flight Compute ARM template - you can go ahea
 * Select the desired **Login Node Type**, this defines the number of CPU cores and memory available on your Alces Flight Compute Login instance.
 * Read over, and accept the terms and conditions.
 * Click **Purchase** to begin deploying your Alces Flight Compute cluster.
-* Deployment can take up to 15 minutes - once deployment has completed you will see details of the created Alces Flight Compute cluster in the **Outputs** section of the deployment page. You can use either the displayed IP address or FQDN, combined with the previously chosen **Admin Username** and **SSH Keypair** to access your Alces Flight Compute login node via SSH.
+* Deployment can take up to 15 minutes - once deployment has completed you will see details of the created Alces Flight Compute cluster in the **Outputs** section of the deployment page. You can use the displayed FQDN, combined with the previously chosen **Admin Username** and **SSH Keypair** to access your Alces Flight Compute login node via SSH. The IP address or FQDN can be found later by navigating to your **Resource Group**, then inspecting the **Public IP Address** resource.
+* Once you are logged in, it may take a few minutes for the compute nodes to register with the login node - you can check the status by running `qhost` from the login node - this will display which compute hosts are ready to accept compute jobs.
 
 Getting started with your Alces Flight Compute cluster
 ------------------------------------------------------
