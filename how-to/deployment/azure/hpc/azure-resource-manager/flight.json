@@ -61,38 +61,46 @@
 		}
 	},
 	"variables": {
-		"alcesFlightVersion": "1.0.0-beta",
-		"alcesFlightAppliance": "compute",
-		"alcesFlightResourceGroup": "alcesflight",
-		"alcesFlightStorageContainer": "images",
-		"clusterUuid": "[guid(resourceGroup().id, deployment().name)]",
-		"clusterToken": "[uniqueString(resourceGroup().id, deployment().name)]",
-		"imageSubscription": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('alcesFlightResourceGroup'), '/providers/Microsoft.Compute/', variables('alcesFlightStorageContainer') ,'/alces-flight-',variables('alcesFlightAppliance'), '-', variables('alcesFlightVersion'))]",
-		"subscriptionId": "d1e964ef-15c7-4b27-8113-e725167cee83",
-		"loginNodeUserData": "[concat('bash /opt/alces/helper --cluster-name ', parameters('clusterName'), ' --type master --uuid ', variables('clusterUuid'), ' --token ', variables('clusterToken'))]",
-		"loginNodePrvIp": "10.0.0.4",
-		"computeNodeUserData": "[concat('bash /opt/alces/helper --master-ip ', variables('loginNodePrvIp'), ' --cluster-name ', parameters('clusterName'), ' --type slave --uuid ', variables('clusterUuid'), ' --token ', variables('clusterToken'))]",
-		"storageAccountName": "[concat(uniqueString(parameters('clusterName'), 'storage'))]",
-		"computeNodeMinCount": 1,
-		"computeNodeMaxCount": 32,
-		"loginNodeOsDiskStorageType": "Premium_LRS",
-		"computeNodeOsDiskStorageType": "Premium_LRS",
-		"storageAccountDiskStorageType": "Standard_LRS",
-		"storageAccountDiskStorageTier": "Standard",
-		"networkCidr": "10.0.0.0/24"
+		"alcesFlightConfig": {
+			"version": "1.0.0-beta",
+			"appliance": "compute",
+			"resourceGroup": "alcesflight",
+			"storageContainer": "images",
+			"clusterUuid": "[guid(resourceGroup().id, deployment().name)]",
+			"clusterToken": "[uniqueString(resourceGroup().id, deployment().name)]",
+			"networkCidr": "10.0.0.0/24"
+		},
+		"azureConfig": {
+			"imageSubscription": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables(''), '/providers/Microsoft.Compute/', variables('alcesFlightConfig').storageContainer ,'/alces-flight-',variables('alcesFlightConfig').appliance, '-', variables('alcesFlightConfig').version)]",
+			"subscriptionId": "d1e964ef-15c7-4b27-8113-e725167cee83",
+			"storageAccountName": "[concat(uniqueString(parameters('clusterName'), 'storage'))]",
+			"storageAccountDiskStorageType": "Standard_LRS",
+			"storageAccountDiskStorageTier": "Standard"
+		},
+		"loginNodeConfig": {
+			"userData": "[concat('bash /opt/alces/helper --cluster-name ', parameters('clusterName'), ' --type master --uuid ', variables('alcesFlightConfig').clusterUuid, ' --token ', variables('alcesFlightConfig').clusterToken)]",
+			"prvIp": "10.0.0.4",
+			"osDiskStorageType": "Premium_LRS"
+		},
+		"computeNodeConfig": {
+			"userData": "[concat('bash /opt/alces/helper --master-ip ', variables('loginNodePrvIp'), ' --cluster-name ', parameters('clusterName'), ' --type slave --uuid ', variables('alcesFlightConfig').clusterUuid, ' --token ', variables('alcesFlightConfig').clusterToken)]",
+			"minCount": 1,
+			"maxCount": 32,
+			"osDiskStorageType": "Premium_LRS"
+		}
 	},
 	"resources": [{
 			"type": "Microsoft.Storage/storageAccounts",
-			"name": "[variables('storageAccountName')]",
+			"name": "[variables('azureConfig').storageAccountName]",
 			"location": "[resourceGroup().location]",
 			"apiVersion": "2016-01-01",
 			"tags": {
 				"displayName": "Alces Flight Storage Account",
-				"AlcesFlightCluster": "[variables('clusterName')]"
+				"AlcesFlightCluster": "[parameters('clusterName')]"
 			},
 			"sku": {
-				"name": "[variables('storageAccountDiskStorageType')]",
-				"tier": "[variables('storageAccountDiskStorageTier')]"
+				"name": "[variables('azureConfig').storageAccountDiskStorageType]",
+				"tier": "[variables('azureConfig').storageAccountDiskStorageTier]"
 			},
 			"kind": "Storage"
 		},
@@ -107,13 +115,13 @@
 			"properties": {
 				"addressSpace": {
 					"addressPrefixes": [
-						"[variables('networkCidr')]"
+						"[variables('alcesFlightConfig').networkCidr]"
 					]
 				},
 				"subnets": [{
 					"name": "default",
 					"properties": {
-						"addressPrefix": "[variables('networkCidr')]"
+						"addressPrefix": "[variables('alcesFlightConfig').networkCidr]"
 					}
 				}]
 			}
@@ -124,7 +132,7 @@
 			"apiVersion": "2017-03-01",
 			"tags": {
 				"displayName": "Alces Flight inbound SSH firewall rule",
-				"AlcesFlightCluster": "[variables('clusterName')]"
+				"AlcesFlightCluster": "[parameters('clusterName')]"
 			},
 			"location": "[resourceGroup().location]",
 			"properties": {
@@ -149,7 +157,7 @@
 			"apiVersion": "2017-03-01",
 			"tags": {
 				"displayName": "Alces Flight login node network interface",
-				"AlcesFlightCluster": "[variables('clusterName')]"
+				"AlcesFlightCluster": "[parameters('clusterName')]"
 			},
 			"location": "[resourceGroup().location]",
 			"properties": {
@@ -157,7 +165,7 @@
 					"name": "login1",
 					"properties": {
 						"privateIPAllocationMethod": "Static",
-						"privateIPAddress": "[variables('loginNodePrvIp')]",
+						"privateIPAddress": "[variables('loginNodeConfig').prvIp]",
 						"publicIpAddress": {
 							"id": "[resourceId('Microsoft.Network/publicIpAddresses', 'login1')]"
 						},
@@ -180,14 +188,14 @@
 			"apiVersion": "2017-03-01",
 			"tags": {
 				"displayName": "Alces Flight login node public IP address",
-				"AlcesFlightCluster": "[variables('clusterName')]"
+				"AlcesFlightCluster": "[parameters('clusterName')]"
 			},
 			"location": "[resourceGroup().location]",
 			"properties": {
 				"publicIPAllocationMethod": "Static",
 				"idleTimeoutInMinutes": 30,
 				"dnsSettings": {
-					"domainNameLabel": "[concat(parameters('clusterName'), '-', variables('storageAccountName'))]"
+					"domainNameLabel": "[concat(parameters('clusterName'), '-', variables('azureConfig').storageAccountName)]"
 				}
 			}
 		},
@@ -197,7 +205,7 @@
 			"apiVersion": "2016-04-30-preview",
 			"tags": {
 				"displayName": "Alces Flight login node",
-				"AlcesFlightCluster": "[variables('clusterName')]"
+				"AlcesFlightCluster": "[parameters('clusterName')]"
 			},
 			"location": "[resourceGroup().location]",
 			"properties": {
@@ -206,19 +214,19 @@
 				},
 				"storageProfile": {
 					"imageReference": {
-						"id": "[variables('imageSubscription')]"
+						"id": "[variables('azureConfig').imageSubscription]"
 					},
 					"osDisk": {
 						"createOption": "fromImage",
 						"managedDisk": {
-							"storageAccountType": "[variables('loginNodeOsDiskStorageType')]"
+							"storageAccountType": "[variables('loginNodeConfig').osDiskStorageType]"
 						}
 					}
 				},
 				"osProfile": {
 					"computerName": "login1",
 					"adminUsername": "[parameters('adminUsername')]",
-					"customData": "[base64(variables('loginNodeUserData'))]",
+					"customData": "[base64(variables('loginNodeConfig').userData)]",
 					"linuxConfiguration": {
 						"disablePasswordAuthentication": true,
 						"ssh": {
@@ -237,7 +245,7 @@
 				"diagnosticsProfile": {
 					"bootDiagnostics": {
 						"enabled": true,
-						"storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))).primaryEndpoints.blob)]"
+						"storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('azureConfig').storageAccountName)).primaryEndpoints.blob)]"
 					}
 				}
 			},
@@ -251,7 +259,7 @@
 			"apiVersion": "2017-03-30",
 			"tags": {
 				"displayName": "Alces Flight autoscaling compute group",
-				"AlcesFlightCluster": "[variables('clusterName')]"
+				"AlcesFlightCluster": "[parameters('clusterName')]"
 			},
 			"location": "[resourceGroup().location]",
 			"sku": {
@@ -269,7 +277,7 @@
 				"virtualMachineProfile": {
 					"osProfile": {
 						"adminUsername": "[parameters('adminUsername')]",
-						"customData": "[base64(variables('computeNodeUserData'))]",
+						"customData": "[base64(variables('computeNodeConfig').userData)]",
 						"computerNamePrefix": "node",
 						"linuxConfiguration": {
 							"disablePasswordAuthentication": true,
@@ -283,12 +291,12 @@
 					},
 					"storageProfile": {
 						"imageReference": {
-							"id": "[variables('imageSubscription')]"
+							"id": "[variables('azureConfig').imageSubscription]"
 						},
 						"osDisk": {
 							"createOption": "FromImage",
 							"managedDisk": {
-								"storageAccountType": "[variables('computeNodeOsDiskStorageType')]"
+								"storageAccountType": "[variables('computeNodeConfig').osDiskStorageType]"
 							}
 						}
 					},
@@ -326,8 +334,8 @@
 				"profiles": [{
 					"name": "CPU",
 					"capacity": {
-						"minimum": "[variables('computeNodeMinCount')]",
-						"maximum": "[variables('computeNodeMaxCount')]",
+						"minimum": "[variables('computeNodeConfig').minCount]",
+						"maximum": "[variables('computeNodeConfig').maxCount]",
 						"default": "[parameters('computeNodeInitialCount')]"
 					},
 					"rules": [{
