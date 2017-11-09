@@ -31,7 +31,9 @@
 			"defaultValue": "Standard_DS1_v2",
 			"allowedValues": [
 				"Standard_DS1_v2",
-				"Standard_DS2_v2"
+				"Standard_DS2_v2",
+				"Standard_F4_v2",
+				"Standard_F8_v2"
 			],
 			"metadata": {
 				"description": "Select the desired compute node instance type"
@@ -71,11 +73,10 @@
 		"loginNodePrvIp": "10.0.0.4",
 		"computeNodeUserData": "[concat('bash /opt/alces/helper --master-ip ', variables('loginNodePrvIp'), ' --cluster-name ', parameters('clusterName'), ' --type slave --uuid ', variables('clusterUuid'), ' --token ', variables('clusterToken'))]",
 		"storageAccountName": "[concat(uniqueString(parameters('clusterName'), 'storage'))]",
-    "computeNodeMinCount": 1,
-    "computeNodeMaxCount": 32
+		"computeNodeMinCount": 1,
+		"computeNodeMaxCount": 32
 	},
-	"resources": [
-		{
+	"resources": [{
 			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[variables('storageAccountName')]",
 			"location": "[resourceGroup().location]",
@@ -103,14 +104,12 @@
 						"10.0.0.0/24"
 					]
 				},
-				"subnets": [
-					{
-						"name": "default",
-						"properties": {
-							"addressPrefix": "10.0.0.0/24"
-						}
+				"subnets": [{
+					"name": "default",
+					"properties": {
+						"addressPrefix": "10.0.0.0/24"
 					}
-				]
+				}]
 			}
 		},
 		{
@@ -122,21 +121,19 @@
 			},
 			"location": "[resourceGroup().location]",
 			"properties": {
-				"securityRules": [
-					{
-						"name": "inbound-ssh",
-						"properties": {
-							"protocol": "TCP",
-							"sourcePortRange": "*",
-							"destinationPortRange": "22",
-							"sourceAddressPrefix": "*",
-							"destinationAddressPrefix": "*",
-							"access": "Allow",
-							"priority": 1000,
-							"direction": "Inbound"
-						}
+				"securityRules": [{
+					"name": "inbound-ssh",
+					"properties": {
+						"protocol": "TCP",
+						"sourcePortRange": "*",
+						"destinationPortRange": "22",
+						"sourceAddressPrefix": "*",
+						"destinationAddressPrefix": "*",
+						"access": "Allow",
+						"priority": 1000,
+						"direction": "Inbound"
 					}
-				]
+				}]
 			}
 		},
 		{
@@ -148,21 +145,19 @@
 			},
 			"location": "[resourceGroup().location]",
 			"properties": {
-				"ipConfigurations": [
-					{
-						"name": "login1",
-						"properties": {
-							"privateIPAllocationMethod": "Static",
-							"privateIPAddress": "[variables('loginNodePrvIp')]",
-							"publicIpAddress": {
-								"id": "[resourceId('Microsoft.Network/publicIpAddresses', 'login1')]"
-							},
-							"subnet": {
-								"id": "[concat(resourceId('Microsoft.Network/virtualNetworks', 'flight-network'), '/subnets/default')]"
-							}
+				"ipConfigurations": [{
+					"name": "login1",
+					"properties": {
+						"privateIPAllocationMethod": "Static",
+						"privateIPAddress": "[variables('loginNodePrvIp')]",
+						"publicIpAddress": {
+							"id": "[resourceId('Microsoft.Network/publicIpAddresses', 'login1')]"
+						},
+						"subnet": {
+							"id": "[concat(resourceId('Microsoft.Network/virtualNetworks', 'flight-network'), '/subnets/default')]"
 						}
 					}
-				],
+				}],
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'inbound-ssh')]"
 				}
@@ -182,9 +177,9 @@
 			"properties": {
 				"publicIPAllocationMethod": "Static",
 				"idleTimeoutInMinutes": 30,
-        "dnsSettings": {
-          "domainNameLabel": "[concat(parameters('clusterName'), '-', variables('storageAccountName'))]"
-        }
+				"dnsSettings": {
+					"domainNameLabel": "[concat(parameters('clusterName'), '-', variables('storageAccountName'))]"
+				}
 			}
 		},
 		{
@@ -217,21 +212,17 @@
 					"linuxConfiguration": {
 						"disablePasswordAuthentication": true,
 						"ssh": {
-							"publicKeys": [
-								{
-									"path": "[concat ('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-									"keyData": "[parameters('adminPublicKey')]"
-								}
-							]
+							"publicKeys": [{
+								"path": "[concat ('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+								"keyData": "[parameters('adminPublicKey')]"
+							}]
 						}
 					}
 				},
 				"networkProfile": {
-					"networkInterfaces": [
-						{
-							"id": "[resourceId('Microsoft.Network/networkInterfaces', 'login1')]"
-						}
-					]
+					"networkInterfaces": [{
+						"id": "[resourceId('Microsoft.Network/networkInterfaces', 'login1')]"
+					}]
 				},
 				"diagnosticsProfile": {
 					"bootDiagnostics": {
@@ -268,16 +259,14 @@
 					"osProfile": {
 						"adminUsername": "[parameters('adminUsername')]",
 						"customData": "[base64(variables('computeNodeUserData'))]",
-            "computerNamePrefix": "node",
+						"computerNamePrefix": "node",
 						"linuxConfiguration": {
 							"disablePasswordAuthentication": true,
 							"ssh": {
-								"publicKeys": [
-									{
-										"path": "[concat ('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-										"keyData": "[parameters('adminPublicKey')]"
-									}
-								]
+								"publicKeys": [{
+									"path": "[concat ('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+									"keyData": "[parameters('adminPublicKey')]"
+								}]
 							}
 						}
 					},
@@ -293,24 +282,20 @@
 						}
 					},
 					"networkProfile": {
-						"networkInterfaceConfigurations": [
-							{
-								"name": "compute-int",
-								"properties": {
-									"primary": true,
-									"ipConfigurations": [
-										{
-											"name": "compute-ipconfig",
-											"properties": {
-												"subnet": {
-													"id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/flight-network/subnets/default')]"
-												}
-											}
+						"networkInterfaceConfigurations": [{
+							"name": "compute-int",
+							"properties": {
+								"primary": true,
+								"ipConfigurations": [{
+									"name": "compute-ipconfig",
+									"properties": {
+										"subnet": {
+											"id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/flight-network/subnets/default')]"
 										}
-									]
-								}
+									}
+								}]
 							}
-						]
+						}]
 					}
 				}
 			}
@@ -327,63 +312,60 @@
 				"name": "autoscaling-compute",
 				"targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/compute-scaleset')]",
 				"enabled": true,
-				"profiles": [
-					{
-						"name": "CPU",
-						"capacity": {
-							"minimum": "[variables('computeNodeMinCount')]",
-							"maximum": "[variables('computeNodeMaxCount')]",
-							"default": "[parameters('computeNodeInitialCount')]"
-						},
-						"rules": [
-							{
-								"metricTrigger": {
-									"metricName": "Percentage CPU",
-									"metricNamespace": "",
-									"metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/compute-scaleset')]",
-									"timeGrain": "PT1M",
-									"statistic": "Average",
-									"timeWindow": "PT5M",
-									"timeAggregation": "Average",
-									"operator": "GreaterThan",
-									"threshold": 90
-								},
-								"scaleAction": {
-									"direction": "Increase",
-									"type": "ChangeCount",
-									"value": "1",
-									"cooldown": "PT1M"
-								}
+				"profiles": [{
+					"name": "CPU",
+					"capacity": {
+						"minimum": "[variables('computeNodeMinCount')]",
+						"maximum": "[variables('computeNodeMaxCount')]",
+						"default": "[parameters('computeNodeInitialCount')]"
+					},
+					"rules": [{
+							"metricTrigger": {
+								"metricName": "Percentage CPU",
+								"metricNamespace": "",
+								"metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/compute-scaleset')]",
+								"timeGrain": "PT1M",
+								"statistic": "Average",
+								"timeWindow": "PT5M",
+								"timeAggregation": "Average",
+								"operator": "GreaterThan",
+								"threshold": 90
 							},
-							{
-								"metricTrigger": {
-									"metricName": "Percentage CPU",
-									"metricNamespace": "",
-									"metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/compute-scaleset')]",
-									"timeGrain": "PT1M",
-									"statistic": "Average",
-									"timeWindow": "PT5M",
-									"timeAggregation": "Average",
-									"operator": "LessThan",
-									"threshold": 30
-								},
-								"scaleAction": {
-									"direction": "Decrease",
-									"type": "ChangeCount",
-									"value": "1",
-									"cooldown": "PT30M"
-								}
+							"scaleAction": {
+								"direction": "Increase",
+								"type": "ChangeCount",
+								"value": "1",
+								"cooldown": "PT1M"
 							}
-						]
-					}
-				]
+						},
+						{
+							"metricTrigger": {
+								"metricName": "Percentage CPU",
+								"metricNamespace": "",
+								"metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/compute-scaleset')]",
+								"timeGrain": "PT1M",
+								"statistic": "Average",
+								"timeWindow": "PT5M",
+								"timeAggregation": "Average",
+								"operator": "LessThan",
+								"threshold": 30
+							},
+							"scaleAction": {
+								"direction": "Decrease",
+								"type": "ChangeCount",
+								"value": "1",
+								"cooldown": "PT30M"
+							}
+						}
+					]
+				}]
 			}
 		}
 	],
-  "outputs": {
-    "fqdn": {
-      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', 'login1'), '2017-03-01').dnsSettings.fqdn]",
-      "type": "string"
-    }
-  }
+	"outputs": {
+		"fqdn": {
+			"value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', 'login1'), '2017-03-01').dnsSettings.fqdn]",
+			"type": "string"
+		}
+	}
 }
