@@ -1,7 +1,7 @@
 Alces Flight on Azure
 =====================
 
-The following steps will help you to deploy and configure an Alces Flight Compute cluster on Azure public cloud. To get started, you will need the following:
+The following steps will help you to deploy and configure an Alces Flight Compute cluster with the Sun Grid Engine cluster scheduler on Azure public cloud. To get started, you will need the following:
 
 * An SSH keypair
 * An SSH client
@@ -37,3 +37,11 @@ Now that you have created an Alces Flight Compute ARM template - you can go ahea
 * Select the desired **Login Node Type**, this defines the number of CPU cores and memory available on your Alces Flight Compute Login instance.
 * Read over, and accept the terms and conditions.
 * Click **Purchase** to begin deploying your Alces Flight Compute cluster.
+* Deployment can take up to 15 minutes - once deployment has completed you will see details of the created Alces Flight Compute cluster in the **Outputs** section of the deployment page. You can use either the displayed IP address or FQDN, combined with the previously chosen **Admin Username** and **SSH Keypair** to access your Alces Flight Compute login node via SSH.
+
+Getting started with your Alces Flight Compute cluster
+------------------------------------------------------
+
+Once you have gained access to your Alces Flight Compute cluster running on Azure, you can use the Alces Flight Compute documentation to help get started. 
+
+[Alces Flight Documentation](http://docs.alces-flight.com)
