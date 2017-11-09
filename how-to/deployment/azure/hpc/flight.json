@@ -74,7 +74,12 @@
 		"computeNodeUserData": "[concat('bash /opt/alces/helper --master-ip ', variables('loginNodePrvIp'), ' --cluster-name ', parameters('clusterName'), ' --type slave --uuid ', variables('clusterUuid'), ' --token ', variables('clusterToken'))]",
 		"storageAccountName": "[concat(uniqueString(parameters('clusterName'), 'storage'))]",
 		"computeNodeMinCount": 1,
-		"computeNodeMaxCount": 32
+		"computeNodeMaxCount": 32,
+		"loginNodeOsDiskStorageType": "Premium_LRS",
+		"computeNodeOsDiskStorageType": "Premium_LRS",
+		"storageAccountDiskStorageType": "Standard_LRS",
+		"storageAccountDiskStorageTier": "Standard",
+		"networkCidr": "10.0.0.0/24"
 	},
 	"resources": [{
 			"type": "Microsoft.Storage/storageAccounts",
@@ -82,11 +87,12 @@
 			"location": "[resourceGroup().location]",
 			"apiVersion": "2016-01-01",
 			"tags": {
-				"displayName": "Alces Flight Storage Account"
+				"displayName": "Alces Flight Storage Account",
+				"AlcesFlightCluster": "[variables('clusterName')]"
 			},
 			"sku": {
-				"name": "Standard_LRS",
-				"tier": "Standard"
+				"name": "[variables('storageAccountDiskStorageType')]",
+				"tier": "[variables('storageAccountDiskStorageTier')]"
 			},
 			"kind": "Storage"
 		},
@@ -101,13 +107,13 @@
 			"properties": {
 				"addressSpace": {
 					"addressPrefixes": [
-						"10.0.0.0/24"
+						"[variables('networkCidr')]"
 					]
 				},
 				"subnets": [{
 					"name": "default",
 					"properties": {
-						"addressPrefix": "10.0.0.0/24"
+						"addressPrefix": "[variables('networkCidr')]"
 					}
 				}]
 			}
@@ -117,7 +123,8 @@
 			"name": "inbound-ssh",
 			"apiVersion": "2017-03-01",
 			"tags": {
-				"displayName": "Alces Flight inbound SSH firewall rule"
+				"displayName": "Alces Flight inbound SSH firewall rule",
+				"AlcesFlightCluster": "[variables('clusterName')]"
 			},
 			"location": "[resourceGroup().location]",
 			"properties": {
@@ -141,7 +148,8 @@
 			"name": "login1",
 			"apiVersion": "2017-03-01",
 			"tags": {
-				"displayName": "Alces Flight login node network interface"
+				"displayName": "Alces Flight login node network interface",
+				"AlcesFlightCluster": "[variables('clusterName')]"
 			},
 			"location": "[resourceGroup().location]",
 			"properties": {
@@ -171,7 +179,8 @@
 			"name": "login1",
 			"apiVersion": "2017-03-01",
 			"tags": {
-				"displayName": "Alces Flight login node public IP address"
+				"displayName": "Alces Flight login node public IP address",
+				"AlcesFlightCluster": "[variables('clusterName')]"
 			},
 			"location": "[resourceGroup().location]",
 			"properties": {
@@ -187,7 +196,8 @@
 			"name": "login1",
 			"apiVersion": "2016-04-30-preview",
 			"tags": {
-				"displayName": "Alces Flight login node"
+				"displayName": "Alces Flight login node",
+				"AlcesFlightCluster": "[variables('clusterName')]"
 			},
 			"location": "[resourceGroup().location]",
 			"properties": {
@@ -201,7 +211,7 @@
 					"osDisk": {
 						"createOption": "fromImage",
 						"managedDisk": {
-							"storageAccountType": "Premium_LRS"
+							"storageAccountType": "[variables('loginNodeOsDiskStorageType')]"
 						}
 					}
 				},
@@ -240,7 +250,8 @@
 			"name": "compute-scaleset",
 			"apiVersion": "2017-03-30",
 			"tags": {
-				"displayName": "Alces Flight autoscaling compute group"
+				"displayName": "Alces Flight autoscaling compute group",
+				"AlcesFlightCluster": "[variables('clusterName')]"
 			},
 			"location": "[resourceGroup().location]",
 			"sku": {
@@ -277,7 +288,7 @@
 						"osDisk": {
 							"createOption": "FromImage",
 							"managedDisk": {
-								"storageAccountType": "Premium_LRS"
+								"storageAccountType": "[variables('computeNodeOsDiskStorageType')]"
 							}
 						}
 					},
