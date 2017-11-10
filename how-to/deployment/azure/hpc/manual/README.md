@@ -138,7 +138,7 @@ Destroying your cluster and resources
 
 Once you have finished up with your Alces Flight Compute cluster, you can easily destroy all associated resources using the command-line tools:
 
-![Resource Group deletion]()
+![Resource Group deletion](https://s3-eu-west-1.amazonaws.com/flight-appliance-support/images/azure-resourcegroupdelete.png)
 
 ```bash
 az group delete -g $az_RESOURCE_GROUP
