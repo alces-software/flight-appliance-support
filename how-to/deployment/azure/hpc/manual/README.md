@@ -103,6 +103,7 @@ The login node is responsible for cluster management including cluster scheduler
 ![Login node creation](https://s3-eu-west-1.amazonaws.com/flight-appliance-support/images/azure-login1.png)
 
 ```bash
+export alces_SSH_KEYPAIR="<insert your keypair>"
 az vm create \
 -n login1 \
 -g $az_RESOURCE_GROUP \
@@ -111,7 +112,7 @@ az vm create \
 --size Standard_DS1_v2 \
 --admin-username alces \
 --ssh-dest-key-path "/home/alces/.ssh/authorized_keys" \
---ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDA+S71+zvHiiH+gFFCSsMs+VZIRLeh29JeDu5z5Y0F+Sg1kmLOQLqr7u2qA6FHTwz4vMMvqW2h3mvYUvW2nGOJec9fkY2cCPrFzSvu/6+44Zirv9Zmm7l9Brozj+7jdatNTmTlfEXUlGZIMxOeXdC/Shkmrajadg9pngaCnzxZaoFFoXfnY5Xf/dR/dgbnHr9tKHY7jDMggFnPEvC8NUCAFYg2HuZVfFjiYn4ptv00TYFhf1m2RX/RNUzR+qpltOZEYww3YAb2MgTZtWgQQPmOCAjbwnLSmwvuijEAiVLlE/wKqI05wr1z2viVC1r9u7Cg+uOD/4X8adoyALx+grsv" \
+--ssh-key-value "${alces_SSH_KEYPAIR}" \
 --nsg flight-compute-demo \
 --private-ip-address 10.0.0.4 \
 --subnet prv \
@@ -140,7 +141,7 @@ az vm create \
 --size Standard_DS1_v2 \
 --admin-username alces \
 --ssh-dest-key-path "/home/alces/.ssh/authorized_keys" \
---ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDA+S71+zvHiiH+gFFCSsMs+VZIRLeh29JeDu5z5Y0F+Sg1kmLOQLqr7u2qA6FHTwz4vMMvqW2h3mvYUvW2nGOJec9fkY2cCPrFzSvu/6+44Zirv9Zmm7l9Brozj+7jdatNTmTlfEXUlGZIMxOeXdC/Shkmrajadg9pngaCnzxZaoFFoXfnY5Xf/dR/dgbnHr9tKHY7jDMggFnPEvC8NUCAFYg2HuZVfFjiYn4ptv00TYFhf1m2RX/RNUzR+qpltOZEYww3YAb2MgTZtWgQQPmOCAjbwnLSmwvuijEAiVLlE/wKqI05wr1z2viVC1r9u7Cg+uOD/4X8adoyALx+grsv" \
+--ssh-key-value "${alces_SSH_KEYPAIR}" \
 --nsg flight-compute-demo \
 --subnet prv \
 --vnet-name flight-compute-demo
