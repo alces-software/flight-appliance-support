@@ -46,3 +46,8 @@ Getting started with your Alces Flight Compute cluster
 Once you have gained access to your Alces Flight Compute cluster running on Azure, you can use the Alces Flight Compute documentation to help get started. 
 
 [Alces Flight Documentation](http://docs.alces-flight.com)
+
+Destroying your cluster and resources
+-------------------------------------
+
+You can easily delete your Alces Flight Compute cluster when you are finished simply by deleting the created Resource Group either through the Azure Portal or via the command-line tools.
