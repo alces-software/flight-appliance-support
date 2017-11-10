@@ -43,7 +43,12 @@ A cluster network needs to be created, along with the appropriate security group
 ![Network creation](https://s3-eu-west-1.amazonaws.com/flight-appliance-support/images/azure-resourcegroup.png)
 
 ```bash
-az network vnet create -g $az_RESOURCE_GROUP -n flight-compute-demo --address-prefix 10.0.0.0/24 --subnet-name prv --subnet-prefix 10.0.0.0/24
+az network vnet create \
+-g $az_RESOURCE_GROUP \
+-n flight-compute-demo \
+--address-prefix 10.0.0.0/24 \
+--subnet-name prv \
+--subnet-prefix 10.0.0.0/24
 ```
 
 * Using the Azure Portal CLI pane - create a new security group, rules will be then attached to the security group later on. When creating a new security group - Azure adds some default, useful rules:
@@ -51,7 +56,9 @@ az network vnet create -g $az_RESOURCE_GROUP -n flight-compute-demo --address-pr
 ![Security Group creation](https://s3-eu-west-1.amazonaws.com/flight-appliance-support/images/azure-securitygroup.png)
 
 ```bash
-az network nsg create -n flight-compute-demo -g $az_RESOURCE_GROUP
+az network nsg create \
+-n flight-compute-demo \
+-g $az_RESOURCE_GROUP
 ```
 
 * Next, a rule to allow inbound SSH access needs to be added to the security group. Again, from the Azure Portal CLI pane - create a new security group rule:
@@ -96,7 +103,19 @@ The login node is responsible for cluster management including cluster scheduler
 ![Login node creation](https://s3-eu-west-1.amazonaws.com/flight-appliance-support/images/azure-login1.png)
 
 ```bash
-az vm create -n login1 -g $az_RESOURCE_GROUP --image "/subscriptions/d1e964ef-15c7-4b27-8113-e725167cee83/resourceGroups/alcesflight/providers/Microsoft.Compute/images/alces-flight-compute-1.0.0-beta" --custom-data "bash /opt/alces/helper --cluster-name $alces_FLIGHT_CLUSTER_NAME --type master --uuid $alces_FLIGHT_UUID --token $alces_FLIGHT_TOKEN" --size Standard_DS1_v2 --admin-username alces --ssh-dest-key-path "/home/alces/.ssh/authorized_keys" --ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDA+S71+zvHiiH+gFFCSsMs+VZIRLeh29JeDu5z5Y0F+Sg1kmLOQLqr7u2qA6FHTwz4vMMvqW2h3mvYUvW2nGOJec9fkY2cCPrFzSvu/6+44Zirv9Zmm7l9Brozj+7jdatNTmTlfEXUlGZIMxOeXdC/Shkmrajadg9pngaCnzxZaoFFoXfnY5Xf/dR/dgbnHr9tKHY7jDMggFnPEvC8NUCAFYg2HuZVfFjiYn4ptv00TYFhf1m2RX/RNUzR+qpltOZEYww3YAb2MgTZtWgQQPmOCAjbwnLSmwvuijEAiVLlE/wKqI05wr1z2viVC1r9u7Cg+uOD/4X8adoyALx+grsv" --nsg flight-compute-demo --private-ip-address 10.0.0.4 --subnet prv --vnet-name flight-compute-demo
+az vm create \
+-n login1 \
+-g $az_RESOURCE_GROUP \
+--image "/subscriptions/d1e964ef-15c7-4b27-8113-e725167cee83/resourceGroups/alcesflight/providers/Microsoft.Compute/images/alces-flight-compute-1.0.0-beta" \
+--custom-data "bash /opt/alces/helper --cluster-name $alces_FLIGHT_CLUSTER_NAME --type master --uuid $alces_FLIGHT_UUID --token $alces_FLIGHT_TOKEN" \
+--size Standard_DS1_v2 \
+--admin-username alces \
+--ssh-dest-key-path "/home/alces/.ssh/authorized_keys" \
+--ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDA+S71+zvHiiH+gFFCSsMs+VZIRLeh29JeDu5z5Y0F+Sg1kmLOQLqr7u2qA6FHTwz4vMMvqW2h3mvYUvW2nGOJec9fkY2cCPrFzSvu/6+44Zirv9Zmm7l9Brozj+7jdatNTmTlfEXUlGZIMxOeXdC/Shkmrajadg9pngaCnzxZaoFFoXfnY5Xf/dR/dgbnHr9tKHY7jDMggFnPEvC8NUCAFYg2HuZVfFjiYn4ptv00TYFhf1m2RX/RNUzR+qpltOZEYww3YAb2MgTZtWgQQPmOCAjbwnLSmwvuijEAiVLlE/wKqI05wr1z2viVC1r9u7Cg+uOD/4X8adoyALx+grsv" \
+--nsg flight-compute-demo \
+--private-ip-address 10.0.0.4 \
+--subnet prv \
+--vnet-name flight-compute-demo
 ```
 
 After a few minutes, you should then be able to log into your Alces Flight Compute login instance using the administrator username and keypair previously specified - together with the `publicIpAddress` displayed when creating the login instance:
@@ -113,7 +132,18 @@ Next, a compute node can be created. This process can be repeated for as many co
 ![Compute node creation](https://s3-eu-west-1.amazonaws.com/flight-appliance-support/images/azure-node01.png)
 
 ```bash
-az vm create -n node01 -g $az_RESOURCE_GROUP --image "/subscriptions/d1e964ef-15c7-4b27-8113-e725167cee83/resourceGroups/alcesflight/providers/Microsoft.Compute/images/alces-flight-compute-1.0.0-beta" --custom-data "bash /opt/alces/helper --cluster-name $alces_FLIGHT_CLUSTER_NAME --type slave --master-ip 10.0.0.4 --uuid $alces_FLIGHT_UUID --token $alces_FLIGHT_TOKEN" --size Standard_DS1_v2 --admin-username alces --ssh-dest-key-path "/home/alces/.ssh/authorized_keys" --ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDA+S71+zvHiiH+gFFCSsMs+VZIRLeh29JeDu5z5Y0F+Sg1kmLOQLqr7u2qA6FHTwz4vMMvqW2h3mvYUvW2nGOJec9fkY2cCPrFzSvu/6+44Zirv9Zmm7l9Brozj+7jdatNTmTlfEXUlGZIMxOeXdC/Shkmrajadg9pngaCnzxZaoFFoXfnY5Xf/dR/dgbnHr9tKHY7jDMggFnPEvC8NUCAFYg2HuZVfFjiYn4ptv00TYFhf1m2RX/RNUzR+qpltOZEYww3YAb2MgTZtWgQQPmOCAjbwnLSmwvuijEAiVLlE/wKqI05wr1z2viVC1r9u7Cg+uOD/4X8adoyALx+grsv" --nsg flight-compute-demo --subnet prv --vnet-name flight-compute-demo
+az vm create \
+-n node01 \
+-g $az_RESOURCE_GROUP \
+--image "/subscriptions/d1e964ef-15c7-4b27-8113-e725167cee83/resourceGroups/alcesflight/providers/Microsoft.Compute/images/alces-flight-compute-1.0.0-beta" \
+--custom-data "bash /opt/alces/helper --cluster-name $alces_FLIGHT_CLUSTER_NAME --type slave --master-ip 10.0.0.4 --uuid $alces_FLIGHT_UUID --token $alces_FLIGHT_TOKEN" \
+--size Standard_DS1_v2 \
+--admin-username alces \
+--ssh-dest-key-path "/home/alces/.ssh/authorized_keys" \
+--ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDA+S71+zvHiiH+gFFCSsMs+VZIRLeh29JeDu5z5Y0F+Sg1kmLOQLqr7u2qA6FHTwz4vMMvqW2h3mvYUvW2nGOJec9fkY2cCPrFzSvu/6+44Zirv9Zmm7l9Brozj+7jdatNTmTlfEXUlGZIMxOeXdC/Shkmrajadg9pngaCnzxZaoFFoXfnY5Xf/dR/dgbnHr9tKHY7jDMggFnPEvC8NUCAFYg2HuZVfFjiYn4ptv00TYFhf1m2RX/RNUzR+qpltOZEYww3YAb2MgTZtWgQQPmOCAjbwnLSmwvuijEAiVLlE/wKqI05wr1z2viVC1r9u7Cg+uOD/4X8adoyALx+grsv" \
+--nsg flight-compute-demo \
+--subnet prv \
+--vnet-name flight-compute-demo
 ```
 
 Next steps
