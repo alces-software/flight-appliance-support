@@ -132,3 +132,14 @@ A few minutes after creating your first compute node, it should be available to 
 ![Compute node access](https://s3-eu-west-1.amazonaws.com/flight-appliance-support/images/azure-node01access.png)
 
 You can learn more about using an Alces Flight Compute cluster in the [Alces Flight Compute documentation](http://docs.alces-flight.com)
+
+Destroying your cluster and resources
+-------------------------------------
+
+Once you have finished up with your Alces Flight Compute cluster, you can easily destroy all associated resources using the command-line tools:
+
+![Resource Group deletion]()
+
+```bash
+az group delete -g $az_RESOURCE_GROUP
+```
