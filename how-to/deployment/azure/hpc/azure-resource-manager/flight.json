@@ -71,8 +71,7 @@
 			"networkCidr": "10.0.0.0/24"
 		},
 		"azureConfig": {
-			"imageSubscription": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables(''), '/providers/Microsoft.Compute/', variables('alcesFlightConfig').storageContainer ,'/alces-flight-',variables('alcesFlightConfig').appliance, '-', variables('alcesFlightConfig').version)]",
-			"subscriptionId": "d1e964ef-15c7-4b27-8113-e725167cee83",
+			"imageSubscription": "[concat('/subscriptions/', 'd1e964ef-15c7-4b27-8113-e725167cee83', '/resourceGroups/', variables('alcesFlightConfig').resourceGroup, '/providers/Microsoft.Compute/', variables('alcesFlightConfig').storageContainer ,'/alces-flight-',variables('alcesFlightConfig').appliance, '-', variables('alcesFlightConfig').version)]",
 			"storageAccountName": "[concat(uniqueString(parameters('clusterName'), 'storage'))]",
 			"storageAccountDiskStorageType": "Standard_LRS",
 			"storageAccountDiskStorageTier": "Standard"
@@ -83,7 +82,7 @@
 			"osDiskStorageType": "Premium_LRS"
 		},
 		"computeNodeConfig": {
-			"userData": "[concat('bash /opt/alces/helper --master-ip ', variables('loginNodePrvIp'), ' --cluster-name ', parameters('clusterName'), ' --type slave --uuid ', variables('alcesFlightConfig').clusterUuid, ' --token ', variables('alcesFlightConfig').clusterToken)]",
+			"userData": "[concat('bash /opt/alces/helper --master-ip ', variables('loginNodeConfig').prvIp, ' --cluster-name ', parameters('clusterName'), ' --type slave --uuid ', variables('alcesFlightConfig').clusterUuid, ' --token ', variables('alcesFlightConfig').clusterToken)]",
 			"minCount": 1,
 			"maxCount": 32,
 			"osDiskStorageType": "Premium_LRS"
