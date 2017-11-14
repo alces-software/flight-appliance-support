@@ -72,7 +72,7 @@
 		},
 		"azureConfig": {
 			"imageSubscription": "[concat('/subscriptions/', 'd1e964ef-15c7-4b27-8113-e725167cee83', '/resourceGroups/', variables('alcesFlightConfig').resourceGroup, '/providers/Microsoft.Compute/', variables('alcesFlightConfig').storageContainer ,'/alces-flight-',variables('alcesFlightConfig').appliance, '-', variables('alcesFlightConfig').version)]",
-			"storageAccountName": "[concat(uniqueString(parameters('clusterName'), 'storage'))]",
+			"storageAccountName": "[resourceGroup().name]",
 			"storageAccountDiskStorageType": "Standard_LRS",
 			"storageAccountDiskStorageTier": "Standard"
 		},
